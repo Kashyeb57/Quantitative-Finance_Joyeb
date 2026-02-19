@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmy_study_site=globalThis.webpackChunkmy_study_site||[]).push([[832],{8874(t){t.exports=JSON.parse('{"metadata":{"permalink":"/Quantitative-Finance_Joyeb/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

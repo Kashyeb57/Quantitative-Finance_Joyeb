@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmy_study_site=globalThis.webpackChunkmy_study_site||[]).push([[903],{1912(t){t.exports=JSON.parse('{"blogBasePath":"/Quantitative-Finance_Joyeb/blog","blogTitle":"Blog","authorsListPath":"/Quantitative-Finance_Joyeb/blog/authors"}')}}]);
