@@ -20,4 +20,4 @@ Where:
 * $E(R_m)$ = Expected return of the market
 * $(E(R_m) - R_f)$ = Market risk premium
 
-</details>
+</details>  
