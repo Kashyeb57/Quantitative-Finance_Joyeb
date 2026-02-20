@@ -16,3 +16,5 @@ C = S_0 N(d_1) - K e^{-rT} N(d_2)
 $$
 
 </details>
+<iframe src={require('./Finance_1.pdf').default} width="100%" height="600px" />
+
