@@ -116,8 +116,8 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'My Notes',
+                to: '/docs/Finance/Chapter_1/problem_1',
               },
             ],
           },
