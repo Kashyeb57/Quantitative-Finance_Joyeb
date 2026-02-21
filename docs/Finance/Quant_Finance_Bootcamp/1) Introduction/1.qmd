@@ -1,0 +1,25 @@
+Quant Finance Bootcamp: Derivative, Risk Management & Quant Modeling
+
+
+What I will learn as a student from here?
+
+1) Foundational Knowledge: Gain a solid understanding of derivative markets, including forwards, futures, and options, and the roles of different traders like hedgers, arbitrageurs, and speculators.
+
+2) Future Markets: Learn the intricacies of futures contracts, margin account operations, and the distinctions between forward and future contracts through case studies.
+
+3) Options Mechanics: Master the types of options, positions, and payoff diagrams, and differentiate between European and American options.
+
+
+4) Option Pricing: Explore the binomial tree method for pricing American options and the concept of risk-neutral valuation.
+
+5) Stochastic Processes: Delve into continuous and discrete stochastic processes, Brownian motion, and apply Ito's Lemma to quantitative finance models.
+
+6) Black-Scholes Model: Understand the assumptions, application, and interpretation of the Black-Scholes Merton model for option pricing.
+
+7) Risk Management with Greeks: Learn how to calculate and use Delta, Gamma, Rho, Theta, and Vega for hedging and risk management.
+
+8) Value at Risk (VaR): Analyze risk using VaR and Expected Shortfall, with backtesting and stress testing to validate models.
+
+9) Exotic Options: Explore the unique characteristics and applications of exotic options such as Asian, binary, and barrier options.
+
+10) Interest Rate Modeling: Study stochastic interest rate models like Vasicek and CIR, focusing on their calibration, implementation, and differences.
