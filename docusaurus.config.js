@@ -117,7 +117,7 @@ const config = {
             items: [
               {
                 label: 'My Notes',
-                to: '/docs/Finance/Chapter_1/problem_1',
+                to: '/docs/Finance/Quant_Finance_Bootcamp/Introduction/1',
               },
             ],
           },
