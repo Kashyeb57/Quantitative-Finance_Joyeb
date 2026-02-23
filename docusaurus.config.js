@@ -22,6 +22,11 @@ const config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
+  // Treat .md files as standard Markdown (not MDX), so special chars like { } < > don't break the parser
+  markdown: {
+    format: 'detect',
+  },
+
   // Set the production url of your site here
   url: 'https://Kashyeb57.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
