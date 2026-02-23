@@ -1,0 +1,3030 @@
+---
+title: 'Calculus Concepts'
+slug: /Calculus-Notes
+---
+
+# COMPLETE CALCULUS KNOWLEDGE SYSTEM
+### Based on Stewart's Calculus: Early Transcendentals, 8th Edition
+### With Visual Explanations & Quantitative Finance Context
+
+---
+
+## TABLE OF CONTENTS
+
+| Part | Chapters | Topic |
+|------|----------|-------|
+| I    | 0–11     | Single-Variable Calculus |
+| II   | 12–17    | Multivariable Calculus |
+| III  | A–E      | Learning Optimization |
+
+---
+
+# PART I: SINGLE-VARIABLE CALCULUS
+
+---
+
+## CHAPTER 0: A PREVIEW OF CALCULUS
+
+---
+
+### 0.1 The Two Central Problems of Calculus
+
+Calculus is built on two problems: **finding areas** and **finding slopes of curves**.
+
+---
+
+#### The Area Problem (Integral Calculus)
+
+We want the exact area under a curve. Since we can't compute curved areas directly, we approximate with rectangles and take a limit.
+
+```
+  y
+  |
+6 |        *****
+5 |      **     **
+4 |    **    ░░░  **
+3 |   *   ░░░░░░░░  *
+2 |  *  ░░░░░░░░░░░░ *
+1 | * ░░░░░░░░░░░░░░░░*
+  +----+----+----+----+-> x
+  a                   b
+
+  ░ = area we want to compute
+  * = the curve f(x)
+```
+
+**Riemann Sum approach** — divide [a,b] into n rectangles:
+
+```
+  y             Each rectangle has:
+  |  |  |  |   - width:  Δx = (b-a)/n
+  |▓▓|▓▓|▓▓|   - height: f(xᵢ*)
+  |▓▓|▓▓|▓▓|
+  |▓▓|▓▓|▓▓|   Area ≈ Σ f(xᵢ*)·Δx
+  +-----------> x
+  a         b
+
+  As n → ∞, approximation becomes exact.
+```
+
+**Formula:**
+```
+A = lim     Σ f(xᵢ*)·Δx     where Δx = (b-a)/n
+    n→∞   i=1 to n
+```
+
+> **Quant Finance:** Area under a probability density function = probability of an event. Used in option pricing (risk-neutral valuation) and expected value of payoffs.
+
+---
+
+#### The Tangent Problem (Differential Calculus)
+
+Given a curve, find the slope of the line that just "touches" it at one point.
+
+```
+  y
+  |              / ← tangent line (what we want)
+  |          __/
+  |       __/ ← curve y = f(x)
+  |    __/
+  |   /
+  | P(a, f(a))
+  +-------------------> x
+       a
+```
+
+**Secant line approach** — take two points and slide Q → P:
+
+```
+  y
+  |           Q(x, f(x))
+  |         o
+  |       / ← secant line
+  |     /
+  |   o ← P(a, f(a))
+  |
+  +-------------------> x
+
+  slope of PQ = [f(x) - f(a)] / (x - a)
+
+  As x → a, secant → tangent:
+
+  m = lim   [f(x) - f(a)]
+      x→a   ─────────────
+                x - a
+```
+
+> **Quant Finance:** Delta (Δ) is the tangent slope of an option price curve vs. underlying price — the hedge ratio.
+
+---
+
+#### The Velocity Problem
+
+```
+  Position
+  s(t)
+  |          *
+  |        *
+  |      *         Average velocity = Δs/Δt = [s(b)-s(a)]/(b-a)
+  |    *
+  |  *
+  +-----------> time t
+  a         b
+
+  Instantaneous velocity = lim  [s(t) - s(a)] / (t - a)
+                           t→a
+```
+
+---
+
+## CHAPTER 1: FUNCTIONS AND MODELS
+
+---
+
+### 1.1 Four Ways to Represent a Function
+
+A function f assigns **exactly one output** to each input.
+
+```
+         f
+  x ──────────> f(x)
+  (input)       (output)
+
+  • Each x has ONE f(x)
+  • Multiple x's can share the same f(x)
+```
+
+**Four representations:**
+
+| Method | Example |
+|--------|---------|
+| **Verbal** | "P(t) is world population at time t" |
+| **Numerical** | Table of stock prices by date |
+| **Visual** | Graph / yield curve plot |
+| **Algebraic** | f(x) = e^(−x²/2) / √(2π) |
+
+**Vertical Line Test:**
+```
+  ✓ IS a function        ✗ NOT a function
+
+  y |    *               y |  *   *
+    |   * *                |  * * *
+    |  *   *               |   ***
+    |                      |
+    +---------> x          +---------> x
+
+  No vertical line        Vertical line hits
+  hits curve twice        curve twice
+```
+
+---
+
+### 1.2 Catalog of Essential Functions
+
+#### Linear Functions: f(x) = mx + b
+
+```
+  y
+  |       /  slope m > 0
+  |      /
+  |     /  ← f(x) = 2x + 1
+  |    /
+  |   / b = y-intercept
+  |  /
+  | /
+  +-----------> x
+
+  y
+  |  \  slope m < 0
+  |   \
+  |    \ ← f(x) = -x + 3
+  |     \
+  |      \
+  +-----------> x
+```
+
+> **Quant Finance:** Duration approximation for bond prices; linear regression factor models.
+
+---
+
+#### Polynomial Functions
+
+```
+  Degree 2 (parabola):        Degree 3 (cubic):
+
+  y    *   *                  y         *
+  |   * * * *                 |        *
+  |  *   *   *                |       *
+  |      ↑                    |      *
+  |   vertex                  |   * *
+  +-----------> x             +-----------> x
+                                 inflection pt
+```
+
+#### Power Functions: f(x) = xᵃ
+
+```
+  a=1: y=x (line)    a=2: y=x² (parabola)   a=1/2: y=√x
+
+  y  /               y    *                  y     *****
+  | /                |   * *                 |   **
+  |/                 |  *   *                |  *
+  |                  | *     *               | *
+  +--> x             *---------> x           *---------> x
+```
+
+#### Exponential Functions: f(x) = bˣ
+
+```
+  b > 1 (growth):        0 < b < 1 (decay):
+
+  y        *             y *
+  |       *              | *
+  |      *               |  *
+  |     *                |   *
+  |    *                 |    *
+  | **                   |     ****
+  +-----------> x        +-----------> x
+  Always passes through (0, 1)
+```
+
+**Laws of Exponents:**
+```
+  b^(x+y) = bˣ · bʸ
+  b^(x-y) = bˣ / bʸ
+  (bˣ)ʸ  = b^(xy)
+  (ab)ˣ  = aˣ · bˣ
+```
+
+> **Quant Finance:** Continuous compounding A = Pe^(rt); GBM: S(t) = S₀·exp((μ−σ²/2)t + σW(t))
+
+---
+
+#### The Number e
+
+```
+  e = lim (1 + 1/n)ⁿ  ≈  2.71828...
+      n→∞
+
+  e = 1 + 1 + 1/2! + 1/3! + 1/4! + ...
+
+  Key property: slope of y = eˣ at x=0 is exactly 1
+
+  y    eˣ     /← slope=1 at (0,1)
+  |    *     /
+  |   *    /
+  |  *   /
+  | *  / ← tangent at (0,1)
+  |* /
+  +-----------> x
+     0
+```
+
+---
+
+#### Logarithmic Functions: f(x) = log_b(x)
+
+```
+  y = ln(x) is the inverse of y = eˣ
+
+  y        |   eˣ (above diagonal)
+  |  *     |  *
+  |   *    | *
+  |    *   |* ← both meet at (1,0) and reflect
+  |-----*--+-----------> x
+  |      * | ← y = x diagonal
+  |       *|
+            * ← ln(x) (below diagonal)
+
+  Domain of ln(x): x > 0
+  Range: all real numbers
+```
+
+**Laws of Logarithms:**
+```
+  ln(xy) = ln(x) + ln(y)
+  ln(x/y) = ln(x) − ln(y)
+  ln(xʳ) = r·ln(x)
+```
+
+> **Quant Finance:** Log returns r = ln(S_t / S_{t−1}); time to double: t = ln(2)/r
+
+---
+
+### 1.3 Function Transformations
+
+```
+  Original f(x)          Transformations:
+
+  y    *                 y + c: shift UP
+  |   ***                y - c: shift DOWN
+  |  *   *               y = -f(x): reflect x-axis
+  |                      y = f(-x): reflect y-axis
+  +-------> x            y = f(x-c): shift RIGHT
+                         y = f(x+c): shift LEFT
+                         y = k·f(x): vertical stretch
+```
+
+**Visual comparison:**
+```
+  f(x)=x²      f(x)+2       f(x-1)      -f(x)
+  y  *  *      y  *  *      y    *  *   y
+  | *    *     | *    *     |   *    *  |
+  |*      *    |*      *    |  *      * |*      *
+  |            |            | *         | *    *
+  +---> x      +---> x      +---> x      *  *
+                                         +---> x
+```
+
+---
+
+### 1.4 Exponential Growth and Decay
+
+```
+  MODEL: P(t) = P₀ · e^(kt)
+
+  k > 0: GROWTH               k < 0: DECAY
+
+  P                            P
+  |          *                 | *
+  |        *                   |  *
+  |       *                    |    *
+  |     *                      |       *
+  |   *                        |            *
+  | *                          |                 *
+  +-----------> t              +-----------> t
+  P₀                           P₀
+
+  Doubling time: t_d = ln(2)/k
+  Half-life:     t_h = ln(2)/|k|
+```
+
+---
+
+### 1.5 Inverse Functions
+
+```
+  f and f⁻¹ are mirror images across y = x
+
+  y    /  ← y=x
+  |   / *  ← f(x)
+  |  /*
+  | /*
+  |/* ← f⁻¹(x)
+  +-----------> x
+
+  f(f⁻¹(x)) = x     for all x in domain of f⁻¹
+  f⁻¹(f(x)) = x     for all x in domain of f
+```
+
+**Horizontal Line Test** — f is one-to-one (invertible) if no horizontal line hits graph twice.
+
+**Inverse Trig Functions:**
+```
+  Function     Domain       Range
+  ─────────────────────────────────────
+  sin⁻¹(x)    [−1, 1]     [−π/2, π/2]
+  cos⁻¹(x)    [−1, 1]     [0, π]
+  tan⁻¹(x)    (−∞, ∞)     (−π/2, π/2)
+
+  tan⁻¹(x) graph:
+
+  y   π/2 ─────────────────── ← asymptote
+  |           *****
+  |       ****
+  |  *****
+  |
+  −π/2 ─────────────────────── ← asymptote
+  +-----------> x
+```
+
+---
+
+## CHAPTER 2: LIMITS AND DERIVATIVES
+
+---
+
+### 2.1 The Tangent and Velocity Problems
+
+```
+  Secant line → Tangent line as Q → P
+
+  y         Q(x, f(x))
+  |           o
+  |          /|
+  |         / |
+  |        /  |
+  |       /   |
+  |      / ↑  |
+  |     /  secant
+  |    o P(a, f(a))
+  |
+  +--a--x---------> x
+
+  slope_PQ = [f(x)−f(a)] / (x−a)
+
+  As x → a:
+  slope_tangent = lim  [f(x)−f(a)] / (x−a)
+                  x→a
+```
+
+---
+
+### 2.2 The Limit of a Function
+
+```
+  lim f(x) = L
+  x→a
+
+  Meaning: f(x) gets arbitrarily close to L
+           as x approaches a (from either side)
+
+  y
+  |             ○ ← hole: f(a) might not exist
+  |           * | *         but limit still = L!
+  |         *   |   *
+  | ───────*────────*────── L
+  |       *           *
+  |
+  +──────────a──────────> x
+
+  LEFT side → L    AND    RIGHT side → L
+  ∴ limit exists and equals L
+```
+
+**When limits do NOT exist:**
+```
+  Case 1: Jump              Case 2: Oscillation
+
+  y    *                    y   *  *  *  *
+  |    *    ○               |  * *  * *  *
+  |    *    *               |          ...
+  |    ●                    |
+  +────a───────> x          +────────────> x
+  Left ≠ Right limit        sin(1/x) as x→0
+```
+
+---
+
+### 2.3 Limit Laws
+
+If lim f(x) = L and lim g(x) = M (as x→a), then:
+
+```
+  ┌─────────────────────────────────────────┐
+  │ Sum:      lim [f+g] = L + M             │
+  │ Difference: lim [f−g] = L − M           │
+  │ Constant: lim [c·f] = c·L              │
+  │ Product:  lim [f·g] = L·M              │
+  │ Quotient: lim [f/g] = L/M  (M ≠ 0)    │
+  │ Power:    lim [f]ⁿ = Lⁿ               │
+  │ Root:     lim ⁿ√f = ⁿ√L              │
+  └─────────────────────────────────────────┘
+```
+
+**The Squeeze Theorem:**
+```
+  If f(x) ≤ g(x) ≤ h(x)  near x=a
+  and  lim f(x) = lim h(x) = L
+  then lim g(x) = L
+
+  y          h(x) ─ ─ ─ ─ ─ ─
+  |              g(x) ~~~~~~       All three
+  |          f(x) ─ ─ ─ ─ ─ ─     squeeze to L
+  | L ━━━━━━━━━━━━━━━━━━━━━━━━
+  +──────────a──────────> x
+
+  KEY RESULT:  lim sin(x)/x = 1
+               x→0
+```
+
+---
+
+### 2.4 The Precise Definition (ε-δ)
+
+```
+  lim f(x) = L  means:
+  x→a
+
+  For every ε > 0, ∃ δ > 0 such that:
+  if 0 < |x − a| < δ  then  |f(x) − L| < ε
+
+  y
+  | L+ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─    ← ε-band
+  |        * within ε of L
+  | L  ━━━━━━━━━━━━━━━━━━━━━
+  |       *
+  | L−ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+  |
+  +──a−δ──a──a+δ──────> x
+         ↑
+    all x within δ of a
+    produce f(x) within ε of L
+```
+
+---
+
+### 2.5 Continuity
+
+A function f is **continuous at a** if all three hold:
+
+```
+  ① f(a) is defined
+  ② lim f(x) exists
+     x→a
+  ③ lim f(x) = f(a)
+     x→a
+
+  CONTINUOUS:        DISCONTINUITIES:
+
+  y    *             Removable:      Jump:        Infinite:
+  |   * *            y   ○           y   *        y     |
+  |  *   *           |  *            |   *        |    /|
+  | *     *          | * ← hole      |   *        |   / |
+  +-------> x        +-----> x       | * ← gap    |  /  |
+                                     +-----> x    +--/--+-> x
+```
+
+**Intermediate Value Theorem:**
+```
+  If f is continuous on [a,b] and N is between f(a) and f(b),
+  then ∃ c in (a,b) where f(c) = N.
+
+  y
+  f(b)─ ─ ─ ─ ─ ─*
+  |              *
+  N  ─ ─ ─ ─ ─*── ← guaranteed crossing!
+  |           *
+  f(a)── ─ ─*
+  |         *
+  +──a───c───b───> x
+```
+
+> **Quant Finance:** Guarantees a yield exists for bond pricing; root-finding for implied volatility.
+
+---
+
+### 2.6 Limits at Infinity and Asymptotes
+
+```
+  Horizontal asymptote y = L:
+
+  y        *****──────────── L  ← f(x) → L as x → ∞
+  |      **
+  |    **
+  |  **
+  | *
+  +──────────────────────> x
+
+  Vertical asymptote x = a:
+
+  y   |
+  |   |  *
+  | * |
+  |  *|
+  |   *
+  |   |*
+  +───a──────────────> x
+  f(x) → ∞ as x → a
+```
+
+**Important limits:**
+```
+  lim  xⁿ = ∞   (n>0)       lim  1/xⁿ = 0
+  x→∞                        x→∞
+
+  lim  eˣ = ∞                lim  eˣ = 0
+  x→∞                        x→−∞
+
+  lim  ln(x) = ∞
+  x→∞
+```
+
+---
+
+### 2.7 Derivatives and Rates of Change
+
+The **derivative** is the slope of the tangent line = instantaneous rate of change.
+
+```
+  DEFINITION:
+
+        f(a+h) − f(a)
+  f'(a) = lim ─────────────
+           h→0       h
+
+  Visually:
+
+  y         f(a+h)─────o Q
+  |                   /
+  |                  /  ← secant (slope = Δf/h)
+  |         f(a)────o P
+  |                /
+  |               / ← tangent as h→0
+  +────────a──a+h────> x
+                 ↑
+                 h
+```
+
+**Three interpretations:**
+```
+  ① Geometric:  slope of tangent line to y=f(x) at x=a
+  ② Physical:   instantaneous rate of change
+  ③ Kinematic:  velocity if f is a position function
+```
+
+> **Quant Finance:** Delta = ∂V/∂S (option price sensitivity to underlying); DV01 = ∂P/∂y (bond price sensitivity to yield)
+
+---
+
+### 2.8 The Derivative as a Function
+
+```
+  f'(x) = lim  [f(x+h) − f(x)] / h
+           h→0
+
+  From the original function, we derive a NEW function f'(x):
+
+  f(x) = x²             f'(x) = 2x
+
+  y   *       *         y         *
+  |    *     *          |        *
+  |     *   *           |       *
+  |      * *            |      *
+  |       *             |─────*──────── 0
+  +──────────> x        |   *
+                        |  *
+                        +──────────> x
+  Parabola              Straight line (2x)
+```
+
+**Notations for derivative:**
+```
+  f'(x)   (Lagrange)
+  df/dx   (Leibniz)
+  Df(x)   (Euler)
+  ẋ       (Newton, time derivative)
+```
+
+**Higher Derivatives:**
+```
+  f(x)   → position
+  f'(x)  → velocity   (1st derivative)
+  f''(x) → acceleration (2nd derivative)
+  f'''(x)→ jerk        (3rd derivative)
+
+  f''(x) = [f'(x)]' = d²f/dx²
+```
+
+> **Quant Finance:** Gamma = ∂²V/∂S² (rate of change of Delta); Convexity = ∂²P/∂y² for bonds.
+
+---
+
+# CHAPTER 3: DIFFERENTIATION RULES
+
+---
+
+### 3.1 Basic Differentiation Rules
+
+```
+  ┌────────────────────────────────────────────┐
+  │  RULE              FORMULA                 │
+  ├────────────────────────────────────────────┤
+  │  Constant          d/dx[c] = 0             │
+  │  Power             d/dx[xⁿ] = nxⁿ⁻¹       │
+  │  Constant Multiple d/dx[cf] = c·f'         │
+  │  Sum               d/dx[f+g] = f'+g'       │
+  │  Difference        d/dx[f−g] = f'−g'       │
+  │  Exponential       d/dx[eˣ] = eˣ           │
+  │  General Exp       d/dx[bˣ] = bˣ·ln(b)     │
+  └────────────────────────────────────────────┘
+```
+
+**Visual: Power Rule**
+```
+  f(x) = x³         f'(x) = 3x²
+
+  y      *           y        *    *
+  |     *            |       *      *
+  |    *             |      *        *
+  |   *              |     *
+  |  *               |────*────────── 0
+  | *                |  *
+  +──────> x         +──────> x
+  cubic              parabola (always ≥ 0)
+```
+
+---
+
+### 3.2 Product and Quotient Rules
+
+**Product Rule:**
+```
+  d/dx[f·g] = f'·g + f·g'
+
+  Think: "first times derivative of second
+         plus second times derivative of first"
+
+  Example: d/dx[x²·sin(x)]
+         = 2x·sin(x) + x²·cos(x)
+```
+
+**Quotient Rule:**
+```
+  d/dx[f/g] = (f'·g − f·g') / g²
+
+  Memory trick: "low d-high minus high d-low, over low squared"
+
+  Example: d/dx[sin(x)/x]
+         = (cos(x)·x − sin(x)·1) / x²
+         = (x·cos(x) − sin(x)) / x²
+```
+
+---
+
+### 3.3 Derivatives of Trigonometric Functions
+
+```
+  ┌───────────────────────────────────────┐
+  │  d/dx[sin(x)]  =  cos(x)             │
+  │  d/dx[cos(x)]  = −sin(x)             │
+  │  d/dx[tan(x)]  =  sec²(x)            │
+  │  d/dx[cot(x)]  = −csc²(x)            │
+  │  d/dx[sec(x)]  =  sec(x)tan(x)       │
+  │  d/dx[csc(x)]  = −csc(x)cot(x)       │
+  └───────────────────────────────────────┘
+```
+
+**Visual: sin and its derivative cos**
+```
+  sin(x):                    cos(x) = [sin(x)]':
+
+  y  1 ─ *   *              y  1 ─ *           *
+  |      * * *              |    ** *         * *
+  |   *       *             |  **    *       *   *
+  |  *         *            | *       *     *     *
+  |──*───────────*──── 0    |*─────────*───*────────0
+  |               *  *      |           * *
+  −1 ─               *      −1 ─         *
+  +──0──π──2π────> x        +──0──π──2π────> x
+
+  Where sin rises → cos is positive (slope is positive)
+  Where sin falls → cos is negative (slope is negative)
+  Where sin peaks → cos = 0 (slope = zero)
+```
+
+---
+
+### 3.4 The Chain Rule
+
+**The most important rule in calculus.**
+
+```
+  If y = f(u) and u = g(x), then:
+  dy/dx = dy/du · du/dx = f'(g(x)) · g'(x)
+
+  VISUAL — think of it as gears:
+
+  x ──[g]──> u ──[f]──> y
+
+  Rate of change of y w.r.t. x
+    = (rate y changes per u) × (rate u changes per x)
+```
+
+**Examples:**
+```
+  d/dx[sin(x²)]  = cos(x²) · 2x
+                    ↑outer      ↑inner derivative
+
+  d/dx[e^(3x)]   = e^(3x) · 3
+
+  d/dx[(x²+1)⁵]  = 5(x²+1)⁴ · 2x
+```
+
+**Nested chain rule:**
+```
+  d/dx[sin(e^(x²))] = cos(e^(x²)) · e^(x²) · 2x
+                        ↑outer      ↑middle    ↑inner
+```
+
+> **Quant Finance:** Chain rule is THE fundamental tool in derivatives pricing. Itô's lemma (stochastic chain rule) derives Black-Scholes PDE.
+
+---
+
+### 3.5 Implicit Differentiation
+
+Sometimes y is not solved explicitly for x. Differentiate both sides and treat y as y(x):
+
+```
+  Example: x² + y² = 25  (circle of radius 5)
+
+  y
+  5─   *****
+  |  **     **
+  | *         *
+  |*           *         Differentiate:
+  |             *        2x + 2y·(dy/dx) = 0
+  |*           *
+  | *         *          dy/dx = −x/y
+  |  **     **
+  −5─   *****
+  +──−5────5────> x
+
+  At point (3,4): slope = −3/4
+```
+
+> **Quant Finance:** Extracting implied volatility from option prices; yield curve bootstrapping.
+
+---
+
+### 3.6 Derivatives of Logarithmic Functions
+
+```
+  d/dx[ln(x)]      = 1/x        (x > 0)
+  d/dx[ln|x|]      = 1/x        (x ≠ 0)
+  d/dx[log_b(x)]   = 1/(x·ln b)
+
+  Visual: d/dx[ln(x)] = 1/x
+
+  y     ln(x)            y  1/x
+  |         ****         |*
+  |      ***             | *
+  |   ***                |  *
+  |***                   |   *
+  +─────────────> x      |    **
+  (0,1) zero crossing    |      ****
+                         +─────────────> x
+```
+
+**Logarithmic Differentiation** — take ln of both sides first:
+```
+  y = xˣ
+  ln(y) = x·ln(x)
+  y'/y = ln(x) + 1
+  y' = xˣ(ln(x) + 1)
+```
+
+---
+
+### 3.7–3.8 Rates of Change and Exponential Growth
+
+**Economics Applications:**
+```
+  C(x) = total cost to produce x units
+  C'(x) = marginal cost (cost of one more unit)
+
+  y  C(x)                 C'(x)
+  |       *               |       *
+  |      *                |     **
+  |    **                 |   **
+  |  **                   | **
+  | *                     |*
+  +──────────> x          +──────────> x
+```
+
+**Natural Growth/Decay:**
+```
+  dy/dt = ky     →     y(t) = y₀·e^(kt)
+
+  This ODE says: "rate of change is proportional to current value"
+  — bacteria, compound interest, radioactive decay, ...
+```
+
+---
+
+### 3.9 Related Rates
+
+Variables that all change with time — use chain rule w.r.t. t:
+
+```
+  Classic: Ladder sliding down wall
+
+  y
+  |\ ← ladder of length L
+  | \
+  | h\      h² + x² = L²
+  |   \
+  |    \
+  +─x───\──> x
+
+  Differentiate w.r.t. t:
+  2h(dh/dt) + 2x(dx/dt) = 0
+  → find dh/dt given dx/dt
+```
+
+---
+
+### 3.10 Linearization and Differentials
+
+**Linear approximation (tangent line approximation):**
+```
+  L(x) = f(a) + f'(a)(x − a)
+
+  y       *
+  |      * ← curve f(x)
+  |     *  ← linear approx L(x)
+  |    * /
+  |   */
+  |  *  (a, f(a))
+  | */
+  +─────────────> x
+        a
+
+  L(x) ≈ f(x) near x = a
+```
+
+**Differential:**
+```
+  dy = f'(x) dx
+
+  When x changes by dx, y changes by approximately dy.
+```
+
+---
+
+### 3.11 Hyperbolic Functions
+
+```
+  sinh(x) = (eˣ − e⁻ˣ)/2
+  cosh(x) = (eˣ + e⁻ˣ)/2
+  tanh(x) = sinh(x)/cosh(x)
+
+  y   cosh(x)          y   tanh(x)
+  |     *              | 1─────────*****
+  |    * *             |       ****
+  |   *   *            |   ****
+  |  *     *           |***
+  | *       *          +──────────────> x
+  +──────────> x       |       (bounded −1 to 1)
+  (catenary shape)
+
+  Identity: cosh²(x) − sinh²(x) = 1
+  (analogous to cos²+sin²=1 for trig)
+```
+
+---
+
+# CHAPTER 4: APPLICATIONS OF DIFFERENTIATION
+
+---
+
+### 4.1 Maximum and Minimum Values
+
+```
+  y           absolute max
+  |           ●
+  |         *   *     local max ●
+  |        *     *            *   *
+  |       *  local *         *     *
+  |      *    min   *       *
+  |     *      ●    *     *   absolute min
+  |    *              *  *    ●
+  +──────────────────────────────> x
+```
+
+**Finding extrema:**
+```
+  ① Extreme Value Theorem: if f continuous on [a,b],
+    then f attains both abs max and abs min.
+
+  ② Critical numbers: f'(c) = 0  OR  f'(c) undefined
+
+  ③ Check: critical points + endpoints → evaluate f
+```
+
+---
+
+### 4.2 The Mean Value Theorem
+
+**Rolle's Theorem:**
+```
+  If f(a) = f(b) and f is continuous/differentiable,
+  then ∃ c where f'(c) = 0
+
+  y   *─────────*       ← f(a)=f(b)
+  |  * *       * *
+  | *   *     *   *
+  |*     *   *
+  |       *** ← f'(c)=0 here
+  +──a──────────b──> x
+```
+
+**Mean Value Theorem (MVT):**
+```
+  ∃ c in (a,b) where f'(c) = [f(b)−f(a)] / (b−a)
+
+  y         *  ← f(b)
+  |       */ |  ← secant line slope = avg rate of change
+  |      *   |
+  |     *    |
+  |    /     |  ← tangent at c has same slope!
+  |   /      |
+  | *  ← f(a)|
+  +─a───c────b──> x
+```
+
+---
+
+### 4.3 How Derivatives Affect Graph Shape
+
+```
+  f'(x) > 0  →  f is INCREASING  ↗
+  f'(x) < 0  →  f is DECREASING  ↘
+  f'(x) = 0  →  f has horizontal tangent (potential extremum)
+
+  f''(x) > 0  →  f is CONCAVE UP    ∪
+  f''(x) < 0  →  f is CONCAVE DOWN  ∩
+  f''(x) = 0  →  possible INFLECTION POINT
+
+  Full picture:
+
+  y             local max          inflection pt
+  |               ●                     ×
+  |         *   *   *           *   *   *   *
+  |        * ↗   ↘   *         * ↗   ↘   ↗   *
+  |       *     ↓      *      *             *
+  |      *    local      *  *
+  |     *     min ●       **
+  +────────────────────────────────────> x
+        [f'>0] [f'<0]   [f'<0][f'>0]
+        [f''>0]         [f''<0] [f''>0]
+         ∪                  ∩     ∪
+```
+
+**Second Derivative Test:**
+```
+  At critical point c where f'(c) = 0:
+  f''(c) > 0  →  local MINIMUM  (concave up = bowl)  ∪
+  f''(c) < 0  →  local MAXIMUM  (concave down = hill) ∩
+  f''(c) = 0  →  test inconclusive (need more analysis)
+```
+
+---
+
+### 4.4 L'Hôpital's Rule
+
+For **0/0** or **∞/∞** indeterminate forms:
+
+```
+  lim f(x)/g(x) = lim f'(x)/g'(x)
+  x→a             x→a
+
+  (provided the right-hand limit exists)
+
+  Examples:
+
+  lim  sin(x)/x  [0/0 form]
+  x→0
+  = lim  cos(x)/1  = 1
+    x→0
+
+  lim  x/eˣ  [∞/∞ form]
+  x→∞
+  = lim  1/eˣ  = 0    (exponential beats polynomial!)
+    x→∞
+```
+
+**Other indeterminate forms — convert first:**
+```
+  0·∞ → rewrite as 0/(1/∞) or ∞/(1/0)
+  ∞−∞ → find common denominator
+  0⁰, 1^∞, ∞⁰ → take logarithm first
+```
+
+---
+
+### 4.5 Curve Sketching Checklist
+
+```
+  STEP-BY-STEP:
+
+  A  Domain          Where is f defined?
+  B  Intercepts      Set f=0 (x-int), x=0 (y-int)
+  C  Symmetry        Even? f(-x)=f(x)  Odd? f(-x)=-f(x)
+  D  Asymptotes      Vertical (where f→∞), Horizontal (limits at ±∞)
+  E  Increase/Dec    Sign of f'
+  F  Local Extrema   f'=0 and sign change
+  G  Concavity       Sign of f''
+  H  Inflection pts  f'' changes sign
+  I  Sketch!
+```
+
+---
+
+### 4.7 Optimization Problems
+
+```
+  STRATEGY:
+  1. Read carefully — what to maximize/minimize?
+  2. Draw a diagram
+  3. Label variables, write constraint equation
+  4. Write objective function in ONE variable
+  5. Find critical points (set derivative = 0)
+  6. Verify it's max/min (2nd derivative test or interval check)
+
+  CLASSIC EXAMPLE: Maximize area of rectangle with perimeter = 40
+
+  P = 2x + 2y = 40  →  y = 20 − x
+  A = xy = x(20−x) = 20x − x²
+  A' = 20 − 2x = 0  →  x = 10, y = 10
+  → Square maximizes area!
+```
+
+---
+
+### 4.8 Newton's Method
+
+Iterative root-finding using tangent lines:
+
+```
+  y            *← curve f(x)
+  |           *
+  |          *
+  |─────────*────────────> x
+  |        *|  ↑
+  |       * |  x₂ = x₁ − f(x₁)/f'(x₁)
+  |      *  |
+  |     *   x₁ (initial guess)
+  |    *
+  |
+
+  Iteration: xₙ₊₁ = xₙ − f(xₙ)/f'(xₙ)
+
+  Each step gives a BETTER approximation of the root.
+```
+
+---
+
+### 4.9 Antiderivatives
+
+F is an antiderivative of f if F'(x) = f(x).
+
+```
+  ∫ f(x) dx = F(x) + C     (C = constant of integration)
+
+  Example:
+  d/dx[x³] = 3x²
+  ∴ antiderivative of 3x² is x³ + C
+
+  Key antiderivatives:
+  ┌──────────────────────────────────┐
+  │  f(x)          F(x) = ∫f dx     │
+  ├──────────────────────────────────┤
+  │  xⁿ (n≠−1)    xⁿ⁺¹/(n+1) + C  │
+  │  1/x           ln|x| + C        │
+  │  eˣ            eˣ + C           │
+  │  sin(x)       −cos(x) + C       │
+  │  cos(x)        sin(x) + C       │
+  └──────────────────────────────────┘
+```
+
+---
+
+# CHAPTER 5: INTEGRALS
+
+---
+
+### 5.1 Areas and Distances
+
+```
+  GOAL: Area under f(x) from a to b
+
+  STEP 1: Divide into n rectangles
+
+  y        ████░░░▒▒▒▓▓▓
+  |    ████████░░░▒▒▒▓▓▓
+  |    ████████░░░▒▒▒▓▓▓▓
+  |    ████████░░░░░▒▒▒▓▓▓▓▓
+  +────┼───┼───┼───┼──────> x
+       x₀  x₁  x₂  x₃  x₄=b
+       a
+
+  Width of each: Δx = (b−a)/n
+  Rₙ = f(x₁)Δx + f(x₂)Δx + ... + f(xₙ)Δx
+
+  STEP 2: Take n → ∞
+
+  As n increases, approximation improves:
+
+  n=4:  ████████    n=8: ██░░██░░   n=∞: perfect
+        ████████         ██░░██░░
+```
+
+---
+
+### 5.2 The Definite Integral
+
+```
+  DEFINITION:
+
+  ∫_a^b f(x)dx = lim  Σ f(xᵢ*)Δx
+                  n→∞ i=1
+
+  GEOMETRIC INTERPRETATION:
+
+  f(x) ≥ 0:  ∫_a^b f dx = area above x-axis
+  f(x) ≤ 0:  ∫_a^b f dx = −(area below x-axis)
+  Mixed:      ∫_a^b f dx = net signed area
+
+  y     *
+  |   * + *  ← positive area
+  |  *       *
+  +──a────────b──> x
+  |            *
+  |   negative ─ area
+  |              *
+```
+
+**Properties:**
+```
+  ∫_a^a f dx = 0
+  ∫_a^b f dx = −∫_b^a f dx
+  ∫_a^b [f±g] dx = ∫f dx ± ∫g dx
+  ∫_a^b c·f dx = c·∫_a^b f dx
+  ∫_a^b f dx = ∫_a^c f dx + ∫_c^b f dx
+```
+
+---
+
+### 5.3 The Fundamental Theorem of Calculus
+
+**THE most important theorem in calculus — links differentiation and integration.**
+
+**FTC Part 1:**
+```
+  g(x) = ∫_a^x f(t) dt     →     g'(x) = f(x)
+
+  Differentiating an integral gives back the integrand.
+
+  Visualize: g(x) = accumulated area from a to x
+
+  y
+  |    ░░░░░░░░░
+  |    ░░░░░░░░░░░░
+  |    ░░░░░░░░░░░░░
+  +────a────────x──> x
+       └─ g(x) = shaded area ─┘
+
+  g'(x) = rate area grows = f(x)  ← height of curve
+```
+
+**FTC Part 2 (Evaluation Theorem):**
+```
+  ∫_a^b f(x) dx = F(b) − F(a)     where F' = f
+
+  This lets us compute areas exactly!
+
+  Example: ∫_0^1 x² dx
+    F(x) = x³/3
+    = F(1) − F(0) = 1/3 − 0 = 1/3
+
+  y  x²
+  |    *
+  |   *
+  |  *  ← area = 1/3
+  | *
+  |* ← shaded region
+  +──0──1──> x
+```
+
+> **Quant Finance:** FTC connects PDEs to integral formulas; basis of Green's functions in option pricing.
+
+---
+
+### 5.4 Indefinite Integrals and Net Change
+
+```
+  ∫ f(x) dx = F(x) + C     (general antiderivative)
+
+  Net Change Theorem:
+  ∫_a^b F'(x) dx = F(b) − F(a)
+
+  If v(t) = velocity:
+  ∫_a^b v(t) dt = displacement (net change in position)
+  ∫_a^b |v(t)| dt = total distance traveled
+```
+
+---
+
+### 5.5 The Substitution Rule
+
+**Reverse chain rule for integration:**
+
+```
+  ∫ f(g(x))·g'(x) dx  =  ∫ f(u) du     where u = g(x)
+
+  STEPS:
+  1. Choose u = g(x)  (the "inside" function)
+  2. Compute du = g'(x)dx
+  3. Rewrite integral entirely in u
+  4. Integrate
+  5. Substitute back
+
+  Example: ∫ 2x·cos(x²) dx
+    u = x²
+    du = 2x dx
+    = ∫ cos(u) du
+    = sin(u) + C
+    = sin(x²) + C
+```
+
+---
+
+# CHAPTER 6: APPLICATIONS OF INTEGRATION
+
+---
+
+### 6.1 Areas Between Curves
+
+```
+  A = ∫_a^b [f(x) − g(x)] dx     where f(x) ≥ g(x)
+
+  y     f(x) ←
+  |       *
+  |      * *
+  |     *░░░*  ← shaded region between curves
+  |    *░░░░░*
+  |   *░░░░░░░*
+  |    *░░░*
+  |      * ↑ g(x)
+  +──a──────b──> x
+```
+
+---
+
+### 6.2 Volumes (Disk Method)
+
+```
+  Rotate f(x) around x-axis → solid of revolution
+
+  V = π·∫_a^b [f(x)]² dx
+
+  Cross-section is a DISK with radius f(x):
+
+      ┌────────────────────────────────┐
+      │ f(x)     .─────.              │
+  ────│────── .-'   ┊   '-.          │
+      │      |   r=f(x)┊  |   → disk │
+  ────│────── '-.   ┊   .-'          │
+      │          '─────'              │
+      └────────────────────────────────┘
+  x-axis
+
+  Volume = sum of infinitely thin disk areas
+```
+
+**Washer Method** (hole in the middle):
+```
+  V = π·∫_a^b ([f(x)]² − [g(x)]²) dx
+
+       Outer²        Inner²
+```
+
+---
+
+### 6.3 Shell Method
+
+```
+  V = ∫ 2π·(radius)·(height)·(thickness)
+
+  Imagine cylindrical shells like tree rings:
+
+  y
+  |    ┌───────────┐
+  |    │ ┌───────┐ │
+  |    │ │ ┌───┐ │ │
+  |    │ │ │   │ │ │  shells stacked
+  |    │ │ │   │ │ │
+  |    │ │ └───┘ │ │
+  |    │ └───────┘ │
+  |    └───────────┘
+  +────────────────────> x
+```
+
+---
+
+### 6.4–6.5 Work and Average Value
+
+**Work:**
+```
+  W = ∫_a^b F(x) dx
+
+  (when force F varies with position x)
+
+  y  F(x)
+  |  *
+  |  *  *
+  |  *  * *           Area under F(x) = Work done
+  |  *  * * *
+  +──a──────b──> x
+```
+
+**Average Value:**
+```
+  f_avg = 1/(b−a) · ∫_a^b f(x) dx
+
+  y         f(x)
+  |      *    *
+  |     * *  * *
+  |    *   **   *
+  |─────────────────── f_avg (horizontal line)
+  |   *               *
+  +────a───────────b──> x
+
+  Area under f(x) = Rectangle with height f_avg
+```
+
+---
+
+# CHAPTER 7: TECHNIQUES OF INTEGRATION
+
+---
+
+### 7.1 Integration by Parts
+
+```
+  ∫ u dv = uv − ∫ v du
+
+  Derived from product rule: d(uv) = u dv + v du
+
+  CHOOSING u and dv — use "LIATE" priority for u:
+  L → Logarithms
+  I → Inverse trig
+  A → Algebraic (polynomials)
+  T → Trigonometric
+  E → Exponential
+
+  Example: ∫ x·eˣ dx
+    u = x     →  du = dx
+    dv = eˣdx →  v = eˣ
+
+    = x·eˣ − ∫ eˣ dx
+    = x·eˣ − eˣ + C
+    = eˣ(x − 1) + C
+```
+
+---
+
+### 7.2 Trigonometric Integrals
+
+```
+  ∫ sinᵐ(x) cosⁿ(x) dx
+
+  Strategy:
+  ┌──────────────────────────────────────────────────┐
+  │ m ODD:  save one sin, convert rest using         │
+  │         sin²=1−cos², substitute u=cos(x)         │
+  │                                                  │
+  │ n ODD:  save one cos, convert rest using         │
+  │         cos²=1−sin², substitute u=sin(x)         │
+  │                                                  │
+  │ BOTH EVEN: use half-angle formulas               │
+  │   sin²(x) = (1−cos2x)/2                         │
+  │   cos²(x) = (1+cos2x)/2                         │
+  └──────────────────────────────────────────────────┘
+```
+
+---
+
+### 7.3 Trigonometric Substitution
+
+```
+  Expression          Substitution         Identity used
+  ─────────────────────────────────────────────────────
+  √(a²−x²)          x = a·sin(θ)         1−sin²=cos²
+  √(a²+x²)          x = a·tan(θ)         1+tan²=sec²
+  √(x²−a²)          x = a·sec(θ)         sec²−1=tan²
+
+  Visual: x = a·sin(θ) substitution for √(a²−x²)
+
+                  a
+               /|
+              / |
+        hyp  /  | √(a²−x²)
+            /   |
+           / θ  |
+          /─────|
+              x
+
+  When x = a·sin(θ): √(a²−x²) = a·cos(θ)  ✓
+```
+
+---
+
+### 7.4 Partial Fractions
+
+Decompose rational functions into simpler fractions:
+
+```
+  P(x)/Q(x)  where deg(P) < deg(Q)
+
+  CASE 1: Q has distinct linear factors
+  ─────────────────────────────────────
+  1/[(x−1)(x+2)] = A/(x−1) + B/(x+2)
+
+  Multiply both sides by denominator, solve for A,B
+
+  CASE 2: Q has repeated linear factors
+  ──────────────────────────────────────
+  1/(x−1)² = A/(x−1) + B/(x−1)²
+
+  CASE 3: Q has irreducible quadratic factors
+  ────────────────────────────────────────────
+  1/[(x²+1)(x−1)] = (Ax+B)/(x²+1) + C/(x−1)
+```
+
+---
+
+### 7.7 Approximate Integration
+
+```
+  MIDPOINT RULE (rectangles at midpoints):
+  ∫_a^b f dx ≈ Δx[f(x̄₁) + f(x̄₂) + ... + f(x̄ₙ)]
+
+  TRAPEZOIDAL RULE (trapezoids):
+  ∫_a^b f dx ≈ (Δx/2)[f(x₀) + 2f(x₁) + ... + 2f(xₙ₋₁) + f(xₙ)]
+
+  SIMPSON'S RULE (parabolas — most accurate):
+  ∫_a^b f dx ≈ (Δx/3)[f(x₀) + 4f(x₁) + 2f(x₂) + 4f(x₃) + ... + f(xₙ)]
+
+  Visual comparison:
+
+  Midpoint:       Trapezoid:       Simpson's:
+  y  ─┬─┬─┬─     y  /\/\/\        y   parabola
+  |  █│█│█│       |  / \ / \      |   fit per
+  |  █│█│█│       | /   X   \     |   3 points
+  +──────────     +──────────     +──────────
+
+  Accuracy:  Midpoint ≈ Trapezoid  <<  Simpson's
+```
+
+---
+
+### 7.8 Improper Integrals
+
+**Type 1: Infinite limits**
+```
+  ∫_a^∞ f(x) dx = lim  ∫_a^t f(x) dx
+                   t→∞
+
+  y    *                   Example:
+  |   * *   Total area     ∫_1^∞ 1/x² dx
+  |  *   *  might be       = lim [−1/x]_1^t
+  | *     * FINITE!        = lim (−1/t+1)
+  |*       ****──────      = 1    ← converges!
+  +──1──────────> x
+
+  But ∫_1^∞ 1/x dx = ∞  (diverges — "just barely")
+```
+
+**Type 2: Discontinuous integrands**
+```
+  ∫_a^b f(x) dx  where f blows up at a:
+
+  = lim  ∫_t^b f(x) dx
+    t→a⁺
+
+  y     |← discontinuity
+  |     |
+  |     |*
+  |     | *
+  |     |  *
+  |     |   ***
+  +─────a──────b──> x
+```
+
+---
+
+# CHAPTER 8: FURTHER APPLICATIONS
+
+---
+
+### 8.1 Arc Length
+
+```
+  Length of curve y=f(x) from a to b:
+
+  L = ∫_a^b √(1 + [f'(x)]²) dx
+
+  Derivation: each tiny piece of arc has length:
+  ds = √(dx² + dy²) = √(1 + (dy/dx)²) dx
+
+  y        *
+  |       * *
+  |      *   *  ← ds = tiny arc element
+  |     *     *
+  |    *       *
+  +────a────────b──> x
+
+  L = ∫ ds   (sum of all tiny arc elements)
+```
+
+---
+
+### 8.2 Surface Area of Revolution
+
+```
+  S = 2π ∫_a^b f(x) √(1 + [f'(x)]²) dx
+
+  Each ring has:
+  - radius = f(x)
+  - slant width = √(1+(f')²)dx
+  - circumference = 2π·f(x)
+
+           ╭──────╮
+          ╱        ╲  ← surface generated by
+  ───────            ─── rotating curve around x-axis
+          ╲        ╱
+           ╰──────╯
+```
+
+---
+
+### 8.5 Probability
+
+```
+  Probability Density Function f(x):
+  1. f(x) ≥ 0  for all x
+  2. ∫_{-∞}^{∞} f(x) dx = 1   (total probability = 1)
+  3. P(a ≤ X ≤ b) = ∫_a^b f(x) dx
+
+  y  normal distribution
+  |        *
+  |      ** **
+  |     *     *
+  |    *       *
+  |   *         *
+  |**               **
+  +─────────────────────> x
+  |←─────── area = 1 ───────→|
+
+  P(a≤X≤b) = shaded area between a and b
+
+  Mean:     μ = ∫ x·f(x) dx
+  Variance: σ² = ∫ (x−μ)²·f(x) dx
+
+  Normal PDF: f(x) = (1/σ√2π)·e^(−(x−μ)²/2σ²)
+```
+
+---
+
+# CHAPTER 9: DIFFERENTIAL EQUATIONS
+
+---
+
+### 9.1 What is a Differential Equation?
+
+```
+  An equation involving a function AND its derivatives.
+
+  ORDER = highest derivative present.
+
+  Examples:
+  y' = ky                    (1st order — population growth)
+  y'' + ω²y = 0              (2nd order — oscillation)
+  ∂u/∂t = k·∂²u/∂x²         (PDE — heat equation)
+```
+
+---
+
+### 9.2 Direction Fields and Euler's Method
+
+**Direction Field:** At each point (x,y), draw a short line with slope f'=F(x,y).
+
+```
+  y' = y (solution is eˣ)
+
+  Direction field:         Solution curves:
+
+  y                        y
+  3  → → → → →            3       /
+  2  → → → → →            2      /
+  1  → → → → →            1     /
+  0  → → → → →     →      0 ───/──────
+  −1 → → → → →           −1   /
+  +──────────> x           +──────────> x
+
+  Arrows show direction    Curves follow arrows
+```
+
+**Euler's Method** — numerical approximation:
+```
+  yₙ₊₁ = yₙ + h·F(xₙ, yₙ)
+
+  Start at (x₀, y₀), take steps of size h:
+
+  y         *  ← exact solution
+  |       * ↑ error grows
+  |      /  *
+  |    */  *
+  |   /*  * ← Euler steps
+  |  /*  *
+  | /* *
+  +────────────> x
+  x₀  x₁  x₂
+```
+
+---
+
+### 9.3 Separable Equations
+
+```
+  Form: dy/dx = g(x)·h(y)
+
+  Separate variables:
+  1/h(y) dy = g(x) dx
+
+  Integrate both sides:
+  ∫ 1/h(y) dy = ∫ g(x) dx
+
+  Example: dy/dx = xy
+
+  dy/y = x dx
+  ∫ dy/y = ∫ x dx
+  ln|y| = x²/2 + C
+  y = Ae^(x²/2)
+```
+
+---
+
+### 9.4 Logistic Growth
+
+```
+  dP/dt = kP(1 − P/M)
+
+  M = carrying capacity (maximum population)
+
+  Solution: P(t) = M / (1 + A·e^(−kt))
+
+  P
+  M ─────────────────── ← carrying capacity (asymptote)
+  |              *****
+  |          ****
+  |        ***
+  M/2 ─ ─**** ← inflection point (fastest growth)
+  |      *
+  |    **
+  |  **
+  | *
+  +──────────────────> t
+
+  Growth slows as population approaches M
+```
+
+> **Quant Finance:** Logistic model for market saturation, adoption curves.
+
+---
+
+### 9.5 First-Order Linear ODEs
+
+```
+  Form: y' + P(x)y = Q(x)
+
+  SOLUTION METHOD — Integrating Factor:
+  I(x) = e^(∫P(x)dx)
+
+  Multiply both sides by I(x):
+  [I(x)·y]' = I(x)·Q(x)
+
+  Integrate both sides:
+  I(x)·y = ∫ I(x)·Q(x) dx
+
+  Solve for y.
+```
+
+---
+
+### 9.6 Predator-Prey Systems (Lotka-Volterra)
+
+```
+  dx/dt = ax − bxy     (prey — grows alone, dies with predator)
+  dy/dt = −cy + dxy    (predator — dies alone, grows with prey)
+
+  Population cycles:
+
+  Population
+  |    prey      predator
+  |   *    *    *    *
+  |  * *  * *  * *  * *
+  | *   **   **   **   *
+  |*                     *
+  +──────────────────────> t
+
+  When prey peaks → predator grows
+  When predator peaks → prey declines
+  → oscillating cycle!
+```
+
+---
+
+# CHAPTER 10: PARAMETRIC EQUATIONS & POLAR COORDINATES
+
+---
+
+### 10.1–10.2 Parametric Curves
+
+```
+  Instead of y=f(x), use:
+  x = f(t),   y = g(t)     (t = parameter, often time)
+
+  Example: Circle  x = cos(t), y = sin(t), 0≤t≤2π
+
+  t=π/2 → (0,1)
+  t=0 → (1,0)         y
+  t=π → (−1,0)        1     *
+  t=3π/2 → (0,−1)         *   *
+                       |  *     *
+                       | *   +   *
+                       |  *     *
+                       |    *   *
+                       −1    *
+                       +──−1───1──> x
+
+  Derivatives:
+  dy/dx = (dy/dt) / (dx/dt)
+
+  Arc Length:
+  L = ∫ √((dx/dt)² + (dy/dt)²) dt
+```
+
+---
+
+### 10.3–10.4 Polar Coordinates
+
+```
+  Point P = (r, θ) where:
+  r = distance from origin
+  θ = angle from positive x-axis
+
+  Conversions:
+  x = r·cos(θ)        r² = x² + y²
+  y = r·sin(θ)        tan(θ) = y/x
+
+  y
+  |    P(r,θ)
+  |   /
+  | r/
+  |  /
+  | / θ
+  +─────────────> x
+
+  Common curves:
+  r = a             → circle of radius a
+  r = a·cos(θ)      → circle through origin
+  r = 1+cos(θ)      → cardioid (heart shape)
+
+  Cardioid r=1+cos(θ):
+       y
+       |  * *
+     * |       *
+   *   |         *
+  *────+──────────*──> x
+   *   |         *
+     * |       *
+       |  * *
+
+  Area in polar:  A = (1/2)∫r² dθ
+```
+
+---
+
+### 10.5–10.6 Conic Sections
+
+```
+  All conics: locus of points where (dist to focus)/(dist to directrix) = e
+
+  e = 0:  Circle         e = 0.5: Ellipse      e = 1: Parabola   e = 2: Hyperbola
+
+       *                    * *                  *                 *     *
+     *   *                *     *               * *               *       *
+    *     *              *       *             *   *             *         *
+     *   *                *     *            *     *             *         *
+       *                    * *             *       *             *       *
+                                                                  *     *
+```
+
+**Polar form:** r = ed/(1 ± e·cos θ) or r = ed/(1 ± e·sin θ)
+
+---
+
+# CHAPTER 11: INFINITE SEQUENCES AND SERIES
+
+---
+
+### 11.1 Sequences
+
+```
+  A sequence {aₙ} is a list: a₁, a₂, a₃, ...
+
+  CONVERGENT:                DIVERGENT:
+
+  aₙ  •                     aₙ           •
+  |    •                    |         •
+  |     •                   |    •
+  |      ••                 | •
+  L ─ ─ ─ •••───           |•──────────────
+  |                         +──────────> n
+  +──────────> n
+  aₙ → L  as n→∞            aₙ → ∞ (no limit)
+
+  lim aₙ = L  (converges)  OR  limit DNE (diverges)
+  n→∞
+```
+
+---
+
+### 11.2 Series
+
+```
+  Series = sum of sequence terms:
+  S = a₁ + a₂ + a₃ + ... = Σ aₙ
+
+  Partial sums: Sₙ = a₁ + a₂ + ... + aₙ
+
+  Series CONVERGES if lim Sₙ = S (finite)
+                       n→∞
+
+  GEOMETRIC SERIES:
+  Σ arⁿ = a/(1−r)    for |r| < 1
+
+  |r|<1: converges          |r|≥1: diverges
+  Sₙ                        Sₙ
+  |      ─────────── S      |            •
+  |  •••• ─ ─ ─              |         •
+  |••                        |      •
+  |                          |   •
+  +──────────> n             +──────────> n
+
+  TEST FOR DIVERGENCE:
+  If lim aₙ ≠ 0, then Σaₙ DIVERGES (necessary condition!)
+```
+
+---
+
+### 11.3 The Integral Test
+
+```
+  If f(n) = aₙ and f is continuous, positive, DECREASING:
+
+  Σaₙ converges  ⟺  ∫_1^∞ f(x)dx converges
+
+  y  a₁            Series sum ≈ integral (area)
+  |  ████
+  |  ████ a₂        Integral: shaded
+  |  ████ ████      Series:   rectangles
+  |  ████ ████ ████
+  +──1────2────3────> n
+
+  p-SERIES: Σ 1/nᵖ
+  converges if p > 1
+  diverges  if p ≤ 1
+```
+
+---
+
+### 11.4–11.6 Convergence Tests Summary
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │ TEST              WHEN TO USE          RESULT               │
+  ├─────────────────────────────────────────────────────────────┤
+  │ Divergence Test   Always try first     aₙ↛0 → diverges     │
+  │ Geometric Series  Σarⁿ form           |r|<1 conv, |r|≥1 div│
+  │ p-Series          Σ1/nᵖ form          p>1 conv, p≤1 div    │
+  │ Integral Test     f(n)=aₙ, decreasing ∫ converges ↔ Σ conv │
+  │ Comparison Test   Compare to known    squeeze argument      │
+  │ Limit Comparison  aₙ~bₙ similar form  lim(aₙ/bₙ)=L>0      │
+  │ Alternating Series (-1)ⁿaₙ, aₙ↘0     converges!           │
+  │ Ratio Test        factorials/powers   L=lim|aₙ₊₁/aₙ|<1→cv │
+  │ Root Test         nᵗʰ powers          L=lim|aₙ|^(1/n)<1→cv│
+  └─────────────────────────────────────────────────────────────┘
+```
+
+**Ratio Test visual:**
+```
+  L = lim |aₙ₊₁/aₙ|
+      n→∞
+
+  L < 1  →  CONVERGES absolutely
+  L > 1  →  DIVERGES
+  L = 1  →  INCONCLUSIVE (try another test)
+```
+
+---
+
+### 11.8–11.9 Power Series
+
+```
+  Σ cₙ(x−a)ⁿ = c₀ + c₁(x−a) + c₂(x−a)² + ...
+
+  RADIUS OF CONVERGENCE R:
+  - Series converges for |x−a| < R
+  - Series diverges  for |x−a| > R
+  - Endpoints: check separately!
+
+  Number line:
+  ───────[────────────────────]───────>
+         a−R        a       a+R
+         ↑                   ↑
+     might converge       might converge
+         or diverge       or diverge
+
+  Find R using Ratio Test: R = lim |cₙ/cₙ₊₁|
+
+  Key example:
+  1/(1−x) = Σ xⁿ = 1 + x + x² + x³ + ...  for |x| < 1
+```
+
+---
+
+### 11.10 Taylor and Maclaurin Series
+
+```
+  f(x) = Σ f⁽ⁿ⁾(a)/n! · (x−a)ⁿ    (Taylor series centered at a)
+
+  When a = 0: MACLAURIN SERIES
+
+  ┌──────────────────────────────────────────────────────┐
+  │  eˣ   = 1 + x + x²/2! + x³/3! + x⁴/4! + ...        │
+  │  sin(x)= x − x³/3! + x⁵/5! − x⁷/7! + ...           │
+  │  cos(x)= 1 − x²/2! + x⁴/4! − x⁶/6! + ...           │
+  │  ln(1+x)= x − x²/2 + x³/3 − x⁴/4 + ...  (|x|<1)   │
+  │  1/(1−x)= 1 + x + x² + x³ + ...          (|x|<1)   │
+  └──────────────────────────────────────────────────────┘
+
+  Visual: approximating sin(x) with Taylor polynomials
+
+  y  *    T₁=x       T₃=x−x³/6    T₅=x−x³/6+x⁵/120
+  | * *
+  |*   *───────      → better and better approximation
+  |    *
+  |     *       *
+  +─────────────────> x
+  0    π         2π
+```
+
+> **Quant Finance:** Taylor expansion of option price gives delta-gamma approximation; Taylor series of e^(iσ) used in characteristic functions.
+
+---
+
+# PART II: MULTIVARIABLE CALCULUS
+
+---
+
+# CHAPTER 12: VECTORS AND GEOMETRY OF SPACE
+
+---
+
+### 12.1 Three-Dimensional Coordinate System
+
+```
+         z
+         |
+         |
+         |          . P(x,y,z)
+         |       . /|
+         |    .  / |
+         | .    /  |
+         +────/───────> y
+        /|  /
+       / | /
+      /  |/
+     x   +
+
+  Distance: d = √((x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²)
+  Sphere: (x−a)² + (y−b)² + (z−c)² = r²
+```
+
+---
+
+### 12.2 Vectors
+
+```
+  A vector has MAGNITUDE and DIRECTION
+
+       B
+  →   /  ←── arrow head
+  a  /
+    /
+   A  ←── tail
+
+  a = <a₁, a₂, a₃>
+
+  |a| = √(a₁² + a₂² + a₃²)   ← magnitude
+
+  Unit vector: û = a/|a|     (magnitude = 1)
+
+  Vector addition (tip-to-tail):
+
+      b         a + b
+      ↗        ↗
+  a → + → b   ↗
+             ↗
+```
+
+---
+
+### 12.3 The Dot Product
+
+```
+  a · b = a₁b₁ + a₂b₂ + a₃b₃ = |a||b|cos(θ)
+
+  θ = angle between vectors
+
+  GEOMETRIC MEANING:
+  a · b > 0  →  θ < 90°  (acute — same direction)
+  a · b = 0  →  θ = 90°  (perpendicular/orthogonal)
+  a · b < 0  →  θ > 90°  (obtuse — opposite directions)
+
+      b                    b
+      |      a · b = |a||b|cosθ
+      |θ
+  ────+────────> a
+
+  Projection of b onto a:
+  proj_a(b) = (a·b/|a|²)·a
+```
+
+---
+
+### 12.4 The Cross Product
+
+```
+  a × b = <a₂b₃−a₃b₂, a₃b₁−a₁b₃, a₁b₂−a₂b₁>
+
+  KEY PROPERTY: a × b is PERPENDICULAR to both a and b
+
+       z  a × b
+       |↑
+       |/
+  ─────+──────> a
+      /|
+     / |
+    b  |y
+
+  |a × b| = |a||b|sin(θ) = area of parallelogram
+
+  Right-hand rule: curl fingers from a to b, thumb points to a×b
+  a × b = −(b × a)  (anti-commutative)
+```
+
+---
+
+### 12.5 Lines and Planes
+
+```
+  LINE through P₀(x₀,y₀,z₀) with direction v=<a,b,c>:
+  Vector form:     r = r₀ + tv
+  Parametric:      x = x₀+at, y = y₀+bt, z = z₀+ct
+
+  PLANE through P₀ with normal n=<a,b,c>:
+  Scalar equation: a(x−x₀) + b(y−y₀) + c(z−z₀) = 0
+  General:         ax + by + cz = d
+
+         z
+         |   n ↑ (normal vector)
+         |   |
+         |   |
+         +───────────────> y    ← plane (flat surface)
+        /
+       x
+```
+
+---
+
+# CHAPTER 13: VECTOR FUNCTIONS
+
+---
+
+### 13.1–13.2 Vector Functions and Derivatives
+
+```
+  r(t) = <f(t), g(t), h(t)>     (space curve)
+
+  Example: Helix
+  r(t) = <cos(t), sin(t), t>
+
+       z
+       |        ← helix spiraling up
+       |      *
+       |    *
+       |   *
+       |  *      *
+       | *     *
+       |      *
+       +──────────> y
+      /  *  *
+     x
+
+  Derivative (tangent vector):
+  r'(t) = <f'(t), g'(t), h'(t)>
+
+  r'(t) is TANGENT to the curve at each point.
+```
+
+---
+
+### 13.3 Arc Length and Curvature
+
+```
+  Arc Length: L = ∫_a^b |r'(t)| dt
+
+  Curvature κ measures how sharply a curve bends:
+  κ = |r'(t) × r''(t)| / |r'(t)|³
+
+  Low κ:              High κ:
+  (gentle curve)      (sharp curve)
+        ────           )(
+  almost straight    tight spiral
+
+  κ = 0:  straight line
+  κ = 1/r: circle of radius r
+```
+
+---
+
+### 13.4 Velocity and Acceleration
+
+```
+  r(t) = position
+  v(t) = r'(t) = velocity
+  a(t) = v'(t) = r''(t) = acceleration
+
+  Speed = |v(t)|
+
+  Projectile motion:
+  r(t) = <v₀cos(α)·t, v₀sin(α)·t − ½gt²>
+
+  y         *  ← maximum height
+  |        * *
+  |       *   *
+  |      *     *
+  |     *       *
+  |    *         *
+  |   *           *
+  +──────────────────> x
+  launch              landing
+```
+
+---
+
+# CHAPTER 14: PARTIAL DERIVATIVES
+
+---
+
+### 14.1–14.2 Functions of Several Variables
+
+```
+  z = f(x,y)   → surface in 3D space
+
+         z
+         |     surface z=f(x,y)
+         |    .─────────.
+         |  .'           '.
+         | /      *        \
+         |/      * *        \
+         +────────────────> y
+        /   level curves
+       x
+
+  Level curves: f(x,y) = c  (slices at constant height)
+
+  Topographic map:
+  y
+  4 ──────────────────
+  3    (···)           ← level curves
+  2   (·····)
+  1    (···)
+  0 ──────────────────
+  +──0──1──2──3──> x
+```
+
+---
+
+### 14.3 Partial Derivatives
+
+```
+  ∂f/∂x = rate of change in x-direction (holding y constant)
+  ∂f/∂y = rate of change in y-direction (holding x constant)
+
+  GEOMETRIC:
+
+         z
+         |        ∂f/∂x = slope of this curve
+         |        (cut surface with plane y=b)
+         |      ─────────────
+         |     /  surface z=f(x,y)
+         |    /──────────────
+         +────────────────> y
+        /
+       x   ← fix y=b, vary x
+
+  CALCULATION:
+  f(x,y) = x²y + sin(y)
+  ∂f/∂x = 2xy          (treat y as constant)
+  ∂f/∂y = x² + cos(y)  (treat x as constant)
+```
+
+**Higher partial derivatives:**
+```
+  fₓₓ = ∂²f/∂x²          fᵧᵧ = ∂²f/∂y²
+  fₓᵧ = ∂²f/∂y∂x         fᵧₓ = ∂²f/∂x∂y
+
+  Clairaut's Theorem: fₓᵧ = fᵧₓ  (if both continuous)
+```
+
+---
+
+### 14.4 Tangent Planes
+
+```
+  Tangent plane to z=f(x,y) at (a,b,f(a,b)):
+
+  z − f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+
+         z
+         |      /   tangent plane (flat)
+         |     /── ─ ─ ─ ─
+         |    /  surface z=f(x,y)
+         |   / (a,b,f(a,b)) ← point of tangency
+         +────────────────> y
+        /
+       x
+
+  Linear Approximation (the tangent plane itself):
+  f(x,y) ≈ f(a,b) + fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+```
+
+---
+
+### 14.5 The Chain Rule (Multivariable)
+
+```
+  z = f(x,y), where x=x(t), y=y(t):
+
+  dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
+
+  TREE DIAGRAM (helps remember):
+
+         z
+        / \
+       x   y
+       |   |
+       t   t
+
+  Each path contributes: (∂z/∂x)(dx/dt) and (∂z/∂y)(dy/dt)
+  ADD all paths to get dz/dt.
+
+  TWO independent variables (x=x(s,t), y=y(s,t)):
+  ∂z/∂s = (∂z/∂x)(∂x/∂s) + (∂z/∂y)(∂y/∂s)
+  ∂z/∂t = (∂z/∂x)(∂x/∂t) + (∂z/∂y)(∂y/∂t)
+```
+
+---
+
+### 14.6 Directional Derivatives and the Gradient
+
+```
+  Directional derivative in direction u = <a,b>:
+  Dᵤf = ∇f · u     (dot product of gradient with unit vector)
+
+  Gradient:  ∇f = <∂f/∂x, ∂f/∂y>
+
+  ∇f ALWAYS points in direction of STEEPEST ASCENT
+
+  Level curves with gradient:
+
+  y
+  |   level curve f=3
+  |   ────────────────
+  |    ↑↑↑↑↑↑↑↑↑↑↑↑   ← ∇f (perpendicular to level curves)
+  |   ────────────────
+  |    f=2
+  |   ────────────────
+  |    f=1
+  +───────────────────> x
+
+  Max rate of increase: |∇f|  (in direction of ∇f)
+  Min rate of increase: −|∇f| (opposite direction)
+  Zero rate of change:   perpendicular to ∇f (along level curve)
+```
+
+---
+
+### 14.7 Optimization in Several Variables
+
+```
+  CRITICAL POINT: (a,b) where fₓ=0 and fᵧ=0
+
+  SECOND DERIVATIVE TEST:
+  D = fₓₓ·fᵧᵧ − (fₓᵧ)²
+
+  D > 0, fₓₓ > 0  →  local MINIMUM  (bowl up)
+  D > 0, fₓₓ < 0  →  local MAXIMUM  (bowl down)
+  D < 0            →  SADDLE POINT
+  D = 0            →  inconclusive
+
+  Saddle point (D<0):       Local min (D>0, fxx>0):
+
+       z                         z
+       |     surface              |         *
+       |   / ─ ─ ─               |        * *
+       |  /  high                |       *   *
+       | *    one way            |      *  ↑  *
+       |  \ low                  |     *  min  *
+       |   \ another way         |
+       +──────────> y            +──────────> y
+```
+
+---
+
+### 14.8 Lagrange Multipliers
+
+```
+  Optimize f(x,y) SUBJECT TO constraint g(x,y) = k
+
+  METHOD: Solve ∇f = λ·∇g  and  g(x,y) = k
+
+  Geometric interpretation:
+
+  y
+  |   constraint g=k
+  |     ─────────────────
+  |    level curves of f:  f=5
+  |    ─────────────────   f=4 ← solution: where f's
+  |     ─────────────────  f=3   level curve TOUCHES
+  |    ─────────────────         constraint g=k
+  +───────────────────────> x
+
+  At solution: ∇f ∥ ∇g  (gradients are parallel)
+  → λ is the multiplier (Lagrange multiplier)
+```
+
+---
+
+# CHAPTER 15: MULTIPLE INTEGRALS
+
+---
+
+### 15.1–15.2 Double Integrals
+
+```
+  ∬_R f(x,y) dA  =  volume under surface z=f(x,y)
+
+         z
+         |  surface z = f(x,y)
+         |    ___
+         |   /   \
+         |  /  V  \  ← volume we integrate
+         | /________\
+         +────────────> y
+        /
+       x    R = region in xy-plane
+
+  FUBINI'S THEOREM (iterate the integral):
+  ∬_R f dA = ∫_a^b ∫_c^d f(x,y) dy dx = ∫_c^d ∫_a^b f(x,y) dx dy
+
+  Evaluate inner integral first, then outer.
+```
+
+---
+
+### 15.3 Polar Coordinates for Double Integrals
+
+```
+  dA = r dr dθ  (area element in polar)
+
+  ∬_R f(x,y) dA = ∫∫ f(r·cosθ, r·sinθ)·r dr dθ
+
+  Why r? — Annular ring at radius r:
+  Area of ring ≈ (2πr)(dr)  →  each bit = r dr dθ
+
+  y
+  |    ╭────╮   ← outer boundary r=b
+  |  ╭─╯ ░░ ╰─╮
+  | ╭╯  ░░░░  ╰╮ ← shaded annulus
+  | |  ░░░░░░  |
+  |  ╰╮░░░░╭╯
+  |    ╰────╯   ← inner boundary r=a
+  +────────────> x
+
+  Useful for circles, rings, sectors!
+```
+
+---
+
+### 15.6–15.8 Triple Integrals and Coordinate Systems
+
+```
+  ∭_E f(x,y,z) dV
+
+  CYLINDRICAL (r, θ, z):
+  x = r cosθ,  y = r sinθ,  z = z
+  dV = r dz dr dθ
+
+         z
+         |        ← cylinder of height h, radius a
+         |   ─────
+         |  /     \
+         | |   +   |  ← center at origin
+         |  \     /
+         |   ─────
+         +────────────> y
+        /
+       x
+
+  SPHERICAL (ρ, φ, θ):
+  x = ρ sinφ cosθ
+  y = ρ sinφ sinθ
+  z = ρ cosφ
+  dV = ρ² sinφ dρ dφ dθ
+
+         z
+         |   ρ = distance from origin
+         | . ← P(ρ,φ,θ)
+         |/ φ ← polar angle from z-axis
+         +──────────> y
+        / θ ← azimuthal angle
+       x
+
+  Use spherical for spheres, cones, balls.
+```
+
+---
+
+### 15.9 Change of Variables (Jacobian)
+
+```
+  ∬_R f(x,y) dA = ∬_S f(x(u,v), y(u,v)) · |J| du dv
+
+  Jacobian: J = ∂(x,y)/∂(u,v) = |∂x/∂u  ∂x/∂v|
+                                  |∂y/∂u  ∂y/∂v|
+
+  |J| is the "stretch factor" of the transformation.
+
+  Example: Polar coordinates
+  x = r cosθ,  y = r sinθ
+  J = r  →  dA = r dr dθ  ✓
+```
+
+---
+
+# CHAPTER 16: VECTOR CALCULUS
+
+---
+
+### 16.1 Vector Fields
+
+```
+  F(x,y) = P(x,y)i + Q(x,y)j
+
+  Assigns a VECTOR to each point in space.
+
+  Examples:
+  Gravitational field:     Wind velocity field:
+
+  y                        y
+  |  ↓ ↓ ↓ ↓              |  → → ↗ ↑
+  |  ↓ ↓ ↓ ↓              |  → → → ↑
+  |  ↓ ↓ ↓ ↓              |  → → → →
+  +──────────> x           +──────────> x
+
+  All arrows point down    Arrows vary by location
+```
+
+---
+
+### 16.2 Line Integrals
+
+```
+  ∫_C F·dr = work done by F along curve C
+
+  Think: Force dotted with tiny displacement, summed along path
+
+  y       F(x,y)
+  |    ↗↗↗/← force vectors
+  |   ↗ / ← curve C
+  |  ↗/
+  | ↗/
+  |/
+  +──────────> x
+
+  ∫_C F·dr = ∫_C P dx + Q dy
+
+  Parametrize C as r(t) = <x(t), y(t)>:
+  = ∫_a^b F(r(t)) · r'(t) dt
+```
+
+---
+
+### 16.3 Fundamental Theorem for Line Integrals
+
+```
+  If F = ∇f (conservative field), then:
+
+  ∫_C F·dr = f(r(b)) − f(r(a))
+
+  KEY CONSEQUENCE:
+  For conservative fields:
+  - Integral depends only on ENDPOINTS, not path
+  - ∮_C F·dr = 0  (closed curve integral = 0)
+
+  Path 1:                 Path 2:
+  y    ___                y
+  |   /   \               |   _____
+  |  /     \              |  /     |
+  | A       B             | A      B
+  +──────────> x          +──────────> x
+
+  Both give same answer if F is conservative!
+```
+
+---
+
+### 16.4 Green's Theorem
+
+```
+  ∮_C P dx + Q dy = ∬_D (∂Q/∂x − ∂P/∂y) dA
+
+  Converts LINE integral (boundary) to DOUBLE integral (region)
+
+  y
+  |    ┌──────┐
+  |    │      │ ← D (region)
+  |    │      │
+  |    └──────┘
+  |      ↑ C (boundary, counterclockwise)
+  +────────────────> x
+
+  Great for computing areas:
+  A = (1/2) ∮_C (x dy − y dx)
+```
+
+---
+
+### 16.5 Curl and Divergence
+
+```
+  CURL: curl F = ∇ × F
+
+  Measures ROTATION in a vector field
+
+  curl F > 0: counterclockwise rotation
+  curl F < 0: clockwise rotation
+  curl F = 0: irrotational (conservative?)
+
+  y                        y
+  |   ↙ ↓ ↘              |   → → →
+  |   ← · →  ← rotation  |   → → →  ← no rotation
+  |   ↖ ↑ ↗              |   → → →
+  +──────────> x           +──────────> x
+  curl F ≠ 0               curl F = 0
+
+  DIVERGENCE: div F = ∇ · F = ∂P/∂x + ∂Q/∂y + ∂R/∂z
+
+  div F > 0: source (flow out)     div F < 0: sink (flow in)
+  y   ↗ ↑ ↖                       y   ↘ ↓ ↙
+  |   ← · →                       |   → · ←
+  |   ↙ ↓ ↘                       |   ↗ ↑ ↖
+  +──────────> x                   +──────────> x
+```
+
+---
+
+### 16.7 Surface Integrals (Flux)
+
+```
+  ∬_S F·dS = ∬_S F·n dS  =  flux through surface S
+
+  Measures how much of F "flows through" S
+
+        n ↑ (outward normal)
+        |
+  ──────┼──────  ← surface S
+  F →→→ | →→→→→
+  →→→→→ | →→→→→  F flowing through S
+  ──────┼──────
+        |
+```
+
+---
+
+### 16.8 Stokes' Theorem
+
+```
+  ∮_C F·dr = ∬_S curl F · dS
+
+  Relates LINE integral on boundary to SURFACE integral
+
+         ↑ n
+        /|  S (surface)
+       / |
+      /  |
+   C─────  ← boundary curve (counterclockwise)
+
+  Generalizes Green's Theorem to 3D surfaces.
+```
+
+---
+
+### 16.9 The Divergence Theorem
+
+```
+  ∬_S F·dS = ∭_E div F dV
+
+  Flux through CLOSED SURFACE = integral of divergence over VOLUME
+
+       ↑ outward normals all around
+      ↗ ↑ ↖
+  ←  [  E  ]  →   ← closed surface S
+      ↙ ↓ ↘
+
+  "What flows out of the surface = what is created inside"
+
+  Generalizes FTC to 3D — unifies all major theorems!
+```
+
+---
+
+# CHAPTER 17: SECOND-ORDER DIFFERENTIAL EQUATIONS
+
+---
+
+### 17.1 Second-Order Linear Equations
+
+```
+  ay'' + by' + cy = 0     (homogeneous, constant coefficients)
+
+  AUXILIARY EQUATION: ar² + br + c = 0
+
+  Solve for r — three cases:
+
+  Case 1: Two real roots r₁ ≠ r₂
+  y = C₁e^(r₁x) + C₂e^(r₂x)
+
+  Case 2: Repeated root r₁ = r₂ = r
+  y = (C₁ + C₂x)e^(rx)
+
+  Case 3: Complex roots r = α ± βi
+  y = e^(αx)(C₁cos(βx) + C₂sin(βx))
+
+  Case 3 gives oscillations:
+
+  y      ← envelope e^(αx)
+  |   *   *   *
+  |  * * * * * * *          α < 0: decaying oscillation
+  | *   *   *   *   *       α = 0: sustained oscillation
+  +──────────────────> x    α > 0: growing oscillation
+```
+
+---
+
+### 17.2 Nonhomogeneous Equations
+
+```
+  ay'' + by' + cy = G(x)
+
+  GENERAL SOLUTION:
+  y = yₚ + yc
+
+  yc = complementary (solution to homogeneous part)
+  yₚ = particular  (any one solution to full equation)
+
+  METHOD OF UNDETERMINED COEFFICIENTS:
+  ┌─────────────────────────────────────────┐
+  │ G(x)           Try yₚ =                │
+  ├─────────────────────────────────────────┤
+  │ polynomial pₙ  Ax^n+...+A₀             │
+  │ Ce^(kx)        Ae^(kx)                 │
+  │ C cos(kx)      A cos(kx) + B sin(kx)   │
+  │ C sin(kx)      A cos(kx) + B sin(kx)   │
+  └─────────────────────────────────────────┘
+```
+
+---
+
+### 17.3 Spring-Mass System
+
+```
+  m·x'' + c·x' + k·x = F(t)
+
+  m = mass, c = damping, k = spring constant, F = external force
+
+  Undamped free oscillation (c=0, F=0):
+  x'' + ω₀²x = 0     ω₀ = √(k/m)
+  x(t) = A cos(ω₀t) + B sin(ω₀t)   (pure oscillation)
+
+  x
+  |  *   *   *   *   *        ← sustained oscillation
+  | * * * * * * * * * *
+  +──────────────────────> t
+  |* * * * * * * * * *
+  |  *   *   *   *   *
+
+  Damped oscillation (c > 0):
+  x
+  |  *                         ← amplitude decays
+  | * *   *
+  |*   * * *   *
+  +────────────────────────> t  ← approaches 0
+  |         *   *
+  |           ***
+```
+
+---
+
+### 17.4 Series Solutions
+
+```
+  For variable-coefficient ODEs, try:
+  y = Σ cₙxⁿ = c₀ + c₁x + c₂x² + c₃x³ + ...
+
+  Substitute into ODE and match coefficients.
+
+  Example: y'' − y = 0
+  → y = cosh(x) = 1 + x²/2! + x⁴/4! + ...
+     or y = sinh(x) = x + x³/3! + x⁵/5! + ...
+```
+
+---
+
+# PART III: LEARNING OPTIMIZATION
+
+---
+
+## A. Full Calculus Learning Roadmap
+
+```
+  ┌────────────────────────────────────────────────────────┐
+  │                    DEPENDENCY MAP                       │
+  ├────────────────────────────────────────────────────────┤
+  │                                                         │
+  │  [Algebra & Trig]                                       │
+  │       ↓                                                 │
+  │  [Functions & Models] ─────────────────────┐           │
+  │       ↓                                    │           │
+  │  [Limits & Continuity]                     │           │
+  │       ↓                                    ↓           │
+  │  [Differentiation] ──────────────→ [Sequences/Series]  │
+  │       ↓                                    ↑           │
+  │  [Applications: Optim, Curve Sketch]       │           │
+  │       ↓                                    │           │
+  │  [Integration] ────────────────────────────┘           │
+  │       ↓                                                 │
+  │  [Differential Equations]                               │
+  │       ↓                                                 │
+  │  [Multivariable: Vectors, Partial Deriv]                │
+  │       ↓                                                 │
+  │  [Multiple Integrals]                                   │
+  │       ↓                                                 │
+  │  [Vector Calculus: Green's, Stokes', Divergence]        │
+  └────────────────────────────────────────────────────────┘
+```
+
+---
+
+## B. Quant Finance Applications Map
+
+```
+  CALCULUS CONCEPT              QUANT FINANCE USE
+  ─────────────────────────────────────────────────────────
+  Derivatives (1st)           Delta (∂V/∂S), DV01, PV01
+  Derivatives (2nd)           Gamma (∂²V/∂S²), Convexity
+  Chain Rule                  Itô's Lemma (stoch. chain rule)
+  Partial Derivatives         Multi-factor Greeks
+  Gradient                    Steepest risk direction
+  Taylor Series               Delta-gamma approximation
+  Integration                 Expected values, PDFs
+  PDEs                        Black-Scholes equation
+  Lagrange Multipliers        Portfolio optimization w/ constraints
+  Implicit Differentiation    Implied volatility extraction
+  MVT/IVT                     Existence of arbitrage-free prices
+  ODE (exponential)           Continuous compounding
+  FTC                         Present value formulas
+  Normal distribution         Option pricing (Black-Scholes)
+```
+
+---
+
+## C. Formula Master-Sheet
+
+```
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  LIMITS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  lim sin(x)/x = 1              (x→0)
+  lim (1−cos x)/x = 0           (x→0)
+  lim (1+1/x)^x = e             (x→∞)
+  lim (eˣ−1)/x = 1              (x→0)
+  lim ln(1+x)/x = 1             (x→0)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DERIVATIVES
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  d/dx[xⁿ]        = nxⁿ⁻¹
+  d/dx[eˣ]        = eˣ
+  d/dx[aˣ]        = aˣ ln(a)
+  d/dx[ln x]      = 1/x
+  d/dx[log_a x]   = 1/(x ln a)
+  d/dx[sin x]     = cos x
+  d/dx[cos x]     = −sin x
+  d/dx[tan x]     = sec²x
+  d/dx[sin⁻¹x]   = 1/√(1−x²)
+  d/dx[tan⁻¹x]   = 1/(1+x²)
+
+  RULES:
+  (fg)'    = f'g + fg'
+  (f/g)'   = (f'g − fg')/g²
+  [f(g(x))]' = f'(g(x))·g'(x)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INTEGRALS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ∫ xⁿ dx           = xⁿ⁺¹/(n+1) + C   (n≠−1)
+  ∫ 1/x dx          = ln|x| + C
+  ∫ eˣ dx           = eˣ + C
+  ∫ aˣ dx           = aˣ/ln(a) + C
+  ∫ sin x dx        = −cos x + C
+  ∫ cos x dx        = sin x + C
+  ∫ sec²x dx        = tan x + C
+  ∫ 1/(1+x²) dx     = tan⁻¹x + C
+  ∫ 1/√(1−x²) dx   = sin⁻¹x + C
+
+  TECHNIQUES:
+  Parts:        ∫ u dv = uv − ∫ v du
+  Substitution: ∫ f(g(x))g'(x)dx = ∫ f(u)du
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TAYLOR/MACLAURIN SERIES
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  eˣ      = 1 + x + x²/2! + x³/3! + ...
+  sin(x)  = x − x³/3! + x⁵/5! − ...
+  cos(x)  = 1 − x²/2! + x⁴/4! − ...
+  ln(1+x) = x − x²/2 + x³/3 − ...     |x|<1
+  (1+x)^k = 1 + kx + k(k−1)x²/2! + ...
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MULTIVARIABLE
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ∇f          = <∂f/∂x, ∂f/∂y, ∂f/∂z>
+  Dᵤf         = ∇f · û
+  Chain Rule  : dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
+  Tangent Plane: z−f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VECTOR CALCULUS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  curl F     = ∇ × F
+  div F      = ∇ · F
+  Green's:    ∮_C F·dr = ∬_D curl F dA
+  Stokes':    ∮_C F·dr = ∬_S curl F · dS
+  Divergence: ∬_S F·dS = ∭_E div F dV
+```
+
+---
+
+## D. Concept Checklist
+
+```
+  LIMITS & CONTINUITY              DIFFERENTIATION
+  ───────────────────────────────────────────────────
+  □ Intuitive limit definition     □ Derivative definition
+  □ Limit laws                     □ Geometric interpretation
+  □ One-sided limits               □ All basic rules
+  □ Infinite limits                □ Product/Quotient rule
+  □ ε-δ definition                 □ Chain rule ★
+  □ Continuity definition          □ Implicit differentiation
+  □ Types of discontinuities       □ Related rates
+  □ IVT                            □ Higher-order derivatives
+  □ Limits at infinity             □ Linear approximation
+
+  INTEGRATION                      SERIES
+  ───────────────────────────────────────────────────
+  □ Riemann sums                   □ Sequence convergence
+  □ Definite integral              □ Series convergence
+  □ FTC Parts 1 & 2               □ Convergence tests
+  □ Indefinite integrals           □ Power series
+  □ Substitution                   □ Taylor/Maclaurin series
+  □ Integration by parts           □ Radius of convergence
+  □ Trig integrals
+  □ Partial fractions
+  □ Improper integrals
+
+  MULTIVARIABLE                    VECTOR CALCULUS
+  ───────────────────────────────────────────────────
+  □ Partial derivatives            □ Vector fields
+  □ Tangent planes                 □ Line integrals
+  □ Multivariable chain rule       □ Conservative fields
+  □ Gradient vector                □ Green's Theorem
+  □ Directional derivatives        □ Curl & Divergence
+  □ Optimization (2 vars)          □ Surface integrals
+  □ Lagrange multipliers           □ Stokes' Theorem
+  □ Double/triple integrals        □ Divergence Theorem
+  □ Jacobian
+  □ Coordinate transforms
+```
+
+---
+
+*End of Complete Calculus Knowledge System*
+*Stewart's Calculus: Early Transcendentals, 8th Edition*
