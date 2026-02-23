@@ -3,6 +3,8 @@ title: 'Calculus Concepts'
 slug: /Calculus-Notes
 ---
 
+import CalcPlot from '@site/src/components/CalcPlot';
+
 # COMPLETE CALCULUS KNOWLEDGE SYSTEM
 ### Based on Stewart's Calculus: Early Transcendentals, 8th Edition
 ### With Visual Explanations & Quantitative Finance Context
@@ -67,33 +69,8 @@ We want the exact area under a curve. Since we can't compute curved areas direct
   As n → ∞, approximation becomes exact.
 ```
 
-> **3D Visualization** — run with `pip install matplotlib numpy`:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="riemann-sum" />
 
-def f(x): return np.sin(x) + 1.5
-
-x_fine = np.linspace(0, np.pi, 300)
-n = 8
-x_bars = np.linspace(0, np.pi, n + 1)
-dx = x_bars[1] - x_bars[0]
-x_mid = 0.5 * (x_bars[:-1] + x_bars[1:])
-
-fig = plt.figure(figsize=(10, 6))
-ax = fig.add_subplot(111, projection='3d')
-
-for i, (xi, hi) in enumerate(zip(x_mid, f(x_mid))):
-    color = plt.cm.viridis(i / n)
-    ax.bar3d(xi - dx/2, 0, 0, dx * 0.92, 0.3, hi, color=color, alpha=0.75, shade=True)
-
-ax.plot(x_fine, [0] * len(x_fine), f(x_fine), 'r-', linewidth=2.5, label='f(x) = sin(x)+1.5')
-ax.set_xlabel('X'); ax.set_ylabel('Depth'); ax.set_zlabel('f(x)')
-ax.set_title(f'Riemann Sum  (n={n} rectangles)\nArea ≈ Σ f(xᵢ*)·Δx  →  ∫f(x)dx  as n→∞')
-ax.set_yticks([])
-ax.legend()
-plt.tight_layout(); plt.show()
-```
 
 **Formula:**
 ```
@@ -335,7 +312,7 @@ A function f assigns **exactly one output** to each input.
   ln(xʳ) = r·ln(x)
 ```
 
-> **Quant Finance:** Log returns r = ln(S_t / S_{t−1}); time to double: t = ln(2)/r
+> **Quant Finance:** Log returns r = ln(S_t / S_\{t−1\}); time to double: t = ln(2)/r
 
 ---
 
@@ -1666,31 +1643,8 @@ Decompose rational functions into simpler fractions:
            ╰──────╯
 ```
 
-> **3D Visualization** — rotate f(x) = sin(x)+1.5 around the x-axis:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="surface-revolution" />
 
-x_vals  = np.linspace(0, np.pi, 80)
-r_vals  = np.sin(x_vals) + 1.5        # radius at each x
-theta   = np.linspace(0, 2*np.pi, 80)
-
-X_grid, THETA_grid = np.meshgrid(x_vals, theta)
-R_grid,  _          = np.meshgrid(r_vals,  theta)
-
-Xsurf = X_grid
-Ysurf = R_grid * np.cos(THETA_grid)
-Zsurf = R_grid * np.sin(THETA_grid)
-
-fig = plt.figure(figsize=(10, 6))
-ax  = fig.add_subplot(111, projection='3d')
-ax.plot_surface(Xsurf, Ysurf, Zsurf, cmap='copper', alpha=0.85, rstride=2, cstride=2)
-ax.plot(x_vals, r_vals, np.zeros_like(x_vals), 'r-', linewidth=3, label="y = sin(x)+1.5")
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-ax.set_title("Surface of Revolution\nS = 2π ∫ f(x) √(1+[f'(x)]²) dx")
-ax.legend()
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2149,31 +2103,8 @@ plt.tight_layout(); plt.show()
   Sphere: (x−a)² + (y−b)² + (z−c)² = r²
 ```
 
-> **3D Visualization** — axes, a point, and its projections:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="3d-coordinates" />
 
-fig = plt.figure(figsize=(8, 7))
-ax  = fig.add_subplot(111, projection='3d')
-
-P = (3, 4, 5)
-ax.scatter(*P, color='red', s=100, zorder=5)
-ax.text(P[0]+0.1, P[1]+0.1, P[2]+0.2, 'P(3, 4, 5)', fontsize=11, color='red')
-
-# Dashed projection lines to each axis-plane
-ax.plot([P[0], P[0]], [P[1], P[1]], [0, P[2]], 'k--', alpha=0.5)   # to xy-plane
-ax.plot([P[0], P[0]], [0, P[1]],   [0, 0],     'k--', alpha=0.5)   # along y
-ax.plot([0, P[0]],   [P[1], P[1]], [0, 0],     'k--', alpha=0.5)   # along x
-
-# Shadow on xy-plane
-ax.scatter([P[0]], [P[1]], [0], color='gray', s=60, alpha=0.5, marker='x')
-
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-ax.set_xlim(0, 5); ax.set_ylim(0, 5); ax.set_zlim(0, 6)
-ax.set_title('3D Coordinate System\nd = √(Δx²+Δy²+Δz²)')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2302,33 +2233,8 @@ plt.tight_layout(); plt.show()
   r'(t) is TANGENT to the curve at each point.
 ```
 
-> **3D Visualization** — helix with tangent vector:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="helix-tangent" />
 
-t  = np.linspace(0, 4 * np.pi, 500)
-x, y, z = np.cos(t), np.sin(t), t
-
-fig = plt.figure(figsize=(8, 8))
-ax  = fig.add_subplot(111, projection='3d')
-ax.plot(x, y, z, 'royalblue', linewidth=2, label='r(t) = ⟨cos t, sin t, t⟩')
-
-# Tangent vector at t₀ = π/4
-t0 = np.pi / 4
-p0 = np.array([np.cos(t0), np.sin(t0), t0])
-dp = np.array([-np.sin(t0), np.cos(t0), 1]) * 0.7   # r'(t) scaled
-ax.quiver(*p0, *dp, color='red', linewidth=2, arrow_length_ratio=0.25, label="r'(t) tangent")
-ax.scatter(*p0, color='red', s=60)
-
-# Projection circle onto xy-plane
-ax.plot(np.cos(t), np.sin(t), np.zeros_like(t), 'gray', linewidth=1, alpha=0.4, linestyle='--')
-
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-ax.set_title('Helix  r(t) = ⟨cos t, sin t, t⟩\nwith tangent vector r\'(t) = ⟨−sin t, cos t, 1⟩')
-ax.legend()
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2407,37 +2313,8 @@ plt.tight_layout(); plt.show()
   +──0──1──2──3──> x
 ```
 
-> **3D Visualization** — surface z = f(x,y) with level-curve map:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="multivariable-surface" />
 
-x = np.linspace(-3, 3, 80)
-y = np.linspace(-3, 3, 80)
-X, Y = np.meshgrid(x, y)
-Z = np.sin(np.sqrt(X**2 + Y**2)) * np.exp(-0.18 * (X**2 + Y**2))
-
-fig = plt.figure(figsize=(13, 5))
-
-# --- 3D surface ---
-ax1 = fig.add_subplot(121, projection='3d')
-surf = ax1.plot_surface(X, Y, Z, cmap='viridis', alpha=0.9, rstride=2, cstride=2)
-fig.colorbar(surf, ax=ax1, shrink=0.45, label='z = f(x,y)')
-ax1.set_xlabel('X'); ax1.set_ylabel('Y'); ax1.set_zlabel('Z')
-ax1.set_title('Surface  z = f(x, y)')
-
-# --- Level curves (topographic map) ---
-ax2 = fig.add_subplot(122)
-cf = ax2.contourf(X, Y, Z, levels=20, cmap='viridis')
-ax2.contour( X, Y, Z, levels=20, colors='white', linewidths=0.5, alpha=0.5)
-plt.colorbar(cf, ax=ax2, label='f(x,y) = c')
-ax2.set_xlabel('X'); ax2.set_ylabel('Y')
-ax2.set_title('Level Curves  f(x,y) = c  (Topographic Map)')
-ax2.set_aspect('equal')
-
-plt.suptitle('Functions of Several Variables', fontsize=13, fontweight='bold')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2473,44 +2350,8 @@ plt.tight_layout(); plt.show()
   Clairaut's Theorem: fₓᵧ = fᵧₓ  (if both continuous)
 ```
 
-> **3D Visualization** — surface with ∂f/∂x and ∂f/∂y cross-sections:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="partial-derivatives" />
 
-x = np.linspace(-2, 2, 60)
-y = np.linspace(-2, 2, 60)
-X, Y = np.meshgrid(x, y)
-Z = X**2 + 0.5 * Y**2          # f(x,y) = x² + 0.5y²
-
-fig = plt.figure(figsize=(13, 5))
-
-# --- 3D surface with slice planes ---
-ax1 = fig.add_subplot(121, projection='3d')
-ax1.plot_surface(X, Y, Z, cmap='plasma', alpha=0.5)
-
-# ∂f/∂x slice: fix y = 0
-ax1.plot(x,  np.zeros_like(x),       x**2,         'r-', linewidth=3, label='∂f/∂x slice (y=0)')
-# ∂f/∂y slice: fix x = 0
-ax1.plot(np.zeros_like(y), y,  0.5 * y**2,          'b-', linewidth=3, label='∂f/∂y slice (x=0)')
-
-ax1.set_xlabel('X'); ax1.set_ylabel('Y'); ax1.set_zlabel('Z')
-ax1.set_title('f(x,y) = x² + 0.5y²\nPartial-Derivative Cross-Sections')
-ax1.legend(fontsize=9)
-
-# --- 2D partial-derivative curves ---
-ax2 = fig.add_subplot(122)
-ax2.plot(x, 2 * x, 'r-',  linewidth=2, label='∂f/∂x = 2x  (slope in x-dir, y fixed)')
-ax2.plot(y,     y, 'b--', linewidth=2, label='∂f/∂y = y   (slope in y-dir, x fixed)')
-ax2.axhline(0, color='k', linewidth=0.5)
-ax2.axvline(0, color='k', linewidth=0.5)
-ax2.set_xlabel('Variable'); ax2.set_ylabel('Partial Derivative value')
-ax2.set_title('Partial Derivatives')
-ax2.legend(); ax2.grid(True, alpha=0.3)
-
-plt.suptitle('Partial Derivatives — Holding One Variable Constant', fontsize=13, fontweight='bold')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2534,36 +2375,8 @@ plt.tight_layout(); plt.show()
   f(x,y) ≈ f(a,b) + fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
 ```
 
-> **3D Visualization** — surface with tangent plane:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="tangent-plane" />
 
-x = np.linspace(-2, 2, 50)
-y = np.linspace(-2, 2, 50)
-X, Y = np.meshgrid(x, y)
-Z = X**2 + Y**2                # f(x,y) = x² + y²  (paraboloid)
-
-a, b = 1.0, 1.0
-fab  = a**2 + b**2             # f(a,b) = 2
-fx   = 2 * a                   # ∂f/∂x at (a,b) = 2
-fy   = 2 * b                   # ∂f/∂y at (a,b) = 2
-Z_plane = fab + fx*(X - a) + fy*(Y - b)    # tangent plane
-
-fig = plt.figure(figsize=(9, 7))
-ax  = fig.add_subplot(111, projection='3d')
-
-ax.plot_surface(X, Y, Z,       cmap='Blues',   alpha=0.55, label='Surface z=x²+y²')
-ax.plot_surface(X, Y, Z_plane, color='orange', alpha=0.40, label='Tangent Plane at (1,1,2)')
-
-ax.scatter([a], [b], [fab], color='red', s=100, zorder=5)
-ax.text(a+0.1, b+0.1, fab+0.3, '(a, b, f(a,b))', fontsize=10, color='red')
-
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-ax.set_title('Tangent Plane to  z = x² + y²  at (1, 1, 2)\n'
-             'z − f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2619,34 +2432,8 @@ plt.tight_layout(); plt.show()
   Zero rate of change:   perpendicular to ∇f (along level curve)
 ```
 
-> **3D Visualization** — level curves with gradient arrows (steepest ascent):
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="gradient-vectors" />
 
-x = np.linspace(-3, 3, 200)
-y = np.linspace(-3, 3, 200)
-X, Y = np.meshgrid(x, y)
-Z = X**2 + 2 * Y**2            # f(x,y) = x² + 2y²  →  ∇f = (2x, 4y)
-
-fig, ax = plt.subplots(figsize=(8, 7))
-cf = ax.contourf(X, Y, Z, levels=20, cmap='RdYlGn_r', alpha=0.75)
-plt.colorbar(cf, ax=ax, label='f(x,y) = x² + 2y²')
-ax.contour(X, Y, Z, levels=15, colors='white', linewidths=1.0, alpha=0.6)
-
-# Gradient arrows  ∇f = (2x, 4y) — normalised so all arrows same length
-gx = np.linspace(-2.5, 2.5, 11)
-gy = np.linspace(-2.5, 2.5, 11)
-GX, GY = np.meshgrid(gx, gy)
-DX = 2 * GX;  DY = 4 * GY
-mag = np.sqrt(DX**2 + DY**2) + 1e-8
-ax.quiver(GX, GY, DX/mag, DY/mag, color='black', scale=20, width=0.004, alpha=0.85)
-
-ax.set_xlabel('X'); ax.set_ylabel('Y')
-ax.set_title('Gradient ∇f = ⟨2x, 4y⟩\n'
-             'Arrows point toward STEEPEST ASCENT  (⊥ level curves)')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2675,33 +2462,8 @@ plt.tight_layout(); plt.show()
        +──────────> y            +──────────> y
 ```
 
-> **3D Visualization** — saddle point vs. local minimum vs. local maximum:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="critical-points" />
 
-x = np.linspace(-2, 2, 60)
-y = np.linspace(-2, 2, 60)
-X, Y = np.meshgrid(x, y)
-
-cases = [
-    (X**2 - Y**2,       'Saddle Point\nz = x²−y²\n(D < 0)',        'coolwarm'),
-    (X**2 + Y**2,       'Local Minimum\nz = x²+y²\n(D>0, fₓₓ>0)', 'Blues'),
-    (-(X**2 + Y**2),    'Local Maximum\nz = −x²−y²\n(D>0, fₓₓ<0)','Reds_r'),
-]
-
-fig = plt.figure(figsize=(15, 5))
-for i, (Z, title, cmap) in enumerate(cases):
-    ax = fig.add_subplot(1, 3, i+1, projection='3d')
-    ax.plot_surface(X, Y, Z, cmap=cmap, alpha=0.85, rstride=2, cstride=2)
-    ax.scatter([0], [0], [0], color='red', s=100, zorder=5)
-    ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-    ax.set_title(title, fontsize=10)
-
-plt.suptitle('Critical Points — Second Derivative Test\nD = fₓₓ·fᵧᵧ − (fₓᵧ)²',
-             fontsize=13, fontweight='bold')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2754,39 +2516,8 @@ plt.tight_layout(); plt.show()
   Evaluate inner integral first, then outer.
 ```
 
-> **3D Visualization** — volume under a surface:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="double-integral" />
 
-x = np.linspace(0, 2, 50)
-y = np.linspace(0, 2, 50)
-X, Y = np.meshgrid(x, y)
-Z = np.clip(4 - X**2 - Y**2, 0, None)    # f(x,y) = 4 − x² − y²
-
-fig = plt.figure(figsize=(10, 7))
-ax  = fig.add_subplot(111, projection='3d')
-
-# Top surface
-surf = ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.80, rstride=2, cstride=2)
-
-# Base on xy-plane
-ax.plot_surface(X, Y, np.zeros_like(Z), color='lightblue', alpha=0.25)
-
-# Vertical curtain lines along edges
-for xi in x[::5]:
-    zi = np.clip(4 - xi**2 - Y[0,:]**2, 0, None)
-    ax.plot([xi]*len(y), y, zi,  color='gray', linewidth=0.4, alpha=0.4)
-for yi in y[::5]:
-    zi = np.clip(4 - X[:,0]**2 - yi**2, 0, None)
-    ax.plot(x, [yi]*len(x), zi, color='gray', linewidth=0.4, alpha=0.4)
-
-fig.colorbar(surf, ax=ax, shrink=0.45, label='f(x,y)')
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('f(x,y)')
-ax.set_title('Double Integral  ∬_R f(x,y) dA  =  Volume under surface\n'
-             'f(x,y) = 4 − x² − y²')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2851,70 +2582,8 @@ plt.tight_layout(); plt.show()
   Use spherical for spheres, cones, balls.
 ```
 
-> **3D Visualization** — cylindrical and spherical coordinate systems:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="coordinate-systems" />
 
-fig = plt.figure(figsize=(14, 6))
-
-# ── Cylindrical (r, θ, z) ──────────────────────────────────────────────
-ax1 = fig.add_subplot(121, projection='3d')
-
-theta = np.linspace(0, 2*np.pi, 80)
-r_cyl, h_cyl = 1.5, 3.0
-T_g, Z_g = np.meshgrid(theta, np.linspace(0, h_cyl, 30))
-ax1.plot_surface(r_cyl*np.cos(T_g), r_cyl*np.sin(T_g), Z_g,
-                 color='cyan', alpha=0.20)
-for z0 in [0, h_cyl]:
-    ax1.plot(r_cyl*np.cos(theta), r_cyl*np.sin(theta), [z0]*80, 'b-', lw=1)
-
-# Sample point P
-r0, th0, z0 = 1.5, np.pi/3, 2.0
-px, py, pz = r0*np.cos(th0), r0*np.sin(th0), z0
-ax1.scatter([px],[py],[pz], color='red', s=80)
-ax1.plot([0, px], [0, py], [pz, pz], 'r--', lw=1.5, label=f'r = {r0}')
-ax1.plot([px,px], [py,py], [0, pz],  'g--', lw=1.5, label=f'z = {z0}')
-ax1.set_xlabel('X'); ax1.set_ylabel('Y'); ax1.set_zlabel('Z')
-ax1.set_title('Cylindrical  (r, θ, z)\ndV = r dz dr dθ')
-ax1.legend(fontsize=8)
-
-# ── Spherical (ρ, φ, θ) ───────────────────────────────────────────────
-ax2 = fig.add_subplot(122, projection='3d')
-
-phi   = np.linspace(0,   np.pi, 30)
-theta_s = np.linspace(0, 2*np.pi, 30)
-PHI, THS = np.meshgrid(phi, theta_s)
-rho = 2.0
-ax2.plot_surface(rho*np.sin(PHI)*np.cos(THS),
-                 rho*np.sin(PHI)*np.sin(THS),
-                 rho*np.cos(PHI),
-                 color='lightgreen', alpha=0.18)
-
-# Latitude / longitude lines
-for ph in np.linspace(0.3, np.pi-0.3, 5):
-    ax2.plot(rho*np.sin(ph)*np.cos(theta_s),
-             rho*np.sin(ph)*np.sin(theta_s),
-             [rho*np.cos(ph)]*30, 'k-', lw=0.4, alpha=0.4)
-for th in np.linspace(0, 2*np.pi, 8, endpoint=False):
-    ph_lin = np.linspace(0, np.pi, 30)
-    ax2.plot(rho*np.sin(ph_lin)*np.cos(th),
-             rho*np.sin(ph_lin)*np.sin(th),
-             rho*np.cos(ph_lin), 'k-', lw=0.4, alpha=0.4)
-
-rho0, phi0, the0 = 2.0, np.pi/4, np.pi/3
-px2 = rho0*np.sin(phi0)*np.cos(the0)
-py2 = rho0*np.sin(phi0)*np.sin(the0)
-pz2 = rho0*np.cos(phi0)
-ax2.scatter([px2],[py2],[pz2], color='red', s=80)
-ax2.plot([0,px2],[0,py2],[0,pz2], 'r-', lw=2, label=f'ρ = {rho0}')
-ax2.set_xlabel('X'); ax2.set_ylabel('Y'); ax2.set_zlabel('Z')
-ax2.set_title('Spherical  (ρ, φ, θ)\ndV = ρ² sin φ dρ dφ dθ')
-ax2.legend(fontsize=8)
-
-plt.suptitle('3D Coordinate Systems', fontsize=13, fontweight='bold')
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -2958,31 +2627,8 @@ plt.tight_layout(); plt.show()
   All arrows point down    Arrows vary by location
 ```
 
-> **3D Visualization** — vector field F = ⟨−y, x, z/3⟩ in 3D space:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+<CalcPlot name="vector-field-3d" />
 
-fig = plt.figure(figsize=(10, 8))
-ax  = fig.add_subplot(111, projection='3d')
-
-pts = np.linspace(-2, 2, 5)
-X, Y, Z = np.meshgrid(pts, pts, pts)
-
-# F = (-y, x, z/3)  — rotation about z-axis with upward component
-U = -Y * 0.35
-V =  X * 0.35
-W =  Z * 0.12
-
-ax.quiver(X, Y, Z, U, V, W, length=0.55, normalize=True,
-          color='steelblue', alpha=0.70, linewidth=0.8)
-
-ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
-ax.set_title('3D Vector Field  F = ⟨−y, x, z/3⟩\n'
-             'curl F ≠ 0  (rotation about z-axis)')
-ax.set_box_aspect([1,1,1])
-plt.tight_layout(); plt.show()
-```
 
 ---
 
@@ -3296,52 +2942,8 @@ plt.tight_layout(); plt.show()
   Normal distribution         Option pricing (Black-Scholes)
 ```
 
-> **3D Visualization** — Black-Scholes Call Price Surface (partial derivatives = Greeks):
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
+<CalcPlot name="black-scholes" />
 
-def bs_call(S, K, T, r, sigma):
-    """Black-Scholes European call price."""
-    T = np.where(T > 1e-6, T, 1e-6)
-    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
-    return S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-
-K, r, sigma = 100, 0.05, 0.20
-
-S_vals = np.linspace(60, 150, 60)
-T_vals = np.linspace(0.02, 2.0, 60)
-S_grid, T_grid = np.meshgrid(S_vals, T_vals)
-V_grid = bs_call(S_grid, K, T_grid, r, sigma)
-
-# Delta surface  ∂V/∂S
-d1     = (np.log(S_grid/K) + (r + 0.5*sigma**2)*T_grid) / (sigma*np.sqrt(T_grid))
-Delta  = norm.cdf(d1)
-
-fig = plt.figure(figsize=(14, 6))
-
-ax1 = fig.add_subplot(121, projection='3d')
-surf1 = ax1.plot_surface(S_grid, T_grid, V_grid, cmap='RdYlGn', alpha=0.90)
-fig.colorbar(surf1, ax=ax1, shrink=0.45, label='Call Price ($)')
-ax1.set_xlabel('Stock Price S'); ax1.set_ylabel('Time to Expiry T'); ax1.set_zlabel('V')
-ax1.set_title('Black-Scholes Call Price  V(S,T)\n'
-              'Slope ∂V/∂S = Delta  |  Slope ∂V/∂T = Theta')
-
-ax2 = fig.add_subplot(122, projection='3d')
-surf2 = ax2.plot_surface(S_grid, T_grid, Delta, cmap='coolwarm', alpha=0.90)
-fig.colorbar(surf2, ax=ax2, shrink=0.45, label='Delta Δ')
-ax2.set_xlabel('Stock Price S'); ax2.set_ylabel('Time to Expiry T'); ax2.set_zlabel('Δ = ∂V/∂S')
-ax2.set_title('Delta  Δ(S,T) = ∂V/∂S\n'
-              'Curvature ∂²V/∂S² = Gamma (2nd partial derivative)')
-
-plt.suptitle('Quant Finance — Calculus in Action: Option Greeks as Partial Derivatives',
-             fontsize=12, fontweight='bold')
-plt.tight_layout(); plt.show()
-```
-
-> **Install scipy for this plot:** `pip install matplotlib numpy scipy`
 
 ---
 
