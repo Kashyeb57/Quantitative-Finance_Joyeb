@@ -129,6 +129,7 @@ const config = {
             position: 'left',
             items: [
               {to: '/books', label: '📚 Books'},
+              {to: '/research', label: '📄 Research Papers'},
               {to: '/resources', label: '🔗 Resources'},
               {to: '/tools', label: '⚙️ Tools'},
               {to: '/scope', label: '🎯 Scope'},
@@ -160,6 +161,7 @@ const config = {
               {label: 'Market terminal', to: '/terminal'},
               {label: 'Projects', to: '/projects'},
               {label: 'Books', to: '/books'},
+              {label: 'Research Papers', to: '/research'},
               {label: 'Resources', to: '/resources'},
             ],
           },
