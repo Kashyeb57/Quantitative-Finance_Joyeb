@@ -24,7 +24,7 @@ const PAPERS = [
     venue: 'SSRN Working Paper',
     year: 2023,
     topic: 'Trading Strategies',
-    url: 'https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351',
+    url: '/library/vwap-holy-grail-day-trading.pdf',
     note: 'Uses the Volume-Weighted Average Price to detect intraday supply/demand imbalances and build day-trading signals — a practitioner study from the same Concretum authors as the ORB paper.',
   },
   // To add another: copy a shape above. `url` can be an external link
