@@ -1,8 +1,8 @@
 ---
-title: 'C. Introduction to Derivative (Call & Put Options) — Part A'
+title: 'Introduction to Derivative (Call & Put Option) – Part A'
 sidebar_class_name: soon
 ---
 
-# C. Introduction to Derivative (Call & Put Options) — Part A
+# Introduction to Derivative (Call & Put Option) – Part A
 
 *Notes in progress — my own write-up for this Quant Finance Bootcamp topic is on the way.*
