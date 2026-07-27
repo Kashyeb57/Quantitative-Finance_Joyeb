@@ -18,7 +18,16 @@ const PAPERS = [
     url: '/library/can-day-trading-be-profitable-orb.pdf',
     note: 'Backtests a simple 5-minute Opening Range Breakout strategy on QQQ/TQQQ (2016–2023) and finds a large, market-uncorrelated alpha — while showing how leveraged ETFs sidestep broker leverage caps, and flagging the slippage caveats.',
   },
-  // To add another: copy the shape above. `url` can be an external link
+  {
+    title: 'VWAP: The Holy Grail for Day Trading Systems',
+    authors: 'Carlo Zarattini & Andrew Aziz',
+    venue: 'SSRN Working Paper',
+    year: 2023,
+    topic: 'Trading Strategies',
+    url: 'https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4631351',
+    note: 'Uses the Volume-Weighted Average Price to detect intraday supply/demand imbalances and build day-trading signals — a practitioner study from the same Concretum authors as the ORB paper.',
+  },
+  // To add another: copy a shape above. `url` can be an external link
   // (arXiv/SSRN/journal) or a self-hosted PDF at /library/<file>.pdf.
 ];
 
