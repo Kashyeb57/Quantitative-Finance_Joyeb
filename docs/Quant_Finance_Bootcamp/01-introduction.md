@@ -1,6 +1,6 @@
 ---
 title: Introduction to Quantitative Finance
-sidebar_label: 1. Introduction
+sidebar_label: Introduction
 description: What the Quant Finance Bootcamp covers — derivatives, risk management, and quant modeling.
 ---
 
