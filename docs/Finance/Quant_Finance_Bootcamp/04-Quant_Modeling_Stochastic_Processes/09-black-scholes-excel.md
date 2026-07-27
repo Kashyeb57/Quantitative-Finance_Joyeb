@@ -1,8 +1,8 @@
 ---
-title: 'Binomial Tree Pricing (One & Two-Step)'
+title: Black–Scholes Model (Excel Implementation)
 sidebar_class_name: soon
 ---
 
-# Binomial Tree Pricing (One & Two-Step)
+# Black–Scholes Model (Excel Implementation)
 
 *Notes in progress — my own write-up for this Quant Finance Bootcamp topic is on the way.*

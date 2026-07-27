@@ -1,8 +1,8 @@
 ---
-title: 'Brownian Motion & Itô''s Lemma'
+title: 'Generalized Wiener Process & Itô''s Lemma'
 sidebar_class_name: soon
 ---
 
-# Brownian Motion & Itô's Lemma
+# Generalized Wiener Process & Itô's Lemma
 
 *Notes in progress — my own write-up for this Quant Finance Bootcamp topic is on the way.*

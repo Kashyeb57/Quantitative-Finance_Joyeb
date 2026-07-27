@@ -1,8 +1,8 @@
 ---
-title: The Black–Scholes–Merton Model
+title: Model Stock Using Geometric Brownian Motion (GBM) (Excel)
 sidebar_class_name: soon
 ---
 
-# The Black–Scholes–Merton Model
+# Model Stock Using Geometric Brownian Motion (GBM) (Excel)
 
 *Notes in progress — my own write-up for this Quant Finance Bootcamp topic is on the way.*

@@ -1,8 +1,8 @@
 ---
-title: 'Monte Carlo Methods (European, Asian & Barrier)'
+title: Cholesky Decomposition for Geometric Brownian Motion (GBM)
 sidebar_class_name: soon
 ---
 
-# Monte Carlo Methods (European, Asian & Barrier)
+# Cholesky Decomposition for Geometric Brownian Motion (GBM)
 
 *Notes in progress — my own write-up for this Quant Finance Bootcamp topic is on the way.*
