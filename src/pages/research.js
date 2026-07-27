@@ -9,28 +9,37 @@ import styles from './research.module.css';
 // `url` can be an arXiv / SSRN / journal link, or a self-hosted PDF you drop in
 // static/library/ and reference as /library/<file>.pdf (opens in the /read reader).
 const PAPERS = [
-  // Example shape (delete the // to activate, or copy it):
-  // {
-  //   title: 'Optimal Execution of Portfolio Transactions',
-  //   authors: 'Robert Almgren & Neil Chriss',
-  //   venue: 'Journal of Risk',
-  //   year: 2000,
-  //   topic: 'Market Microstructure',
-  //   url: 'https://arxiv.org/abs/...',
-  //   note: 'The mean–variance framework for trading out of a position while balancing market impact against timing risk.',
-  // },
+  {
+    title: 'Can Day Trading Really Be Profitable? Evidence from the Opening Range Breakout (ORB) Strategy',
+    authors: 'Carlo Zarattini & Andrew Aziz',
+    venue: 'SSRN Working Paper',
+    year: 2023,
+    topic: 'Trading Strategies',
+    url: '/library/can-day-trading-be-profitable-orb.pdf',
+    note: 'Backtests a simple 5-minute Opening Range Breakout strategy on QQQ/TQQQ (2016–2023) and finds a large, market-uncorrelated alpha — while showing how leveraged ETFs sidestep broker leverage caps, and flagging the slippage caveats.',
+  },
+  // To add another: copy the shape above. `url` can be an external link
+  // (arXiv/SSRN/journal) or a self-hosted PDF at /library/<file>.pdf.
 ];
 
 function PaperCard({ p }) {
   const meta = [p.authors, p.venue, p.year].filter(Boolean).join(' · ');
   const external = p.url && p.url.startsWith('http');
+  const selfHosted = p.url && p.url.startsWith('/library/');
+  // Self-hosted PDFs open in the on-site reader (like the books); external
+  // links (arXiv/SSRN/journal) open in a new tab.
+  const readerHref = selfHosted
+    ? `/read?file=${encodeURIComponent(p.url)}&title=${encodeURIComponent(p.title)}`
+    : p.url;
   return (
     <article className={styles.card}>
       <div className={styles.cardHead}>
         <h2 className={styles.title}>
-          <a href={p.url} {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}>
-            {p.title} {external ? '↗' : '→'}
-          </a>
+          {external ? (
+            <a href={p.url} target="_blank" rel="noreferrer">{p.title} ↗</a>
+          ) : (
+            <Link to={readerHref}>{p.title} {selfHosted ? '📖' : '→'}</Link>
+          )}
         </h2>
         {p.topic && <span className={styles.topic}>{p.topic}</span>}
       </div>
