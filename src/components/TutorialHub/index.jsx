@@ -13,7 +13,7 @@ const FIELDS = [
     color: '#16a34a',
     blurb: 'Markets, instruments & risk — from derivatives to valuation.',
     topics: [
-      { label: 'Quant Finance Bootcamp', to: '/docs/Quant_Finance_Bootcamp/introduction' },
+      { label: 'Quant Finance Bootcamp', to: '/docs/Finance/Quant_Finance_Bootcamp/introduction' },
       { label: 'Derivatives (Forwards, Futures, Options, Swaps)', to: '/docs/Finance/derivatives' },
       { label: 'Fixed Income (Yield, Duration, Convexity)', to: '/docs/Finance/fixed-income' },
       { label: 'Foreign Exchange (FX)', to: '/docs/Finance/foreign-exchange' },
