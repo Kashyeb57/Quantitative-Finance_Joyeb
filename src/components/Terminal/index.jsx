@@ -8,7 +8,7 @@ import styles from './styles.module.css';
  * Right: live RSS news feed, which can be filtered to the selected ticker.
  */
 
-const TICKERS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'SPY', 'BTC-USD'];
+const TICKERS = ['AMD', 'MU', 'SNDK', 'META', 'COIN', 'SOXL', 'NVDA', 'TSLA', 'SPY', 'BTC-USD'];
 const tickerLabel = (t) => (t === 'BTC-USD' ? '₿ BTC' : t);
 
 export default function Terminal() {
