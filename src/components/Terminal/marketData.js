@@ -17,10 +17,10 @@ const PROXIES = [
 
 // Our timeframe keys -> Yahoo's (interval, range) for the fallback path.
 export const TIMEFRAMES = [
-  { key: '1Min',  label: '1m',  yahoo: { interval: '1m',  range: '1d'  }, pollMs: 15000 },
-  { key: '5Min',  label: '5m',  yahoo: { interval: '5m',  range: '5d'  }, pollMs: 30000 },
-  { key: '1Hour', label: '1H',  yahoo: { interval: '60m', range: '1mo' }, pollMs: 60000 },
-  { key: '1Day',  label: '1D',  yahoo: { interval: '1d',  range: '1y'  }, pollMs: 300000 },
+  { key: '1Min',  label: '1m',  yahoo: { interval: '1m',  range: '1d'  }, pollMs: 2500 },
+  { key: '5Min',  label: '5m',  yahoo: { interval: '5m',  range: '5d'  }, pollMs: 5000 },
+  { key: '1Hour', label: '1H',  yahoo: { interval: '60m', range: '1mo' }, pollMs: 20000 },
+  { key: '1Day',  label: '1D',  yahoo: { interval: '1d',  range: '1y'  }, pollMs: 60000 },
 ];
 
 export function tfConfig(key) {
@@ -67,9 +67,56 @@ function parseYahooChart(j) {
   return { bars, meta: r.meta || null };
 }
 
+/* ------------------------------------------------------ crypto (Coinbase) */
+
+// Crypto tickers use the "BTC-USD" form. Coinbase's public API is CORS-enabled,
+// keyless, US-available, and 24/7 — so crypto works straight from the browser
+// (no Worker, no proxy) and keeps ticking on weekends.
+export function isCrypto(symbol) {
+  return /-USD$/.test(symbol);
+}
+
+const COINBASE = 'https://api.exchange.coinbase.com';
+const CB_GRAN = { '1Min': 60, '5Min': 300, '1Hour': 3600, '1Day': 86400 };
+
+async function cryptoBars(symbol, tfKey) {
+  const gran = CB_GRAN[tfKey] || 60;
+  // Each candle: [ time(sec), low, high, open, close, volume ], newest first.
+  const arr = await getJson(`${COINBASE}/products/${symbol}/candles?granularity=${gran}`);
+  return (Array.isArray(arr) ? arr : [])
+    .map((k) => ({ time: k[0], open: +k[3], high: +k[2], low: +k[1], close: +k[4], volume: +k[5] }))
+    .sort((a, b) => a.time - b.time);
+}
+
+async function cryptoSnapshot(symbol) {
+  const s = await getJson(`${COINBASE}/products/${symbol}/stats`);
+  const last = +s.last;
+  const open = +s.open; // 24h-ago open, used as the reference close
+  const change = last - open;
+  return {
+    symbol,
+    last,
+    prevClose: open,
+    change,
+    changePct: open ? (change / open) * 100 : null,
+    dayHigh: +s.high,
+    dayLow: +s.low,
+    volume: +s.volume,
+    source: 'crypto',
+  };
+}
+
 /* ------------------------------------------------------------------ bars */
 
 export async function fetchBars(symbol, tfKey) {
+  if (isCrypto(symbol)) {
+    try {
+      return { bars: await cryptoBars(symbol, tfKey), source: 'crypto' };
+    } catch (e) {
+      return { bars: [], source: 'none' };
+    }
+  }
+
   // 1. our Worker (real feed, credentials stay server-side)
   try {
     const j = await getJson(`${WORKER}/bars?symbol=${encodeURIComponent(symbol)}&tf=${tfKey}`);
@@ -97,6 +144,14 @@ export async function fetchBars(symbol, tfKey) {
 /* -------------------------------------------------------------- snapshot */
 
 export async function fetchSnapshot(symbol) {
+  if (isCrypto(symbol)) {
+    try {
+      return await cryptoSnapshot(symbol);
+    } catch (e) {
+      return null;
+    }
+  }
+
   // 1. our Worker
   try {
     const j = await getJson(`${WORKER}/snapshot?symbol=${encodeURIComponent(symbol)}`);

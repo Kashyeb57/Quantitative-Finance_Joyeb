@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { fetchSnapshot, marketStatus, fmtPrice, fmtVolume } from './marketData';
+import { fetchSnapshot, marketStatus, fmtPrice, fmtVolume, isCrypto } from './marketData';
 import styles from './styles.module.css';
 
 /*
  * Live price header: last trade, day change, session high/low/volume and a
- * market open/closed badge. Refreshes every 10s while the tab is visible,
- * and flashes green/red briefly whenever the price moves.
+ * market open/closed badge. Refreshes fast while the tab is visible, and
+ * flashes green/red briefly whenever the price moves.
  */
 
-const REFRESH_MS = 10000;
+const REFRESH_MS = 2500;
+
+// Crypto trades 24/7, so it shouldn't inherit the US-equities session badge.
+function statusFor(ticker) {
+  return isCrypto(ticker) ? { state: 'open', label: 'Crypto · 24/7' } : marketStatus();
+}
 
 export default function PriceHeader({ ticker }) {
   const [snap, setSnap] = useState(null);
   const [flash, setFlash] = useState(null);
-  const [status, setStatus] = useState(marketStatus());
+  const [status, setStatus] = useState(() => statusFor(ticker));
   const prevPrice = useRef(null);
   const flashTimer = useRef(null);
 
@@ -21,6 +26,7 @@ export default function PriceHeader({ ticker }) {
     let cancelled = false;
     prevPrice.current = null;
     setSnap(null);
+    setStatus(statusFor(ticker));
 
     async function pull() {
       if (document.visibilityState === 'hidden') return;
@@ -37,7 +43,7 @@ export default function PriceHeader({ ticker }) {
 
     pull();
     const dataTimer = setInterval(pull, REFRESH_MS);
-    const clockTimer = setInterval(() => setStatus(marketStatus()), 30000);
+    const clockTimer = setInterval(() => setStatus(statusFor(ticker)), 30000);
     const onVisible = () => { if (document.visibilityState === 'visible') pull(); };
     document.addEventListener('visibilitychange', onVisible);
 

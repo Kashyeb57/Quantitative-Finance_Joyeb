@@ -9,7 +9,8 @@ import styles from './styles.module.css';
  * Right: live RSS news feed, which can be filtered to the selected ticker.
  */
 
-const TICKERS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'SPY'];
+const TICKERS = ['AAPL', 'MSFT', 'NVDA', 'TSLA', 'SPY', 'BTC-USD'];
+const tickerLabel = (t) => (t === 'BTC-USD' ? '₿ BTC' : t);
 
 export default function Terminal() {
   const [ticker, setTicker] = useState(TICKERS[0]);
@@ -26,7 +27,7 @@ export default function Terminal() {
             className={`${styles.tickerBtn} ${t === ticker ? styles.tickerBtnActive : ''}`}
             onClick={() => setTicker(t)}
           >
-            {t}
+            {tickerLabel(t)}
           </button>
         ))}
 
