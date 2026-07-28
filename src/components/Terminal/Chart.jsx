@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
+import { fetchBars, tfConfig } from './marketData';
 import styles from './styles.module.css';
 
 /*
- * Price chart — rendered in-page with TradingView's open-source lightweight-charts
- * library (loaded from CDN, draws into our own canvas — nothing external to block).
- * Daily OHLC data is keyless, pulled from Yahoo Finance's chart JSON through a
- * multi-proxy fallback chain (if one CORS proxy is throttled, it tries the next).
+ * Live price chart.
+ *
+ * Rendered in-page with TradingView's open-source lightweight-charts library
+ * (loaded from CDN, drawn into our own canvas). Candles refresh on a timer:
+ * the newest bar is updated in place as it ticks, and completed bars are
+ * appended — so the chart moves with the market instead of sitting still.
  */
 
 const LIB = 'https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js';
 
 let _libPromise = null;
 function loadLib() {
-  if (typeof window !== 'undefined' && window.LightweightCharts) return Promise.resolve(window.LightweightCharts);
+  if (typeof window !== 'undefined' && window.LightweightCharts) {
+    return Promise.resolve(window.LightweightCharts);
+  }
   if (_libPromise) return _libPromise;
   _libPromise = new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -26,128 +31,153 @@ function loadLib() {
   return _libPromise;
 }
 
-const PROXIES = [
-  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-  (u) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`,
-  (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, // wraps body in {contents}
-];
-
-function ymd(sec) {
-  const d = new Date(sec * 1000);
-  return d.toISOString().slice(0, 10);
-}
-
-function parseYahoo(text) {
-  let j;
-  try { j = JSON.parse(text); } catch { return []; }
-  if (j && typeof j.contents === 'string') {
-    try { j = JSON.parse(j.contents); } catch { return []; }
-  }
-  const r = j && j.chart && j.chart.result && j.chart.result[0];
-  if (!r || !r.timestamp || !r.indicators || !r.indicators.quote) return [];
-  const ts = r.timestamp;
-  const q = r.indicators.quote[0];
-  const out = [];
-  for (let i = 0; i < ts.length; i++) {
-    const o = q.open[i], h = q.high[i], l = q.low[i], c = q.close[i];
-    if (o == null || h == null || l == null || c == null) continue;
-    out.push({ time: ymd(ts[i]), open: o, high: h, low: l, close: c });
-  }
-  return out;
-}
-
-async function fetchCandles(sym) {
-  const bucket = Math.floor(Date.now() / 120000);
-  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=1y&interval=1d&_=${bucket}`;
-  for (const p of PROXIES) {
-    try {
-      const res = await fetch(p(target), { cache: 'no-store' });
-      if (!res.ok) continue;
-      const rows = parseYahoo(await res.text());
-      if (rows.length) return rows;
-    } catch (e) { /* try next proxy */ }
-  }
-  return [];
-}
-
-export default function Chart({ ticker }) {
+export default function Chart({ ticker, timeframe, onStatus }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
+  const lastBarRef = useRef(null);
+  const pollRef = useRef(null);
   const { colorMode } = useColorMode();
   const [status, setStatus] = useState('loading');
 
-  function load(sym) {
-    setStatus('loading');
-    fetchCandles(sym).then((rows) => {
-      if (!seriesRef.current) return;
-      if (rows.length === 0) { setStatus('error'); return; }
-      seriesRef.current.setData(rows);
-      chartRef.current.timeScale().fitContent();
-      setStatus('ok');
-    });
-  }
-
-  // Create / theme the chart.
+  /* ---- create the chart once (and re-create on theme change) ---- */
   useEffect(() => {
     let disposed = false;
     let resizeObs = null;
-    loadLib().then((LC) => {
-      if (disposed || !wrapRef.current) return;
-      const dark = colorMode === 'dark';
-      const el = wrapRef.current;
-      el.innerHTML = '';
-      const chart = LC.createChart(el, {
-        width: el.clientWidth || 600,
-        height: el.clientHeight || 460,
-        layout: {
-          background: { type: 'solid', color: 'transparent' },
-          textColor: dark ? '#cbd5e1' : '#334155',
-        },
-        grid: {
-          vertLines: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-          horzLines: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
-        },
-        rightPriceScale: { borderColor: 'rgba(127,127,127,0.2)' },
-        timeScale: { borderColor: 'rgba(127,127,127,0.2)' },
-        crosshair: { mode: 0 },
-      });
-      const series = chart.addCandlestickSeries({
-        upColor: '#22c55e', downColor: '#ef4444',
-        borderUpColor: '#22c55e', borderDownColor: '#ef4444',
-        wickUpColor: '#22c55e', wickDownColor: '#ef4444',
-      });
-      chartRef.current = chart;
-      seriesRef.current = series;
-      resizeObs = new ResizeObserver(() => {
-        if (chartRef.current && el.clientWidth) {
-          chartRef.current.applyOptions({ width: el.clientWidth, height: el.clientHeight || 460 });
-        }
-      });
-      resizeObs.observe(el);
-      load(ticker);
-    }).catch(() => setStatus('error'));
+
+    loadLib()
+      .then((LC) => {
+        if (disposed || !wrapRef.current) return;
+        const dark = colorMode === 'dark';
+        const el = wrapRef.current;
+        el.innerHTML = '';
+
+        const chart = LC.createChart(el, {
+          width: el.clientWidth || 600,
+          height: el.clientHeight || 460,
+          layout: {
+            background: { type: 'solid', color: 'transparent' },
+            textColor: dark ? '#cbd5e1' : '#334155',
+          },
+          grid: {
+            vertLines: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+            horzLines: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
+          },
+          rightPriceScale: { borderColor: 'rgba(127,127,127,0.2)' },
+          timeScale: {
+            borderColor: 'rgba(127,127,127,0.2)',
+            timeVisible: true,
+            secondsVisible: false,
+          },
+          crosshair: { mode: 0 },
+        });
+
+        const series = chart.addCandlestickSeries({
+          upColor: '#22c55e', downColor: '#ef4444',
+          borderUpColor: '#22c55e', borderDownColor: '#ef4444',
+          wickUpColor: '#22c55e', wickDownColor: '#ef4444',
+        });
+
+        chartRef.current = chart;
+        seriesRef.current = series;
+
+        resizeObs = new ResizeObserver(() => {
+          if (chartRef.current && el.clientWidth) {
+            chartRef.current.applyOptions({
+              width: el.clientWidth,
+              height: el.clientHeight || 460,
+            });
+          }
+        });
+        resizeObs.observe(el);
+      })
+      .catch(() => setStatus('error'));
 
     return () => {
       disposed = true;
       if (resizeObs) resizeObs.disconnect();
-      if (chartRef.current) { chartRef.current.remove(); chartRef.current = null; seriesRef.current = null; }
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+        seriesRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [colorMode]);
 
-  // Reload data when the ticker changes (chart already exists).
+  /* ---- load data + keep it live ---- */
   useEffect(() => {
-    if (seriesRef.current) load(ticker);
+    let cancelled = false;
+    lastBarRef.current = null;
+
+    async function fullLoad() {
+      setStatus('loading');
+      const { bars, source } = await fetchBars(ticker, timeframe);
+      if (cancelled || !seriesRef.current) return;
+      if (!bars.length) {
+        setStatus('error');
+        if (onStatus) onStatus({ source: 'none' });
+        return;
+      }
+      seriesRef.current.setData(bars);
+      chartRef.current.timeScale().fitContent();
+      lastBarRef.current = bars[bars.length - 1];
+      setStatus('ok');
+      if (onStatus) onStatus({ source });
+    }
+
+    // Incremental tick: only touch the newest bar(s), never redraw everything.
+    async function tick() {
+      if (document.visibilityState === 'hidden') return;
+      const { bars, source } = await fetchBars(ticker, timeframe);
+      if (cancelled || !seriesRef.current || !bars.length) return;
+      const prev = lastBarRef.current;
+      if (!prev) {
+        seriesRef.current.setData(bars);
+        lastBarRef.current = bars[bars.length - 1];
+      } else {
+        for (const b of bars) {
+          if (b.time >= prev.time) seriesRef.current.update(b);
+        }
+        lastBarRef.current = bars[bars.length - 1];
+      }
+      setStatus('ok');
+      if (onStatus) onStatus({ source });
+    }
+
+    // Wait for the chart instance, then load and start polling.
+    const startTimer = setInterval(() => {
+      if (seriesRef.current) {
+        clearInterval(startTimer);
+        fullLoad().then(() => {
+          if (cancelled) return;
+          const { pollMs } = tfConfig(timeframe);
+          pollRef.current = setInterval(tick, pollMs);
+        });
+      }
+    }, 120);
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      cancelled = true;
+      clearInterval(startTimer);
+      if (pollRef.current) clearInterval(pollRef.current);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker]);
+  }, [ticker, timeframe, colorMode]);
 
   return (
     <div className={styles.chartArea}>
       {status !== 'ok' && (
         <div className={styles.chartMsg}>
-          {status === 'error' ? 'Could not load chart data — proxy busy, try the ↻ ticker again.' : 'Loading chart…'}
+          {status === 'error'
+            ? 'Could not load price data — retrying on the next tick.'
+            : 'Loading chart…'}
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />

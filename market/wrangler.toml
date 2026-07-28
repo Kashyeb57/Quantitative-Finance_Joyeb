@@ -1,0 +1,20 @@
+# Cloudflare Worker: live market data proxy for joyebkashyeb.com.np
+#
+# Deploy steps live in README.md. Short version:
+#   1) npm i -g wrangler && wrangler login
+#   2) wrangler secret put ALPACA_KEY_ID       # from alpaca.markets (paper keys are fine)
+#   3) wrangler secret put ALPACA_SECRET_KEY
+#   4) wrangler deploy
+
+name = "market-data"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# The Worker only handles /_m/* — every other path on the domain still goes
+# to GitHub Pages. `zone_name` must match your Cloudflare zone.
+routes = [
+  { pattern = "joyebkashyeb.com.np/_m/*", zone_name = "joyebkashyeb.com.np" }
+]
+
+# ALPACA_KEY_ID and ALPACA_SECRET_KEY are NOT stored here — they are set as
+# secrets with `wrangler secret put` so they never land in git.

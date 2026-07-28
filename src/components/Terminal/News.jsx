@@ -132,10 +132,30 @@ async function fetchFeed(feed) {
   return [];
 }
 
-export default function News() {
+// Map tickers to the names a headline is likely to use, so we can tell when a
+// story is about the symbol currently selected on the chart.
+const COMPANY = {
+  AAPL: ['apple'],
+  MSFT: ['microsoft'],
+  NVDA: ['nvidia'],
+  TSLA: ['tesla', 'musk'],
+  SPY: ['s&p 500', 's&p500', 'sp500'],
+};
+
+function matchesTicker(item, ticker) {
+  if (!ticker) return false;
+  const t = ticker.toUpperCase();
+  if (item.tags && item.tags.some((tag) => tag.toUpperCase() === t || tag.toUpperCase() === '$' + t)) return true;
+  const title = (item.title || '').toLowerCase();
+  if (new RegExp(`\\$?\\b${t.toLowerCase()}\\b`).test(title)) return true;
+  return (COMPANY[t] || []).some((name) => title.includes(name));
+}
+
+export default function News({ ticker }) {
   const [cat, setCat] = useState('ALL');
   const [range, setRange] = useState('24H');
   const [query, setQuery] = useState('');
+  const [onlyTicker, setOnlyTicker] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -185,9 +205,10 @@ export default function News() {
     return items.filter((it) => {
       if (cutoff) { const d = new Date(it.pubDate); if (!isNaN(d) && d.getTime() < cutoff) return false; }
       if (q && !it.title.toLowerCase().includes(q) && !it.tags.some((t) => t.toLowerCase().includes(q))) return false;
+      if (onlyTicker && !matchesTicker(it, ticker)) return false;
       return true;
     });
-  }, [items, range, query]);
+  }, [items, range, query, onlyTicker, ticker]);
 
   const arrow = (imp) => (imp === 'pos' ? '▲' : imp === 'neg' ? '▼' : '–');
 
@@ -211,6 +232,15 @@ export default function News() {
         {RANGES.map((r) => (
           <button key={r.code} className={`${styles.tab} ${r.code === range ? styles.tabActive : ''}`} onClick={() => setRange(r.code)}>{r.code}</button>
         ))}
+        {ticker && (
+          <button
+            className={`${styles.tab} ${styles.tabTicker} ${onlyTicker ? styles.tabActive : ''}`}
+            onClick={() => setOnlyTicker((v) => !v)}
+            title={`Show only headlines mentioning ${ticker}`}
+          >
+            ${ticker}
+          </button>
+        )}
       </div>
 
       <div className={styles.newsList}>
@@ -219,7 +249,7 @@ export default function News() {
         {!loading && !error && view.length === 0 && <div className={styles.newsMsg}>No headlines match.</div>}
         {!loading && !error &&
           view.map((it, i) => (
-            <a key={it.link || it.title || i} className={styles.row} href={it.link} target="_blank" rel="noreferrer">
+            <a key={it.link || it.title || i} className={`${styles.row} ${matchesTicker(it, ticker) ? styles.rowMatch : ''}`} href={it.link} target="_blank" rel="noreferrer">
               <span className={styles.rowTime}>{timeAgo(it.pubDate)}</span>
               <span className={`${styles.rowImpactDot} ${styles['imp_' + it.impact]}`} />
               <span className={styles.rowSrc}>{it.source}</span>
