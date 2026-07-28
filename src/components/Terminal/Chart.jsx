@@ -32,6 +32,16 @@ function loadLib() {
   return _libPromise;
 }
 
+// Seconds -> "m:ss" (or "h:mm:ss" for long intervals like 1D).
+function fmtCountdown(s) {
+  if (s < 0) s = 0;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const p = (n) => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${p(m)}:${p(sec)}` : `${m}:${p(sec)}`;
+}
+
 export default function Chart({ ticker, timeframe, onStatus }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
@@ -40,6 +50,7 @@ export default function Chart({ ticker, timeframe, onStatus }) {
   const pollRef = useRef(null);
   const { colorMode } = useColorMode();
   const [status, setStatus] = useState('loading');
+  const [countdown, setCountdown] = useState('');
 
   /* ---- create the chart once (and re-create on theme change) ---- */
   useEffect(() => {
@@ -195,6 +206,18 @@ export default function Chart({ ticker, timeframe, onStatus }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, timeframe, colorMode]);
 
+  /* ---- countdown to the current candle's close (updates every second) ---- */
+  useEffect(() => {
+    const gran = cryptoGran(timeframe);
+    const update = () => {
+      const now = Math.floor(Date.now() / 1000);
+      setCountdown(fmtCountdown(gran - (now % gran)));
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [timeframe]);
+
   return (
     <div className={styles.chartArea}>
       {status !== 'ok' && (
@@ -202,6 +225,12 @@ export default function Chart({ ticker, timeframe, onStatus }) {
           {status === 'error'
             ? 'Could not load price data — retrying on the next tick.'
             : 'Loading chart…'}
+        </div>
+      )}
+      {status === 'ok' && countdown && (
+        <div className={styles.candleCountdown} title="Time until the current candle closes">
+          <span className={styles.cdDot} />
+          {countdown}
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />
