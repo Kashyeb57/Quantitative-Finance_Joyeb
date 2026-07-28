@@ -51,6 +51,7 @@ export default function Chart({ ticker, timeframe, onStatus }) {
   const { colorMode } = useColorMode();
   const [status, setStatus] = useState('loading');
   const [countdown, setCountdown] = useState('');
+  const [cdTop, setCdTop] = useState(8);
 
   /* ---- create the chart once (and re-create on theme change) ---- */
   useEffect(() => {
@@ -182,6 +183,8 @@ export default function Chart({ ticker, timeframe, onStatus }) {
               seriesRef.current.update(bar);
               lastBarRef.current = bar;
               setStatus('ok');
+              const y = seriesRef.current.priceToCoordinate(bar.close);
+              if (y != null && !Number.isNaN(y)) setCdTop(y + 11);
             });
           } else {
             const { pollMs } = tfConfig(timeframe);
@@ -212,6 +215,13 @@ export default function Chart({ ticker, timeframe, onStatus }) {
     const update = () => {
       const now = Math.floor(Date.now() / 1000);
       setCountdown(fmtCountdown(gran - (now % gran)));
+      // pin the badge just under the live price label on the right axis
+      const s = seriesRef.current;
+      const lp = lastBarRef.current ? lastBarRef.current.close : null;
+      if (s && lp != null) {
+        const y = s.priceToCoordinate(lp);
+        if (y != null && !Number.isNaN(y)) setCdTop(y + 11);
+      }
     };
     update();
     const id = setInterval(update, 1000);
@@ -228,7 +238,11 @@ export default function Chart({ ticker, timeframe, onStatus }) {
         </div>
       )}
       {status === 'ok' && countdown && (
-        <div className={styles.candleCountdown} title="Time until the current candle closes">
+        <div
+          className={styles.candleCountdown}
+          style={{ top: cdTop }}
+          title="Time until the current candle closes"
+        >
           <span className={styles.cdDot} />
           {countdown}
         </div>

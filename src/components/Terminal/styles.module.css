@@ -302,22 +302,22 @@
 /* Countdown to the current candle's close (top-right of the chart). */
 .candleCountdown {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  right: 1px;
   z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 9px;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--ifm-color-emphasis-800);
-  background: var(--ifm-background-surface-color);
-  border: 1px solid var(--ifm-color-emphasis-200);
+  color: #f1f5f9;
+  background: #334155;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   pointer-events: none;
-  opacity: 0.92;
+  white-space: nowrap;
 }
 .cdDot {
   width: 7px;
