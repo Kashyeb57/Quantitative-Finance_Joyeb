@@ -6,6 +6,8 @@
  *
  *   GET /_m/bars?symbol=AAPL&tf=1Min      -> OHLC candles for the chart
  *   GET /_m/snapshot?symbol=AAPL          -> latest trade + day change (price header)
+ *   GET /_m/stream?symbol=AAPL  (WebSocket) -> live trades relayed from Alpaca's
+ *                                             IEX stream (auth done server-side)
  *
  * Why a Worker: Alpaca requires an API key AND secret. Putting those in the
  * site's JavaScript would expose them to everyone. Here they live as Worker
@@ -127,9 +129,76 @@ async function handleSnapshot(request, env, url) {
   }, 200, 5);
 }
 
+// WebSocket proxy: browser <-> this Worker <-> Alpaca's live trade stream.
+// The Alpaca key/secret are used only here (server-side) to authenticate the
+// upstream connection; the browser never sees them.
+async function handleStream(request, env, url) {
+  if ((request.headers.get('Upgrade') || '').toLowerCase() !== 'websocket') {
+    return json(request, { error: 'Expected a WebSocket upgrade' }, 426);
+  }
+  const symbol = (url.searchParams.get('symbol') || '').toUpperCase();
+  if (!SYMBOL_RE.test(symbol)) return json(request, { error: 'Bad symbol' }, 400);
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) {
+    return json(request, { error: 'Worker is missing Alpaca credentials.' }, 503);
+  }
+
+  const pair = new WebSocketPair();
+  const client = pair[0];
+  const server = pair[1];
+  server.accept();
+  const send = (obj) => { try { server.send(JSON.stringify(obj)); } catch (_) {} };
+
+  let upstream = null;
+  try {
+    const resp = await fetch('https://stream.data.alpaca.markets/v2/iex', {
+      headers: { Upgrade: 'websocket' },
+    });
+    upstream = resp.webSocket;
+  } catch (_) {
+    upstream = null;
+  }
+  if (!upstream) {
+    send({ type: 'error', msg: 'Could not reach the data stream.' });
+    try { server.close(1011, 'upstream failed'); } catch (_) {}
+    return new Response(null, { status: 101, webSocket: client });
+  }
+  upstream.accept();
+
+  upstream.addEventListener('message', (ev) => {
+    let msgs;
+    try { msgs = JSON.parse(ev.data); } catch (_) { return; }
+    if (!Array.isArray(msgs)) return;
+    for (const m of msgs) {
+      if (m.T === 'success' && m.msg === 'connected') {
+        upstream.send(JSON.stringify({ action: 'auth', key: env.ALPACA_KEY_ID, secret: env.ALPACA_SECRET_KEY }));
+      } else if (m.T === 'success' && m.msg === 'authenticated') {
+        upstream.send(JSON.stringify({ action: 'subscribe', trades: [symbol] }));
+        send({ type: 'ready' });
+      } else if (m.T === 't') {
+        send({
+          type: 'trade',
+          price: m.p,
+          size: m.s,
+          time: m.t ? Math.floor(new Date(m.t).getTime() / 1000) : Math.floor(Date.now() / 1000),
+        });
+      } else if (m.T === 'error') {
+        send({ type: 'error', msg: m.msg || 'stream error', code: m.code });
+      }
+    }
+  });
+  upstream.addEventListener('close', () => { try { server.close(); } catch (_) {} });
+  upstream.addEventListener('error', () => { try { server.close(); } catch (_) {} });
+  server.addEventListener('close', () => { try { upstream.close(); } catch (_) {} });
+  server.addEventListener('error', () => { try { upstream.close(); } catch (_) {} });
+
+  return new Response(null, { status: 101, webSocket: client });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === '/_m/stream') return handleStream(request, env, url);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(request) });

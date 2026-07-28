@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { fetchSnapshot, marketStatus, fmtPrice, fmtVolume, isCrypto } from './marketData';
 import { subscribeCryptoTicker } from './cryptoStream';
+import { subscribeStockTrades } from './stockStream';
 import styles from './styles.module.css';
 
 /*
@@ -73,6 +74,28 @@ export default function PriceHeader({ ticker }) {
     } else {
       pull();
       dataTimer = setInterval(pull, REFRESH_MS);
+      // Live last price tick-by-tick when the market is open; the poll fills in
+      // the rest of the stats (and keeps working when the market is closed).
+      unsub = subscribeStockTrades(ticker, (t) => {
+        if (cancelled) return;
+        const last = t.price;
+        if (prevPrice.current != null && last !== prevPrice.current) {
+          setFlash(last > prevPrice.current ? 'up' : 'down');
+          clearTimeout(flashTimer.current);
+          flashTimer.current = setTimeout(() => setFlash(null), 700);
+        }
+        prevPrice.current = last;
+        setSnap((prev) => {
+          if (!prev) return prev;
+          const change = prev.prevClose != null ? last - prev.prevClose : prev.change;
+          return {
+            ...prev,
+            last,
+            change,
+            changePct: prev.prevClose ? (change / prev.prevClose) * 100 : prev.changePct,
+          };
+        });
+      });
     }
 
     const clockTimer = setInterval(() => setStatus(statusFor(ticker)), 30000);

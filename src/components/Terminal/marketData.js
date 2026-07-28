@@ -170,7 +170,7 @@ export async function fetchBars(symbol, tfKey) {
   const bucket = Math.floor(Date.now() / 30000); // cache-bust every 30s
   const target =
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
-    `?range=${yahoo.range}&interval=${yahoo.interval}&includePrePost=false&_=${bucket}`;
+    `?range=${yahoo.range}&interval=${yahoo.interval}&includePrePost=true&_=${bucket}`;
   try {
     let { bars } = parseYahooChart(await viaProxy(target));
     if (aggSec) bars = bucketBars(bars, aggSec); // e.g. 1m -> 3m
@@ -203,11 +203,13 @@ export async function fetchSnapshot(symbol) {
   const bucket = Math.floor(Date.now() / 30000);
   const target =
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
-    `?range=1d&interval=1m&_=${bucket}`;
+    `?range=1d&interval=1m&includePrePost=true&_=${bucket}`;
   try {
     const j = await viaProxy(target);
     const { bars, meta } = parseYahooChart(j);
-    const last = (meta && meta.regularMarketPrice) || (bars.length ? bars[bars.length - 1].close : null);
+    // Prefer the freshest trade — the last bar reflects pre/post-market too, so
+    // the price still updates outside regular hours — then the regular price.
+    const last = (bars.length ? bars[bars.length - 1].close : null) || (meta && meta.regularMarketPrice) || null;
     const prevClose = (meta && (meta.chartPreviousClose || meta.previousClose)) || null;
     const change = last != null && prevClose != null ? last - prevClose : null;
     return {

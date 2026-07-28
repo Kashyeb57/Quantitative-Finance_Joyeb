@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
 import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES } from './marketData';
 import { subscribeCryptoTicker } from './cryptoStream';
+import { subscribeStockTrades } from './stockStream';
 import styles from './styles.module.css';
 
 /*
@@ -191,30 +192,35 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         clearInterval(startTimer);
         fullLoad().then(() => {
           if (cancelled) return;
+          const gran = cryptoGran(timeframe);
+          // Rebuild the forming candle from one live trade (shared by crypto & stocks).
+          const applyTrade = (t) => {
+            if (cancelled || !seriesRef.current) return;
+            const bucket = Math.floor(t.timeSec / gran) * gran;
+            const prev = lastBarRef.current;
+            let bar;
+            if (prev && bucket === prev.time) {
+              bar = { time: bucket, open: prev.open, high: Math.max(prev.high, t.price), low: Math.min(prev.low, t.price), close: t.price };
+            } else if (!prev || bucket > prev.time) {
+              bar = { time: bucket, open: t.price, high: t.price, low: t.price, close: t.price };
+            } else {
+              return; // out-of-order tick older than the current bar
+            }
+            seriesRef.current.update(bar);
+            lastBarRef.current = bar;
+            setStatus('ok');
+            const y = seriesRef.current.priceToCoordinate(bar.close);
+            if (y != null && !Number.isNaN(y)) setCdTop(y + 11);
+          };
+
           if (isCrypto(ticker)) {
-            // Live tick-by-tick stream: rebuild the forming candle on each trade.
-            const gran = cryptoGran(timeframe);
-            unsub = subscribeCryptoTicker(ticker, (t) => {
-              if (cancelled || !seriesRef.current) return;
-              const bucket = Math.floor(t.timeSec / gran) * gran;
-              const prev = lastBarRef.current;
-              let bar;
-              if (prev && bucket === prev.time) {
-                bar = { time: bucket, open: prev.open, high: Math.max(prev.high, t.price), low: Math.min(prev.low, t.price), close: t.price };
-              } else if (!prev || bucket > prev.time) {
-                bar = { time: bucket, open: t.price, high: t.price, low: t.price, close: t.price };
-              } else {
-                return; // out-of-order tick older than the current bar
-              }
-              seriesRef.current.update(bar);
-              lastBarRef.current = bar;
-              setStatus('ok');
-              const y = seriesRef.current.priceToCoordinate(bar.close);
-              if (y != null && !Number.isNaN(y)) setCdTop(y + 11);
-            });
+            unsub = subscribeCryptoTicker(ticker, applyTrade);
           } else {
+            // Stocks: polling is the always-on baseline (works when closed, or if
+            // the stream Worker isn't deployed); the WS adds tick-by-tick when open.
             const { pollMs } = tfConfig(timeframe);
             pollRef.current = setInterval(tick, pollMs);
+            unsub = subscribeStockTrades(ticker, applyTrade);
           }
         });
       }
