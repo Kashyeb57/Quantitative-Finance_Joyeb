@@ -331,6 +331,35 @@
   50% { opacity: 0.25; }
 }
 
+/* Full-screen: keep a solid page background instead of black. */
+.chartArea:fullscreen {
+  background: var(--ifm-background-color);
+}
+
+.fsBtn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ifm-color-emphasis-700);
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  opacity: 0.7;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+.fsBtn:hover {
+  opacity: 1;
+  color: var(--ifm-color-primary);
+}
+
 /* ── Live price header ─────────────────────────────── */
 .priceHeader {
   display: flex;
