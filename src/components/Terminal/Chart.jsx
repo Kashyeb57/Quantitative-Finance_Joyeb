@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
-import { fetchBars, tfConfig, isCrypto, cryptoGran } from './marketData';
+import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES } from './marketData';
 import { subscribeCryptoTicker } from './cryptoStream';
 import styles from './styles.module.css';
 
@@ -42,7 +42,7 @@ function fmtCountdown(s) {
   return h > 0 ? `${h}:${p(m)}:${p(sec)}` : `${m}:${p(sec)}`;
 }
 
-export default function Chart({ ticker, timeframe, onStatus }) {
+export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
@@ -256,6 +256,17 @@ export default function Chart({ ticker, timeframe, onStatus }) {
 
   return (
     <div className={styles.chartArea} ref={areaRef}>
+      <div className={styles.chartToolbar}>
+        {TIMEFRAMES.map((tf) => (
+          <button
+            key={tf.key}
+            className={`${styles.tfBtn} ${tf.key === timeframe ? styles.tfBtnActive : ''}`}
+            onClick={() => setTimeframe && setTimeframe(tf.key)}
+          >
+            {tf.label}
+          </button>
+        ))}
+      </div>
       <button
         className={styles.fsBtn}
         onClick={toggleFs}

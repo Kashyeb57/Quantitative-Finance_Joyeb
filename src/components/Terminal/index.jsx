@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import { TIMEFRAMES } from './marketData';
 import styles from './styles.module.css';
 
 /*
@@ -31,18 +30,6 @@ export default function Terminal() {
           </button>
         ))}
 
-        <span className={styles.tfSpacer} />
-
-        <span className={styles.tickerLabel}>Interval:</span>
-        {TIMEFRAMES.map((tf) => (
-          <button
-            key={tf.key}
-            className={`${styles.tickerBtn} ${tf.key === timeframe ? styles.tickerBtnActive : ''}`}
-            onClick={() => setTimeframe(tf.key)}
-          >
-            {tf.label}
-          </button>
-        ))}
       </div>
 
       <div className={styles.grid}>
@@ -57,7 +44,7 @@ export default function Terminal() {
           <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading chart…</div></div>}>
             {() => {
               const Chart = require('./Chart').default;
-              return <Chart ticker={ticker} timeframe={timeframe} onStatus={(s) => setSource(s.source)} />;
+              return <Chart ticker={ticker} timeframe={timeframe} setTimeframe={setTimeframe} onStatus={(s) => setSource(s.source)} />;
             }}
           </BrowserOnly>
         </div>

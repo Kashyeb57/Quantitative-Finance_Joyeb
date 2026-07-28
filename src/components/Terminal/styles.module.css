@@ -339,7 +339,7 @@
 .fsBtn {
   position: absolute;
   top: 8px;
-  left: 8px;
+  right: 8px;
   z-index: 3;
   display: inline-flex;
   align-items: center;
@@ -358,6 +358,42 @@
 .fsBtn:hover {
   opacity: 1;
   color: var(--ifm-color-primary);
+}
+
+/* In-chart interval toolbar (top-left, TradingView-style). */
+.chartToolbar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  opacity: 0.92;
+}
+.tfBtn {
+  border: none;
+  background: transparent;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.tfBtn:hover {
+  color: var(--ifm-color-emphasis-900);
+  background: var(--ifm-color-emphasis-200);
+}
+.tfBtnActive,
+.tfBtnActive:hover {
+  color: #fff;
+  background: var(--ifm-color-primary);
 }
 
 /* ── Live price header ─────────────────────────────── */

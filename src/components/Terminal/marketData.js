@@ -18,7 +18,9 @@ const PROXIES = [
 // Our timeframe keys -> Yahoo's (interval, range) for the fallback path.
 export const TIMEFRAMES = [
   { key: '1Min',  label: '1m',  yahoo: { interval: '1m',  range: '1d'  }, pollMs: 2500 },
+  { key: '3Min',  label: '3m',  yahoo: { interval: '1m',  range: '1d'  }, pollMs: 3000, aggSec: 180 },
   { key: '5Min',  label: '5m',  yahoo: { interval: '5m',  range: '5d'  }, pollMs: 5000 },
+  { key: '15Min', label: '15m', yahoo: { interval: '15m', range: '5d'  }, pollMs: 8000 },
   { key: '1Hour', label: '1H',  yahoo: { interval: '60m', range: '1mo' }, pollMs: 20000 },
   { key: '1Day',  label: '1D',  yahoo: { interval: '1d',  range: '1y'  }, pollMs: 60000 },
 ];
@@ -77,20 +79,51 @@ export function isCrypto(symbol) {
 }
 
 const COINBASE = 'https://api.exchange.coinbase.com';
-const CB_GRAN = { '1Min': 60, '5Min': 300, '1Hour': 3600, '1Day': 86400 };
+// Coinbase's native candle granularities (seconds) — note: no native 3-minute.
+const CB_GRAN = { '1Min': 60, '5Min': 300, '15Min': 900, '1Hour': 3600, '1Day': 86400 };
+// Candle length in seconds per timeframe (used by the live stream + countdown).
+const TF_SEC = { '1Min': 60, '3Min': 180, '5Min': 300, '15Min': 900, '1Hour': 3600, '1Day': 86400 };
 
-// Candle interval, in seconds, for a given timeframe key (used by the live stream).
 export function cryptoGran(tfKey) {
-  return CB_GRAN[tfKey] || 60;
+  return TF_SEC[tfKey] || 60;
 }
 
-async function cryptoBars(symbol, tfKey) {
-  const gran = CB_GRAN[tfKey] || 60;
-  // Each candle: [ time(sec), low, high, open, close, volume ], newest first.
-  const arr = await getJson(`${COINBASE}/products/${symbol}/candles?granularity=${gran}`);
+// Aggregate finer bars into `granSec` buckets aligned to clean boundaries.
+function bucketBars(bars, granSec) {
+  const out = [];
+  let cur = null;
+  for (const b of bars) {
+    const t = Math.floor(b.time / granSec) * granSec;
+    if (!cur || cur.time !== t) {
+      if (cur) out.push(cur);
+      cur = { time: t, open: b.open, high: b.high, low: b.low, close: b.close, volume: b.volume || 0 };
+    } else {
+      if (b.high > cur.high) cur.high = b.high;
+      if (b.low < cur.low) cur.low = b.low;
+      cur.close = b.close;
+      cur.volume += b.volume || 0;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function toCbBars(arr) {
+  // Each Coinbase candle: [ time(sec), low, high, open, close, volume ], newest first.
   return (Array.isArray(arr) ? arr : [])
     .map((k) => ({ time: k[0], open: +k[3], high: +k[2], low: +k[1], close: +k[4], volume: +k[5] }))
     .sort((a, b) => a.time - b.time);
+}
+
+async function cryptoBars(symbol, tfKey) {
+  // Coinbase has no native 3-minute candle — build it by bucketing 1-minute data.
+  if (tfKey === '3Min') {
+    const arr = await getJson(`${COINBASE}/products/${symbol}/candles?granularity=60`);
+    return bucketBars(toCbBars(arr), 180);
+  }
+  const gran = CB_GRAN[tfKey] || 60;
+  const arr = await getJson(`${COINBASE}/products/${symbol}/candles?granularity=${gran}`);
+  return toCbBars(arr);
 }
 
 async function cryptoSnapshot(symbol) {
@@ -133,13 +166,14 @@ export async function fetchBars(symbol, tfKey) {
   }
 
   // 2. keyless fallback
-  const { yahoo } = tfConfig(tfKey);
+  const { yahoo, aggSec } = tfConfig(tfKey);
   const bucket = Math.floor(Date.now() / 30000); // cache-bust every 30s
   const target =
     `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
     `?range=${yahoo.range}&interval=${yahoo.interval}&includePrePost=false&_=${bucket}`;
   try {
-    const { bars } = parseYahooChart(await viaProxy(target));
+    let { bars } = parseYahooChart(await viaProxy(target));
+    if (aggSec) bars = bucketBars(bars, aggSec); // e.g. 1m -> 3m
     return { bars, source: 'fallback' };
   } catch (e) {
     return { bars: [], source: 'none' };
