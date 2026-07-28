@@ -79,6 +79,11 @@ export function isCrypto(symbol) {
 const COINBASE = 'https://api.exchange.coinbase.com';
 const CB_GRAN = { '1Min': 60, '5Min': 300, '1Hour': 3600, '1Day': 86400 };
 
+// Candle interval, in seconds, for a given timeframe key (used by the live stream).
+export function cryptoGran(tfKey) {
+  return CB_GRAN[tfKey] || 60;
+}
+
 async function cryptoBars(symbol, tfKey) {
   const gran = CB_GRAN[tfKey] || 60;
   // Each candle: [ time(sec), low, high, open, close, volume ], newest first.

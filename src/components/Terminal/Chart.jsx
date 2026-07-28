@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
-import { fetchBars, tfConfig } from './marketData';
+import { fetchBars, tfConfig, isCrypto, cryptoGran } from './marketData';
+import { subscribeCryptoTicker } from './cryptoStream';
 import styles from './styles.module.css';
 
 /*
@@ -108,6 +109,7 @@ export default function Chart({ ticker, timeframe, onStatus }) {
   /* ---- load data + keep it live ---- */
   useEffect(() => {
     let cancelled = false;
+    let unsub = null;
     lastBarRef.current = null;
 
     async function fullLoad() {
@@ -151,8 +153,29 @@ export default function Chart({ ticker, timeframe, onStatus }) {
         clearInterval(startTimer);
         fullLoad().then(() => {
           if (cancelled) return;
-          const { pollMs } = tfConfig(timeframe);
-          pollRef.current = setInterval(tick, pollMs);
+          if (isCrypto(ticker)) {
+            // Live tick-by-tick stream: rebuild the forming candle on each trade.
+            const gran = cryptoGran(timeframe);
+            unsub = subscribeCryptoTicker(ticker, (t) => {
+              if (cancelled || !seriesRef.current) return;
+              const bucket = Math.floor(t.timeSec / gran) * gran;
+              const prev = lastBarRef.current;
+              let bar;
+              if (prev && bucket === prev.time) {
+                bar = { time: bucket, open: prev.open, high: Math.max(prev.high, t.price), low: Math.min(prev.low, t.price), close: t.price };
+              } else if (!prev || bucket > prev.time) {
+                bar = { time: bucket, open: t.price, high: t.price, low: t.price, close: t.price };
+              } else {
+                return; // out-of-order tick older than the current bar
+              }
+              seriesRef.current.update(bar);
+              lastBarRef.current = bar;
+              setStatus('ok');
+            });
+          } else {
+            const { pollMs } = tfConfig(timeframe);
+            pollRef.current = setInterval(tick, pollMs);
+          }
         });
       }
     }, 120);
@@ -166,6 +189,7 @@ export default function Chart({ ticker, timeframe, onStatus }) {
       cancelled = true;
       clearInterval(startTimer);
       if (pollRef.current) clearInterval(pollRef.current);
+      if (unsub) unsub();
       document.removeEventListener('visibilitychange', onVisible);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

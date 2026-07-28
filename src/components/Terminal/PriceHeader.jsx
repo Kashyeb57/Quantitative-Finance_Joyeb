@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { fetchSnapshot, marketStatus, fmtPrice, fmtVolume, isCrypto } from './marketData';
+import { subscribeCryptoTicker } from './cryptoStream';
 import styles from './styles.module.css';
 
 /*
@@ -41,15 +42,47 @@ export default function PriceHeader({ ticker }) {
       setSnap(s);
     }
 
-    pull();
-    const dataTimer = setInterval(pull, REFRESH_MS);
+    let unsub = null;
+    let dataTimer = null;
+
+    if (isCrypto(ticker)) {
+      // Immediate snapshot, then live tick-by-tick from Coinbase's stream.
+      pull();
+      unsub = subscribeCryptoTicker(ticker, (t) => {
+        if (cancelled) return;
+        const last = t.price;
+        if (prevPrice.current != null && last !== prevPrice.current) {
+          setFlash(last > prevPrice.current ? 'up' : 'down');
+          clearTimeout(flashTimer.current);
+          flashTimer.current = setTimeout(() => setFlash(null), 700);
+        }
+        prevPrice.current = last;
+        const change = t.open24h != null ? last - t.open24h : null;
+        setSnap({
+          symbol: ticker,
+          last,
+          prevClose: t.open24h,
+          change,
+          changePct: t.open24h ? (change / t.open24h) * 100 : null,
+          dayHigh: t.high24h,
+          dayLow: t.low24h,
+          volume: t.volume24h,
+          source: 'live',
+        });
+      });
+    } else {
+      pull();
+      dataTimer = setInterval(pull, REFRESH_MS);
+    }
+
     const clockTimer = setInterval(() => setStatus(statusFor(ticker)), 30000);
     const onVisible = () => { if (document.visibilityState === 'visible') pull(); };
     document.addEventListener('visibilitychange', onVisible);
 
     return () => {
       cancelled = true;
-      clearInterval(dataTimer);
+      if (dataTimer) clearInterval(dataTimer);
+      if (unsub) unsub();
       clearInterval(clockTimer);
       clearTimeout(flashTimer.current);
       document.removeEventListener('visibilitychange', onVisible);
