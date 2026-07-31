@@ -65,7 +65,8 @@ export default function Terminal() {
 
       <p className={styles.note}>
         Live candles refresh automatically while this tab is open; the news feed
-        merges fresh headlines from ~22 RSS sources.
+        merges fresh headlines from ~22 RSS sources. Chart times are shown in
+        Central Time (CT).
         {source === 'fallback' && ' Prices are currently coming from the public fallback source.'}
       </p>
     </div>

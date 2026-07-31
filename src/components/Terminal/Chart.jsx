@@ -43,6 +43,30 @@ function fmtCountdown(s) {
   return h > 0 ? `${h}:${p(m)}:${p(sec)}` : `${m}:${p(sec)}`;
 }
 
+// Render chart times in US Central Time (America/Chicago), regardless of the
+// viewer's locale. lightweight-charts is UTC by default and has no tz setting,
+// so we format the axis ticks and the crosshair tooltip ourselves.
+function ctToDate(t) {
+  if (typeof t === 'number') return new Date(t * 1000);
+  if (t && typeof t === 'object' && t.year) return new Date(Date.UTC(t.year, (t.month || 1) - 1, t.day || 1));
+  return new Date();
+}
+function ctTickFormatter(time, tickMarkType) {
+  const base = { timeZone: 'America/Chicago' };
+  let opts;
+  if (tickMarkType === 0) opts = { ...base, year: 'numeric' };
+  else if (tickMarkType === 1) opts = { ...base, month: 'short' };
+  else if (tickMarkType === 2) opts = { ...base, month: 'short', day: 'numeric' };
+  else opts = { ...base, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+  return new Intl.DateTimeFormat('en-US', opts).format(ctToDate(time));
+}
+function ctTimeFormatter(time) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago',
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(ctToDate(time));
+}
+
 export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
@@ -104,10 +128,12 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
             horzLines: { color: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' },
           },
           rightPriceScale: { borderColor: 'rgba(127,127,127,0.2)' },
+          localization: { timeFormatter: ctTimeFormatter },
           timeScale: {
             borderColor: 'rgba(127,127,127,0.2)',
             timeVisible: true,
             secondsVisible: false,
+            tickMarkFormatter: ctTickFormatter,
           },
           crosshair: { mode: 0 },
         });
