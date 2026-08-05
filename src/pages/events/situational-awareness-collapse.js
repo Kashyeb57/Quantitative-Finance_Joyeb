@@ -5,6 +5,8 @@ import Heading from '@theme/Heading';
 import TimeSeriesChart from '@site/src/components/Events/TimeSeriesChart';
 import LeverageBars from '@site/src/components/Events/LeverageBars';
 import RecoveryBars from '@site/src/components/Events/RecoveryBars';
+import DeclineBars from '@site/src/components/Events/DeclineBars';
+import LeverageLadder from '@site/src/components/Events/LeverageLadder';
 import styles from './styles.module.css';
 
 // Assets-under-management trajectory (t = months since the Nov-2024 launch).
@@ -17,6 +19,42 @@ const AUM = [
   { t: 16, value: 18, xLabel: 'Mar 2026' },
   { t: 20, value: 45, tag: 'Peak', sub: '≈$20–45B', xLabel: 'early Jul 2026', tagSide: 'left' },
   { t: 21, value: 10, tag: 'Wipe-out', sub: '~$10B left', xLabel: '6 days later', tagSide: 'left' },
+];
+
+// Normalized investor returns — base 100 at launch (Nov 2024).
+// +439% net through Jun 30, 2026 → NAV = 539.
+// July wipe-out: −67% of 539 → NAV ≈ 178.
+const NAV = [
+  { t: 0,  value: 100, tag: 'Launch', sub: 'NAV = 100',    xLabel: 'Nov 2024', tagSide: 'right' },
+  { t: 3,  value: 148, xLabel: 'Feb 2025' },
+  { t: 6,  value: 215, xLabel: 'May 2025' },
+  { t: 9,  value: 305 },
+  { t: 12, value: 385, xLabel: 'Nov 2025' },
+  { t: 16, value: 468, xLabel: 'Mar 2026' },
+  { t: 20, value: 539, tag: '+439%',  sub: 'Jun 30, 2026', xLabel: 'Jun 2026', tagSide: 'left' },
+  { t: 21, value: 178, tag: '−67%',   sub: 'Jul 31, 2026', xLabel: 'Jul 2026', tagSide: 'left' },
+];
+
+// Top-5 concentration bars (% of disclosed long book, Q1-2026 13F).
+const CONC_BARS = [
+  { label: 'Bloom Energy',    note: 'Power generation',          pct: 22.8 },
+  { label: 'SanDisk',         note: 'Storage / memory',          pct: 18.8 },
+  { label: 'CoreWeave',       note: 'GPU cloud (neocloud)',       pct: 14.4 },
+  { label: 'IREN',            note: 'Bitcoin miner → AI/HPC',    pct: 10.4 },
+  { label: 'Core Scientific', note: 'Bitcoin miner → AI/HPC',    pct: 10.1 },
+  { label: 'Other 21 names',  note: 'remaining disclosed longs', pct: 23.5 },
+];
+
+// Approx drawdowns from June 2026 peak to Jul-29 forced-sale lows.
+const JULY_DECLINES = [
+  { label: 'Nebius',           pct: -54, note: 'fund long',                     kind: 'long'  },
+  { label: 'CoreWeave',        pct: -47, note: 'fund long — 14.4% of book',     kind: 'long'  },
+  { label: 'IREN',             pct: -45, note: 'fund long — 10.4% of book',     kind: 'long'  },
+  { label: 'Core Scientific',  pct: -38, note: 'fund long — 10.1% of book',     kind: 'long'  },
+  { label: 'Bloom Energy',     pct: -30, note: 'fund long — 22.8% of book',     kind: 'long'  },
+  { label: 'SOX Index',        pct: -29, note: 'Phila. Semiconductor benchmark', kind: 'index' },
+  { label: 'SanDisk',          pct: -27, note: 'fund long — 18.8% of book',     kind: 'long'  },
+  { label: 'Nvidia',           pct: -16, note: 'hedge name (fund held puts)',    kind: 'hedge' },
 ];
 
 // A ~30% fall in the longs, at ~4x leverage, is a ~120% hit to the fund's own
@@ -239,7 +277,7 @@ export default function SituationalAwarenessCollapse() {
             </p>
 
             <figure className={styles.figure}>
-              <p className={styles.figTitle}>Assets: ≈$225M → a reported $20–45B → ~$10B</p>
+              <p className={styles.figTitle}>Assets under management: ≈$225M → $20–45B → ~$10B</p>
               <TimeSeriesChart
                 data={AUM}
                 peakT={20}
@@ -248,8 +286,26 @@ export default function SituationalAwarenessCollapse() {
               />
               <figcaption className={styles.figCaption}>
                 Green is the climb, red is the collapse. The near-vertical drop is the signature of a
-                forced, leveraged unwind. Peak figures vary by source (roughly $20B AUM up to a ~$45B
-                headline that includes leveraged/gross exposure); every account agrees on the shape.
+                forced, leveraged unwind. Peak figures vary by source — roughly $20B net equity to a
+                ~$45B headline that includes leveraged gross exposure; every account agrees on the shape.
+              </figcaption>
+            </figure>
+
+            <figure className={styles.figure}>
+              <p className={styles.figTitle}>The investor journey — NAV normalized to 100 at launch</p>
+              <TimeSeriesChart
+                data={NAV}
+                peakT={20}
+                unit={{ prefix: '', suffix: '' }}
+                yTicks={5}
+                ariaLabel="Fund NAV rising from 100 at launch to 539 (plus 439 percent) then falling to 178 (minus 67 percent) in July 2026"
+              />
+              <figcaption className={styles.figCaption}>
+                If you invested $1 at launch you watched it become <strong>$5.39</strong> by
+                June 30, 2026. By July 31 it was <strong>$1.78</strong>. The same leverage
+                that built the mountain excavated the valley in six days. Monthly steps
+                between launch and peak are illustrative; the three labelled endpoints
+                (NAV 100, +439%, −67%) are as reported.
               </figcaption>
             </figure>
           </section>
@@ -274,10 +330,44 @@ export default function SituationalAwarenessCollapse() {
                 ))}
               </tbody>
             </table>
+            <figure className={styles.figure} style={{ marginTop: '1.2rem' }}>
+              <p className={styles.figTitle}>Portfolio concentration — % of disclosed long book (Q1-2026 13F)</p>
+              <svg
+                viewBox="0 0 780 230"
+                role="img"
+                aria-label="Portfolio concentration bar chart showing top 5 holdings"
+                preserveAspectRatio="xMidYMid meet"
+                style={{ display: 'block', width: '100%', height: 'auto', fontFamily: 'var(--ifm-font-family-base)' }}
+              >
+                {CONC_BARS.map((r, i) => {
+                  const cy     = 16 + i * 35 + 17;
+                  const innerW = 780 - 200 - 90;
+                  const barW   = (r.pct / 100) * innerW;
+                  const isOther = r.label === 'Other 21 names';
+                  const fill   = isOther ? 'var(--viz-muted)' : 'var(--viz-s1)';
+                  return (
+                    <g key={r.label}>
+                      <text x={188} y={cy - 3}  textAnchor="end" style={{ fill: 'var(--viz-ink)',   fontSize: '13px', fontWeight: 600 }}>{r.label}</text>
+                      <text x={188} y={cy + 12} textAnchor="end" style={{ fill: 'var(--viz-muted)', fontSize: '10.5px' }}>{r.note}</text>
+                      <rect x={200} y={cy - 13} width={innerW} height={24} rx={4} fill="var(--viz-panel-bg)" />
+                      <rect x={200} y={cy - 13} width={barW}   height={24} rx={4} fill={fill} opacity={isOther ? 0.45 : 0.88} />
+                      <text x={200 + barW + 8} y={cy + 5} style={{ fill, fontSize: '14px', fontWeight: 800 }}>{r.pct}%</text>
+                    </g>
+                  );
+                })}
+              </svg>
+              <figcaption className={styles.figCaption}>
+                The top 5 names account for <strong>76.5%</strong> of the book.
+                The remaining 21 positions share only 23.5%. At that concentration,
+                a single-name move is fund-defining — and an exit without moving
+                the market against yourself is nearly impossible.
+              </figcaption>
+            </figure>
+
             <p className={styles.posCaption}>
               Source: Q1-2026 13F. The fund also held ~8.2% of Core Scientific&rsquo;s entire float,
               4&ndash;5% stakes in Applied Digital, CleanSpark and WhiteFiber, plus Riot, Bitdeer,
-              HIVE and several power names — and a big overseas long in Korea&rsquo;s SK Hynix.
+              HIVE and several power names — and a large overseas long in Korea&rsquo;s SK Hynix.
             </p>
             <p>
               Owning 8% of a company&rsquo;s float is easy to buy and brutal to sell: there simply
@@ -324,6 +414,17 @@ export default function SituationalAwarenessCollapse() {
                 symmetric: it giveth the 439%, and it taketh the 67%.
               </figcaption>
             </figure>
+
+            <figure className={styles.figure}>
+              <p className={styles.figTitle}>The leverage ladder — equity impact at every level</p>
+              <LeverageLadder actualDrop={-30} actualLev={4} />
+              <figcaption className={styles.figCaption}>
+                Each cell = underlying drop × leverage multiple = equity impact,{' '}
+                <em>before</em> any hedges. At <strong>4× leverage</strong>, a 25% underlying
+                drop already wipes out 100% of investor capital. The fund&rsquo;s longs fell
+                closer to 30%. The outlined cell is the Situational Awareness scenario.
+              </figcaption>
+            </figure>
           </section>
 
           <section className={styles.section}>
@@ -339,11 +440,28 @@ export default function SituationalAwarenessCollapse() {
             <p>
               The damage compounded fast. The Philadelphia Semiconductor Index fell ~28.6% from its
               June peak; a momentum-tech basket dropped over 50%; the Nasdaq-100 lost 10%+. The
-              fund&rsquo;s own names cratered &mdash; Nebius, SanDisk, Micron and CoreWeave each fell
-              27&ndash;54%. Underneath it all was a genuine question investors had started asking out
-              loud: <em>will the hundreds of billions being poured into AI infrastructure actually
+              fund&rsquo;s own names cratered — the core longs each fell 27–54% from their June
+              peaks to the July 29 forced-sale lows. Underneath it all was a genuine question
+              investors had started asking out loud:{' '}
+              <em>will the hundreds of billions being poured into AI infrastructure actually
               turn into near-term profits?</em>
             </p>
+
+            <figure className={styles.figure}>
+              <p className={styles.figTitle}>July 2026 drawdowns — June peak to Jul-29 lows, by name</p>
+              <DeclineBars rows={JULY_DECLINES} />
+              <figcaption className={styles.figCaption}>
+                <span style={{ color: 'var(--viz-crit)', fontWeight: 700 }}>Red bars</span> = fund
+                long positions.{' '}
+                <span style={{ color: 'var(--viz-s3)', fontWeight: 700 }}>Amber bar</span> = Nvidia,
+                a hedge instrument (the fund held put options). Nvidia fell <em>far less</em> than
+                the small-cap longs — that gap is exactly why the beta hedge failed to offset
+                the losses.{' '}
+                <span style={{ color: 'var(--viz-muted)', fontWeight: 700 }}>Grey bar</span> = SOX
+                semiconductor index for benchmark context. Decline percentages are approximate;
+                reported figures vary by source and exact measurement dates.
+              </figcaption>
+            </figure>
           </section>
 
           <section className={styles.section}>

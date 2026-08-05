@@ -35,3 +35,109 @@
   font-size: 15px;
   font-weight: 800;
 }
+
+/* ── LeverageLadder heat-map table ───────────────────────────────────── */
+.ladderWrap {
+  overflow-x: auto;
+  margin: 0.6rem 0;
+}
+
+.ladder {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ladderCornerCell,
+.ladderHeadCell {
+  padding: 0.55rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--viz-muted);
+  background: var(--viz-panel-bg);
+  border: 1px solid var(--ifm-toc-border-color);
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+}
+
+.ladderActualColHead {
+  background: rgba(208, 59, 59, 0.07);
+  color: var(--viz-crit);
+}
+
+.ladderRowLabel {
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--viz-ink);
+  border: 1px solid var(--ifm-toc-border-color);
+  white-space: nowrap;
+  background: var(--viz-panel-bg);
+  position: relative;
+}
+
+.ladderActualRowLabel {
+  background: rgba(208, 59, 59, 0.07);
+  color: var(--viz-crit);
+}
+
+.ladderCell {
+  text-align: center;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  font-weight: 600;
+  color: var(--viz-s4);
+  position: relative;
+}
+
+.ladderWarn {
+  color: #b84c00;
+  background: rgba(237, 161, 0, 0.10);
+  font-weight: 700;
+}
+
+.ladderCrit {
+  color: var(--viz-crit) !important;
+  font-weight: 800 !important;
+  background: rgba(208, 59, 59, 0.14) !important;
+}
+
+/* The exact SA scenario cell — outlined so it stands out */
+.ladderScen {
+  outline: 2.5px solid var(--viz-crit);
+  outline-offset: -2px;
+  font-weight: 900 !important;
+  color: var(--viz-crit) !important;
+}
+
+/* tiny "wipe-out" / "SA fund" / "Jul 2026" badges */
+.ladderActualBadge {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--viz-crit);
+  margin-top: 2px;
+}
+
+.ladderWipeTag {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--viz-crit);
+  opacity: 0.75;
+}
+
+.ladderNote {
+  font-size: 0.81rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-top: 0.55rem;
+  line-height: 1.55;
+}
