@@ -103,6 +103,66 @@
   margin: 0 0 2rem;
 }
 
+/* Plain-English summary box */
+.plainBox {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  padding: 1.1rem 1.4rem;
+  margin: 1.75rem 0;
+}
+
+.plainBox h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.plainBox p {
+  line-height: 1.8;
+  margin-bottom: 0.7rem;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.plainBox p:last-child { margin-bottom: 0; }
+
+/* Glossary (definition list) */
+.glossary {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 12px;
+  background: var(--ifm-background-surface-color);
+  padding: 1rem 1.4rem 1.2rem;
+  margin: 1.5rem 0;
+}
+
+.glossary dl { margin: 0; }
+
+.glossary dt {
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+  margin-top: 0.9rem;
+  font-size: 0.98rem;
+}
+
+.glossary dt:first-of-type { margin-top: 0; }
+
+.glossary dd {
+  margin: 0.25rem 0 0;
+  line-height: 1.65;
+  color: var(--ifm-color-emphasis-800);
+}
+
+/* "Picture this" story analogy callout */
+.analogy {
+  border-left: 3px solid var(--viz-s3);
+  padding: 0.15rem 0 0.15rem 1rem;
+  margin: 1.1rem 0;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.75;
+}
+
+.analogy strong { color: var(--viz-s3); }
+
 .section {
   margin: 2.4rem 0;
 }

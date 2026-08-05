@@ -123,7 +123,6 @@ const config = {
           {to: '/roadmap', label: 'Roadmap', position: 'left'},
           {to: '/notebook', label: 'Notebook', position: 'left'},
           {to: '/terminal', label: 'Terminal', position: 'left'},
-          {to: '/events', label: 'Big Events', position: 'left'},
           {to: '/projects', label: 'Projects', position: 'left'},
           {
             label: 'Library',
@@ -136,6 +135,7 @@ const config = {
               {to: '/scope', label: '🎯 Scope'},
             ],
           },
+          {to: '/events', label: 'Big Events', position: 'left'},
           {to: '/about', label: 'About', position: 'right'},
           {
             href: 'https://github.com/Kashyeb57/quant-finance-journey',

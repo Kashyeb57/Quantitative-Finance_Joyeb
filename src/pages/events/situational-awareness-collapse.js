@@ -19,7 +19,7 @@ const AUM = [
 ];
 
 const LEVERAGE = [
-  { label: 'The AI basket, unlevered', note: 'Oracle, AMD, memory, power', pct: -17 },
+  { label: 'The AI basket, unlevered', note: 'if you used only your own money', pct: -17 },
   { label: 'Fund equity at ~4× leverage', note: 'what investors actually felt', pct: -67 },
 ];
 
@@ -32,15 +32,26 @@ const STATS = [
   { v: '~$10B', label: 'Left afterward (mostly private)', dir: 'down' },
 ];
 
+const GLOSSARY = [
+  ['Hedge fund', 'A private investment pool where rich people and institutions hand their money to a manager who tries to grow it with more aggressive tactics than a normal fund is allowed to use.'],
+  ['AUM (assets under management)', 'The total pile of money a fund is looking after. Bigger AUM = a bigger, more important fund.'],
+  ['Leverage', 'Investing with borrowed money so your bet is bigger than your own cash. It multiplies your winnings — and your losses — by the same amount.'],
+  ['Short selling', 'A way to bet that a price will go DOWN instead of up. If you short a stock and it falls, you make money.'],
+  ['Hedge', 'A side bet meant to protect you if your main bet goes wrong — basically insurance for your portfolio.'],
+  ['Margin call', 'When the bank that lent you money says: “your bet is losing — put in more cash right now, or we sell your stuff to protect our loan.” You don’t get to say no.'],
+  ['Prime broker', 'The big bank that lends a hedge fund money and holds its investments. Goldman Sachs and JPMorgan are examples.'],
+  ['Liquidity', 'How quickly you can turn something into cash. A stock is liquid (sell in seconds); a share of a private company is not (can take months).'],
+];
+
 const TIMELINE = [
-  { d: '2023', b: 'Aschenbrenner joins OpenAI’s “Superalignment” team (under Jan Leike and Ilya Sutskever), working on controlling AI smarter than humans.' },
-  { d: 'April 2024', b: 'OpenAI fires him, citing an alleged information leak. He disputes it, saying the real trigger was a security memo he wrote warning about foreign espionage. The Superalignment team dissolves soon after.' },
-  { d: 'June 2024', b: 'He publishes “Situational Awareness: The Decade Ahead,” a ~165-page manifesto arguing AGI arrives around 2027 and superintelligence soon after. It goes viral across tech and policy circles.' },
-  { d: 'Late 2024', b: 'He launches Situational Awareness LP — an AI-focused hedge fund — with about $225 million, backed by Stripe’s Patrick and John Collison, Daniel Gross and Nat Friedman.' },
-  { d: 'Through mid-2026', b: 'Riding the AI-infrastructure boom with heavy leverage, the fund posts a reported +439% net return and assets balloon toward a reported ~$45 billion — one of the great runs in hedge-fund history.' },
-  { d: 'Early–mid July 2026', b: 'AI and semiconductor stocks roll over. Oracle and AMD each fall roughly 20%; smaller AI-infra and Asian tech names fall further. The fund’s short-software “hedge” fails to offset the damage.' },
-  { d: 'July 24, 2026', b: 'Aschenbrenner tells investors the fund “failed to escape” the correction, particularly in Asian tech.', crash: true },
-  { d: '~July 29–30, 2026', b: 'With ~4× leverage, margin calls cascade. Prime brokers (Goldman, JPMorgan, BofA, Citi) push the fund to unwind. It dumps its entire ~$16 billion public-equity book in about 24 hours — largely to Ken Griffin’s Citadel. Month-to-date loss: about −67%. Assets fall to ~$10 billion, mostly an illiquid stake in Anthropic.', crash: true },
+  { d: '2023', b: 'Aschenbrenner joins OpenAI’s “Superalignment” team — the group trying to keep future super-smart AI under human control.' },
+  { d: 'April 2024', b: 'OpenAI fires him, saying he leaked information. He says the real reason was a memo he wrote warning that OpenAI wasn’t safe from foreign spying. The team is shut down soon after.' },
+  { d: 'June 2024', b: 'He publishes “Situational Awareness: The Decade Ahead,” a ~165-page essay predicting that human-level AI arrives around 2027. It goes viral.' },
+  { d: 'Late 2024', b: 'He starts his own hedge fund, Situational Awareness LP, with about $225 million from famous tech backers (the Collison brothers, Daniel Gross, Nat Friedman).' },
+  { d: 'Through mid-2026', b: 'Betting big — with lots of borrowed money — on the AI boom, the fund reportedly grows +439% and swells toward a reported ~$45 billion. One of the great runs ever.' },
+  { d: 'Early–mid July 2026', b: 'AI and chip stocks start falling. Oracle and AMD each drop about 20%. His protective “short” bets don’t save him.' },
+  { d: 'July 24, 2026', b: 'Aschenbrenner tells his investors the fund “failed to escape” the sell-off.', crash: true },
+  { d: '~July 29–30, 2026', b: 'The banks demand their money back (margin calls). Forced to sell, the fund dumps its ENTIRE ~$16 billion stock portfolio in about a day — mostly to Ken Griffin’s Citadel. It ends the month down ~67%, with only ~$10 billion left, most of it stuck in a private Anthropic stake.', crash: true },
 ];
 
 const SOURCES = [
@@ -50,7 +61,7 @@ const SOURCES = [
   { t: 'TradingKey — “How leverage amplified the crisis”', u: 'https://www.tradingkey.com/analysis/stocks/us-stocks/262066744-ex-openai-researcher-leopold-aschenbrenner-situational-awareness-blows-up-tradingkey' },
   { t: 'CryptoBriefing — “Situational Awareness dumps entire public stock portfolio in margin-fueled fire sale”', u: 'https://cryptobriefing.com/situational-awareness-hedge-fund-liquidates-portfolio/' },
   { t: 'Wikipedia — Leopold Aschenbrenner', u: 'https://en.wikipedia.org/wiki/Leopold_Aschenbrenner' },
-  { t: 'The video that prompted this write-up (YouTube)', u: 'https://youtu.be/-h8hPIlMgvs' },
+  { t: 'Roman Paolucci — “Situational Awareness LP Blowup” (the YouTube video that prompted this write-up)', u: 'https://youtu.be/-h8hPIlMgvs' },
 ];
 
 function Stat({ s }) {
@@ -67,7 +78,7 @@ export default function SituationalAwarenessCollapse() {
   return (
     <Layout
       title="The Situational Awareness fund collapse"
-      description="How Leopold Aschenbrenner turned $225M into a reported ~$45B AI-infrastructure fund and then lost roughly two-thirds of it in one month — a textbook leverage blow-up, explained in full with charts.">
+      description="How Leopold Aschenbrenner turned $225M into a reported ~$45B AI-infrastructure fund and then lost roughly two-thirds of it in one month — a textbook leverage blow-up, explained simply with charts.">
       <header className="hero hero--primary" style={{ padding: '2.2rem 1rem' }}>
         <div className="container">
           <Heading as="h1" className="hero__title" style={{ fontSize: '2rem' }}>
@@ -83,126 +94,204 @@ export default function SituationalAwarenessCollapse() {
 
           <p className={styles.dek}>
             The person who wrote the most famous essay arguing that AI would change everything built
-            a hedge fund on exactly that thesis — and then got liquidated when the AI trade
-            corrected. His thesis may still prove right. Leverage just doesn&rsquo;t let you be early.
+            a hedge fund on exactly that idea &mdash; and then got wiped out when AI stocks dipped.
+            His big-picture idea might still turn out right. Borrowed money just doesn&rsquo;t give
+            you time to be early.
           </p>
 
-          {/* The video the user shared */}
-          <div className={styles.videoWrap}>
-            <iframe
-              src="https://www.youtube.com/embed/-h8hPIlMgvs"
-              title="Leopold Aschenbrenner / Situational Awareness — video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
+          {/* Plain-English one-shot summary */}
+          <div className={styles.plainBox}>
+            <Heading as="h2">The whole thing in plain English</Heading>
+            <p>
+              A very smart 24-year-old borrowed a <em>huge</em> amount of money to bet that
+              AI-related stocks (chips, data centers, electricity) would keep going up. For a while
+              he was a genius: he turned $225 million into what was reported as around $45 billion.
+            </p>
+            <p>
+              Then those stocks dropped for a few weeks. Because so much of the money was borrowed, a
+              medium-sized dip in the stocks turned into a <strong>giant</strong> loss for his fund.
+              The banks that lent him the money got scared and forced him to sell everything, fast, at
+              bad prices. In about one month he lost roughly <strong>two-thirds</strong> of the whole
+              fund. That&rsquo;s the entire story &mdash; the rest of this page explains the
+              &ldquo;why,&rdquo; step by step.
+            </p>
           </div>
 
           <div className={styles.stats}>
             {STATS.map((s) => <Stat key={s.label} s={s} />)}
           </div>
 
+          {/* Glossary */}
+          <div className={styles.glossary}>
+            <strong>The words you&rsquo;ll need (in plain English)</strong>
+            <dl>
+              {GLOSSARY.map(([term, def]) => (
+                <React.Fragment key={term}>
+                  <dt>{term}</dt>
+                  <dd>{def}</dd>
+                </React.Fragment>
+              ))}
+            </dl>
+          </div>
+
           <section className={styles.section}>
-            <h2>Who is Leopold Aschenbrenner?</h2>
+            <h2>1. Who is Leopold Aschenbrenner?</h2>
             <p>
-              A German-born prodigy (born around 2001), he graduated from Columbia as valedictorian
-              at 19 with degrees in economics and math-statistics. He joined OpenAI in 2023 on the
-              &ldquo;Superalignment&rdquo; team &mdash; the group tasked with keeping
-              smarter-than-human AI under control. OpenAI fired him in April 2024 over an alleged
-              information leak; he says the real reason was a memo he wrote warning that OpenAI
-              wasn&rsquo;t secure against foreign espionage.
+              He&rsquo;s a German-born prodigy, born around 2001. He finished Columbia University at
+              the top of his class at just 19, studying economics and math. In 2023 he went to work
+              at OpenAI (the company behind ChatGPT) on a team whose job was to keep future
+              super-smart AI safe and under control.
             </p>
             <p>
-              Two months later, in June 2024, he published{' '}
+              In April 2024 OpenAI fired him. The company said he leaked information; he says the
+              real reason was that he warned &mdash; in writing &mdash; that OpenAI wasn&rsquo;t
+              protected against foreign spies. Two months later, in June 2024, he published a long
+              essay called{' '}
               <a href="https://situational-awareness.ai/" target="_blank" rel="noreferrer">
                 &ldquo;Situational Awareness: The Decade Ahead&rdquo;
-              </a>{' '}
-              &mdash; a ~165-page manifesto predicting that AI would reach human-level capability
-              around 2027, trigger an intelligence explosion, and become the defining
-              national-security issue of the era. It became one of the most-discussed documents in
-              tech. Then he did something unusual for an essayist: he put money behind the thesis.
+              </a>
+              , predicting that AI would become as smart as humans around 2027 and reshape the world.
+              It became one of the most talked-about documents in tech. Then he did something bold:
+              he bet real money on his own prediction.
             </p>
           </section>
 
           <section className={styles.section}>
-            <h2>The thesis, turned into a fund</h2>
+            <h2>2. What was his bet? (The &ldquo;shovels&rdquo; idea)</h2>
             <p>
-              In late 2024 he launched <strong>Situational Awareness LP</strong>, an AI-focused
-              hedge fund seeded with about <strong>$225 million</strong> and backed by heavyweight
-              names &mdash; Stripe&rsquo;s Collison brothers, Daniel Gross and Nat Friedman. The
-              strategy was a concentrated, heavily leveraged bet on the <em>picks-and-shovels</em> of
-              the AI boom: the compute, memory and power that every AI company has to buy. Reported
-              holdings included Oracle, AMD, memory-chip and data-center names (Nebius, SanDisk),
-              and power plays like Bloom Energy &mdash; hedged with short positions in software
-              stocks.
+              In late 2024 he opened a <strong>hedge fund</strong> &mdash; a pool of money he invests
+              for wealthy backers &mdash; called <strong>Situational Awareness LP</strong>. It
+              started with about <strong>$225 million</strong>. His strategy was clever.
+            </p>
+            <p className={styles.analogy}>
+              <strong>Picture this:</strong> In the 1849 Gold Rush, most people digging for gold went
+              broke. But the folks who sold the <em>shovels, picks and jeans</em> got rich no matter
+              who struck gold. Leopold&rsquo;s bet was the modern version: don&rsquo;t try to guess
+              which AI company wins &mdash; instead, own the &ldquo;shovels&rdquo; that <em>every</em>{' '}
+              AI company has to buy: the computer chips, the memory, the data centers, the
+              electricity.
             </p>
             <p>
-              It worked spectacularly. Through June 2026 the fund reportedly returned{' '}
-              <strong>+439% net</strong>, and its assets ballooned from $225 million to a reported
-              peak near <strong>$45 billion</strong> in under two years &mdash; one of the fastest
-              rises the industry had ever seen.
+              So he bought big stakes in companies like Oracle, AMD, memory-chip makers and power
+              companies. It was a smart idea, and for 18 months it worked better than almost anyone
+              in history: through June 2026 the fund was reportedly up <strong>+439%</strong>, and
+              its money had grown from $225 million to a reported peak near{' '}
+              <strong>$45 billion</strong>. The problem was never the idea. The problem was <em>how</em>{' '}
+              he made the bet.
             </p>
 
             <figure className={styles.figure}>
-              <p className={styles.figTitle}>Assets under management: $225M → ~$45B → ~$10B</p>
+              <p className={styles.figTitle}>The money: $225M → ~$45B → ~$10B</p>
               <TimeSeriesChart
                 data={AUM}
                 peakT={20}
                 unit={{ prefix: '$', suffix: 'B' }}
-                ariaLabel="Situational Awareness fund assets rising from $225M to about $45B, then collapsing to about $10B in July 2026"
+                ariaLabel="The fund's money rising from $225M to about $45B, then collapsing to about $10B in July 2026"
               />
               <figcaption className={styles.figCaption}>
-                The curve that tells the whole story: a near-vertical rise powered by leverage, then
-                a cliff. Figures are approximate and vary by source &mdash; the reported peak ranges
-                from roughly $20B to $45B depending on whether you count gross exposure; what every
-                account agrees on is the shape.
+                Green is the climb, red is the crash. Notice how the drop at the end is almost
+                straight down &mdash; that&rsquo;s what &ldquo;forced selling&rdquo; looks like.
+                (Figures are approximate; the reported peak ranges from ~$20B to ~$45B depending on
+                the source, but every account agrees on this shape.)
               </figcaption>
             </figure>
           </section>
 
           <section className={styles.section}>
-            <h2>What went wrong: leverage cuts both ways</h2>
+            <h2>3. The secret ingredient &mdash; and the poison &mdash; was leverage</h2>
             <p>
-              The same leverage that produced the +439% run is what destroyed the fund. Reported at
-              up to <strong>~4× (≈400%)</strong>, it multiplied every move in the underlying
-              portfolio. In early July 2026 the AI trade finally corrected: Oracle and AMD each fell
-              roughly 20%, smaller AI-infrastructure and Asian tech names fell further, and the
-              short-software leg that was supposed to cushion the blow didn&rsquo;t fall enough to
-              help.
+              <strong>Leverage</strong> means investing with borrowed money so your bet is bigger
+              than your own cash. Leopold used a <em>lot</em> of it &mdash; reportedly up to{' '}
+              <strong>4×</strong>. Here&rsquo;s why that matters, with small numbers:
+            </p>
+            <p className={styles.analogy}>
+              <strong>Picture this:</strong> You have $100. You&rsquo;re so sure a stock will go up
+              that you borrow $300 from a bank and buy $400 of it. If it rises 25%, you now have
+              $500 &mdash; pay back the $300 loan and you&rsquo;ve got $200. You <em>doubled</em> your
+              money on a 25% move! But if it <em>falls</em> 25%, your $400 becomes $300 &mdash; you
+              pay back the loan and you&rsquo;re left with <strong>$0</strong>. The stock only dropped
+              a quarter, but <em>all</em> your money is gone. That is leverage: it multiplies wins and
+              losses by the same amount.
             </p>
             <p>
-              A ~17% drawdown in an unlevered basket is a bad month. At ~4× leverage, that same drop
-              becomes a fund-threatening loss:
+              Now scale that up to billions. In early July 2026 the AI stocks he owned fell &mdash;
+              Oracle and AMD each dropped about 20%, and smaller names fell more. A ~17% drop in his
+              basket of stocks doesn&rsquo;t sound fatal&hellip; until you remember it was ~4×
+              leveraged:
             </p>
 
             <figure className={styles.figure}>
-              <p className={styles.figTitle}>How ~4× leverage turned a bad month into a blow-up</p>
+              <p className={styles.figTitle}>How ~4× leverage turned a bad month into a wipe-out</p>
               <LeverageBars rows={LEVERAGE} />
               <figcaption className={styles.figCaption}>
-                Illustrative: roughly a 17% decline in the underlying basket, amplified by ~4×
-                leverage, maps to about a 67% loss on the fund&rsquo;s equity &mdash; the figure
-                reported for July 2026.
+                A roughly 17% fall in the stocks, multiplied by ~4× borrowing, becomes about a 67%
+                loss for the fund &mdash; the actual figure reported for July 2026. Same market, very
+                different pain, purely because of borrowed money.
               </figcaption>
             </figure>
+          </section>
 
+          <section className={styles.section}>
+            <h2>4. The &ldquo;doom loop&rdquo; that finished it off</h2>
             <p>
-              Then the doom loop kicked in. As the positions fell, the fund&rsquo;s prime brokers
-              &mdash; Goldman Sachs, JPMorgan, Bank of America and Citi &mdash; raised margin
-              requirements and demanded more collateral. To meet the calls, the fund had to sell
-              into a market that was already falling, which pushed prices down further, which
-              triggered more margin calls. Forced selling begets forced selling.
+              When you invest with borrowed money, the bank that lent it to you is watching nervously,
+              because it&rsquo;s <em>their</em> money at risk too. When your investments start losing,
+              they make a <strong>margin call</strong>.
+            </p>
+            <p className={styles.analogy}>
+              <strong>Picture this:</strong> Remember the $300 you borrowed? As your $400 of stock
+              slides toward $300, the bank calls you: <em>&ldquo;Add more cash right now, or we sell
+              your stock today to get our $300 back.&rdquo;</em> You can&rsquo;t say no, and you
+              don&rsquo;t get to pick the price. That phone call is a margin call.
+            </p>
+            <p>
+              Now imagine <em>everyone</em> in the same AI trade gets that call on the same day. They
+              all sell at once. All that selling pushes prices down even more &mdash; which triggers
+              <em> more</em> margin calls &mdash; which forces <em>more</em> selling. It feeds on
+              itself. Traders call this a <strong>doom loop</strong>, and it&rsquo;s why the end of
+              the chart is a cliff instead of a gentle slope. Leopold&rsquo;s prime brokers (Goldman
+              Sachs, JPMorgan, Bank of America, Citi) all wanted their loans made safe at the same
+              time.
             </p>
           </section>
 
           <section className={styles.section}>
-            <h2>How it ended</h2>
+            <h2>5. The insurance that didn&rsquo;t work</h2>
             <p>
-              Around July 29&ndash;30, 2026, the fund gave up trying to hold on and liquidated its{' '}
-              <strong>entire public-equity book &mdash; roughly $16 billion &mdash; in about 24
-              hours</strong>, selling largely to a single buyer: Ken Griffin&rsquo;s Citadel, which
-              had the balance sheet to absorb it. When the dust settled, the fund was down about{' '}
-              <strong>67% for the month</strong> and its assets had fallen to around{' '}
-              <strong>$10 billion</strong> &mdash; most of that not cash but an illiquid private
-              stake in Anthropic that couldn&rsquo;t be sold in a hurry.
+              Leopold wasn&rsquo;t reckless on purpose &mdash; he thought he was protected. Alongside
+              buying AI stocks, he also <strong>shorted</strong> (bet against) a bunch of software
+              stocks. The plan: if the market fell, his short bets would go up and cushion the blow.
+              That protective side bet is called a <strong>hedge</strong>.
+            </p>
+            <p>
+              But the hedge failed. The software stocks he bet against didn&rsquo;t fall enough to
+              help, so <em>both</em> sides of his book lost money at the same time &mdash; exactly
+              when he needed one side to win. A hedge only helps if it actually moves the opposite way
+              from your main bet. His didn&rsquo;t.
+            </p>
+          </section>
+
+          <section className={styles.section}>
+            <h2>6. The fire sale &mdash; how it ended</h2>
+            <p>
+              Around July 29&ndash;30, 2026, it was over. Unable to meet the margin calls, the fund
+              sold its <strong>entire pile of stocks &mdash; about $16 billion worth &mdash; in
+              roughly 24 hours</strong>. When you have to sell that much that fast, you take whatever
+              price you can get. Most of it went to a single buyer big enough to swallow it: Ken
+              Griffin&rsquo;s <strong>Citadel</strong>, one of the largest funds in the world.
+            </p>
+            <p>
+              When the smoke cleared, the fund was down about <strong>67%</strong> for the month and
+              only around <strong>$10 billion</strong> was left.
+            </p>
+            <p className={styles.analogy}>
+              <strong>And here&rsquo;s the cruel twist:</strong> most of that remaining $10 billion
+              wasn&rsquo;t cash &mdash; it was a stake the fund owned in <em>Anthropic</em>, a private
+              AI company. You can sell a normal stock in seconds, but you can&rsquo;t quickly sell a
+              piece of a private company. It&rsquo;s like owning part of a house when you need cash
+              tonight: it&rsquo;s worth a lot, but you can&rsquo;t spend it right now. That&rsquo;s
+              called being <strong>illiquid</strong> &mdash; and it meant the one valuable thing left
+              couldn&rsquo;t be used to stop the bleeding.
             </p>
           </section>
 
@@ -219,41 +308,39 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>Why it matters — the lessons</h2>
+            <h2>Why it matters &mdash; the lessons</h2>
             <div className={styles.lessons}>
               <ul>
                 <li>
-                  <strong>Being right isn&rsquo;t enough; surviving is.</strong> The AI thesis could
-                  be entirely correct over ten years and still wipe you out over ten days if
-                  leverage forces you to sell at the bottom. Markets can stay irrational &mdash; or
-                  simply volatile &mdash; longer than a levered book can stay solvent.
+                  <strong>Being right isn&rsquo;t enough &mdash; you have to survive to see it.</strong>{' '}
+                  His AI idea could be 100% correct over ten years and <em>still</em> wipe him out over
+                  ten days, because borrowed money forced him to sell at the bottom. In plain terms:
+                  the market can stay scary longer than a borrowed bet can stay alive.
                 </li>
                 <li>
-                  <strong>Leverage is symmetric.</strong> The +439% and the −67% came from the same
-                  dial. Any return achieved with 4× leverage is a return you can also lose 4× as
-                  fast.
+                  <strong>Leverage cuts both ways.</strong> The same 4× that made the +439% also made
+                  the −67%. Any gain you get from borrowing is a loss you can suffer just as fast.
                 </li>
                 <li>
-                  <strong>Concentration + correlation kills.</strong> The longs were all the same
-                  bet (AI infrastructure) and the &ldquo;hedge&rdquo; wasn&rsquo;t truly
-                  uncorrelated, so everything fell together exactly when diversification was needed.
+                  <strong>Putting all your eggs in one basket is dangerous</strong> &mdash; especially
+                  when your &ldquo;backup plan&rdquo; is secretly tied to the same basket. Everything
+                  fell together right when he needed something to hold up.
                 </li>
                 <li>
-                  <strong>Margin calls set the timing, not you.</strong> Once prime brokers raise
-                  requirements, the forced-seller loses control of when and at what price they exit.
+                  <strong>When the bank calls, you&rsquo;re not in charge anymore.</strong> Margin
+                  calls decide <em>when</em> and <em>at what price</em> you sell &mdash; not you.
                 </li>
                 <li>
-                  <strong>Liquidity is a feature you only miss when it&rsquo;s gone.</strong> What
-                  survived was an Anthropic stake that couldn&rsquo;t be sold to meet the calls &mdash;
-                  private marks don&rsquo;t pay margin.
+                  <strong>Cash you can&rsquo;t reach isn&rsquo;t really cash.</strong> A great private
+                  investment is useless if you can&rsquo;t sell it in the exact moment you need money.
                 </li>
               </ul>
             </div>
             <p>
-              It rhymes with history: <strong>Long-Term Capital Management</strong> (1998) and{' '}
-              <strong>Archegos</strong> (2021) were also brilliant, highly levered, highly
-              concentrated books that unwound violently into the arms of big banks. Different
-              decade, same physics.
+              This has happened before to very smart people. <strong>Long-Term Capital Management</strong>{' '}
+              (1998) was run by Nobel Prize winners and blew up the same way. <strong>Archegos</strong>{' '}
+              (2021) lost $20 billion in days on borrowed, concentrated bets. Different decade, same
+              trap: brilliance + borrowed money + one big bet.
             </p>
           </section>
 
