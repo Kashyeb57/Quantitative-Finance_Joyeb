@@ -123,6 +123,7 @@ const config = {
           {to: '/roadmap', label: 'Roadmap', position: 'left'},
           {to: '/notebook', label: 'Notebook', position: 'left'},
           {to: '/terminal', label: 'Terminal', position: 'left'},
+          {to: '/events', label: 'Big Events', position: 'left'},
           {to: '/projects', label: 'Projects', position: 'left'},
           {
             label: 'Library',
@@ -159,6 +160,7 @@ const config = {
             title: 'Explore',
             items: [
               {label: 'Market terminal', to: '/terminal'},
+              {label: 'Big Events', to: '/events'},
               {label: 'Projects', to: '/projects'},
               {label: 'Books', to: '/books'},
               {label: 'Research Papers', to: '/research'},
