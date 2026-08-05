@@ -103,7 +103,9 @@ const config = {
         {name: 'author', content: 'Joyeb Kashyeb'},
       ],
       colorMode: {
-        respectPrefersColorScheme: true,
+        defaultMode: 'dark',
+        disableSwitch: true,
+        respectPrefersColorScheme: false,
       },
       docs: {
         sidebar: {
