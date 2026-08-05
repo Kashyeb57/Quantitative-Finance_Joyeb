@@ -485,6 +485,101 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
+            <h2>7½. The letters: five days, two completely different realities</h2>
+            <p>
+              There were two letters to investors. Reading them back to back is the most concise
+              possible education in what leverage does to time horizons. The first was written five
+              days before the margin calls. The second was written the day after the forced sale.
+            </p>
+
+            <div className={styles.letterWrap}>
+              {/* ── Letter 1: July 24 ── */}
+              <div className={`${styles.letter} ${styles.letterBullish}`}>
+                <div className={styles.letterHeader}>
+                  <span>📩 Investor letter</span>
+                  <span className={styles.letterDate}>July 24, 2026 — five days before the margin calls</span>
+                </div>
+                <div className={styles.letterBody}>
+                  <p>
+                    With the fund already deep in the red, Aschenbrenner wrote to his investors
+                    framing the sell-off not as a crisis but as an opportunity. He called it:
+                  </p>
+                  <blockquote className={styles.letterQuote}>
+                    &ldquo;One of the best buying opportunities in over a year&rdquo; — specifically,
+                    the best since <strong>April 2025</strong>.
+                  </blockquote>
+                  <p>
+                    He was not reducing risk. He was doubling down, asking investors to contribute
+                    fresh capital starting <strong>August 1</strong>. The fundraise never
+                    happened — the margin calls arrived on July 29, five days later. There was no
+                    August 1.
+                  </p>
+                  <p>
+                    This is not evidence that Aschenbrenner was incompetent. His AI thesis may
+                    well prove correct over years. The letter is evidence of something more
+                    dangerous: at extreme leverage, <em>even a correct thesis can be timed out of
+                    existence</em>. You can be right and still not survive to collect.
+                  </p>
+                  <p className={styles.letterNote}>
+                    Source: reported by Reuters, CNBC, Inc. and others citing the investor
+                    communication dated July 24, 2026.
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Letter 2: July 31 ── */}
+              <div className={`${styles.letter} ${styles.letterBear}`}>
+                <div className={styles.letterHeader}>
+                  <span>📩 Investor letter</span>
+                  <span className={styles.letterDate}>July 31, 2026 — one day after the forced sale to Citadel</span>
+                </div>
+                <div className={styles.letterBody}>
+                  <p>
+                    After the entire public book had been sold to Citadel and the fund had finished
+                    July down 67%, Aschenbrenner sent a second letter. The tone could not have been
+                    more different:
+                  </p>
+                  <blockquote className={styles.letterQuote}>
+                    &ldquo;We let you down this month. We came closer to permanent capital
+                    impairment than is acceptable to us.&rdquo;
+                  </blockquote>
+                  <blockquote className={styles.letterQuote}>
+                    &ldquo;While we ultimately found a solution that protected the fund and you as
+                    investors, our intention in running the fund is to never find ourselves in such
+                    a position in the first place.&rdquo;
+                  </blockquote>
+                  <blockquote className={styles.letterQuote}>
+                    &ldquo;Volatility is the price of long-term investment returns. Over the past
+                    two years, we have delivered outstanding results, despite occasional sharp
+                    pullbacks. But our fund must always be structured such that we can take a loss
+                    and fight another day. I will make it my mission to ensure that we learn the
+                    necessary lessons from this experience.&rdquo;
+                  </blockquote>
+                  <p>
+                    He took full responsibility, pledged to <strong>stop borrowing from banks to
+                    amplify public-market bets</strong>, and committed to restructuring the fund&rsquo;s
+                    risk management. He noted the fund remained up roughly{' '}
+                    <strong>+80% for 2026</strong> due to the first half&rsquo;s gains — a number that
+                    gives some context to the damage but does not undo the six-day experience for
+                    anyone who joined closer to the peak.
+                  </p>
+                  <p className={styles.letterNote}>
+                    Direct quotes as reported by Business Insider, Financial Express and others
+                    citing the investor communication dated July 31, 2026. The full letter has not
+                    been publicly released; these are excerpts reported by news outlets.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p>
+              The five-day gap between those two letters is the whole story in miniature. Conviction,
+              leverage, and a wrong estimate of how much time you have left are a combination that
+              even the most accurate thesis cannot survive.
+            </p>
+          </section>
+
+          <section className={styles.section}>
             <h2>8. The exit: one block, one buyer</h2>
             <p>
               Before the open on <strong>July 30</strong>, the fund sold its <strong>entire public

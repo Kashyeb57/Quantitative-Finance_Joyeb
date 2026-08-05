@@ -152,7 +152,7 @@
   color: var(--ifm-color-emphasis-800);
 }
 
-/* "Picture this" story analogy callout */
+/* Illustrative example / key-insight callout */
 .analogy {
   border-left: 3px solid var(--viz-s3);
   padding: 0.15rem 0 0.15rem 1rem;
@@ -162,6 +162,43 @@
 }
 
 .analogy strong { color: var(--viz-s3); }
+
+/* Positions table */
+.posTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 0.4rem;
+  font-size: 0.9rem;
+}
+
+.posTable th,
+.posTable td {
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.posTable th {
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 700;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.posTable td:last-child,
+.posTable th:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.posCaption {
+  font-size: 0.83rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1.55;
+  margin: 0.2rem 0 0;
+}
 
 .section {
   margin: 2.4rem 0;
@@ -319,6 +356,90 @@
 .disclaimer {
   margin-top: 1.5rem;
   font-size: 0.78rem;
+  color: var(--ifm-color-emphasis-500);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ---- Investor letters ---- */
+.letterWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  margin: 1.4rem 0;
+}
+
+.letter {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--viz-card-bg);
+}
+
+.letterHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.letterDate {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Letter 1 — bullish / confident tone */
+.letterBullish {
+  border-left: 4px solid var(--viz-good);
+}
+
+.letterBullish .letterHeader {
+  background: rgba(12, 163, 12, 0.05);
+}
+
+/* Letter 2 — apology / crisis tone */
+.letterBear {
+  border-left: 4px solid var(--viz-crit);
+}
+
+.letterBear .letterHeader {
+  background: rgba(208, 59, 59, 0.05);
+}
+
+.letterBody {
+  padding: 1rem 1.2rem;
+}
+
+.letterBody p {
+  margin: 0 0 0.75rem;
+  line-height: 1.8;
+  font-size: 0.97rem;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.letterBody p:last-child { margin-bottom: 0; }
+
+.letterQuote {
+  border-left: 3px solid var(--ifm-toc-border-color);
+  padding: 0.3rem 0 0.3rem 1rem;
+  margin: 0.8rem 0;
+  font-style: italic;
+  color: var(--ifm-color-emphasis-800);
+  line-height: 1.75;
+}
+
+.letterNote {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  font-size: 0.79rem;
   color: var(--ifm-color-emphasis-500);
   font-style: italic;
   line-height: 1.5;
