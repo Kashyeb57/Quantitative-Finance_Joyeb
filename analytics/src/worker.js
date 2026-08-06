@@ -18,6 +18,7 @@
 const COLLECT_PATH = '/_a/collect';
 const LOGS_PATH = '/_a/logs';
 const LOGS_JSON_PATH = '/_a/logs.json';
+const RESET_PATH = '/_a/reset';
 
 // 1x1 transparent GIF for the no-JS pixel fallback.
 const PIXEL = Uint8Array.from([
@@ -40,6 +41,9 @@ export default {
     }
     if (path === LOGS_JSON_PATH) {
       return handleJson(request, env, url);
+    }
+    if (path === RESET_PATH) {
+      return handleReset(request, env, url);
     }
 
     // Not one of ours — shouldn't normally happen given the route, but be safe.
@@ -161,6 +165,29 @@ async function handleJson(request, env, url) {
   return new Response(JSON.stringify(results, null, 2), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });
+}
+
+/* ------------------------------ reset ---------------------------------- */
+
+// Wipe every recorded visit. Owner-only (needs the token) and POST-only, so it
+// can't be triggered by a crawler, a prefetch, or an accidental link click.
+async function handleReset(request, env, url) {
+  if (!authorized(env, url)) return denied();
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed — POST required.', {
+      status: 405, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' },
+    });
+  }
+  try {
+    await env.DB.prepare('DELETE FROM hits').run();
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ ok: false, error: String((e && e.message) || e) }), {
+      status: 500, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    });
+  }
 }
 
 /* --------------------------- dashboard --------------------------------- */
@@ -437,6 +464,10 @@ function renderDashboard(d) {
   .fbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 22px; font-size: 13px; }
   .fbar a { text-decoration: none; background: #1c1f26; border: 1px solid #262b34; padding: 5px 11px; border-radius: 8px; }
   .fbar a:hover { border-color: #25c2a0; }
+  .fbar button.danger { margin-left: auto; cursor: pointer; font: inherit; font-size: 13px;
+    background: #2a1618; border: 1px solid #5a2a2e; color: #ff9b9b; padding: 5px 11px; border-radius: 8px; }
+  .fbar button.danger:hover { border-color: #e06c75; color: #ffc2c2; }
+  .fbar button.danger:disabled { opacity: .6; cursor: default; }
   .fnote { color: #6b727c; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 14px; margin-bottom: 22px; }
   .card { background: #1c1f26; border: 1px solid #262b34; border-radius: 12px; padding: 14px 16px; }
@@ -477,7 +508,7 @@ function renderDashboard(d) {
   <h1>Visitor log <span class="accent">·</span> joyebkashyeb.com.np</h1>
   <p class="sub">Private owner view. Auto-recorded on every page view. Times are Central (Alabama).</p>
 
-  <div class="fbar">${selfLink}${humansLink}${allLink}${activeNote}</div>
+  <div class="fbar">${selfLink}${humansLink}${allLink}${activeNote}<button id="resetBtn" class="danger" type="button" title="Delete all recorded visits">↺ Reset data</button></div>
 
   <div class="cards">
     <div class="card"><div class="k">Total visits</div><div class="v">${d.visits}</div></div>
@@ -518,7 +549,22 @@ function renderDashboard(d) {
     Raw JSON: <a href="${LOGS_JSON_PATH}?token=${esc(d.token)}&amp;limit=1000">${LOGS_JSON_PATH}?token=…</a>
     &nbsp;·&nbsp; Keep this URL private — anyone with the token can read the log.
   </p>
-</div></body></html>`;
+</div>
+<script>
+(function(){
+  var b = document.getElementById('resetBtn');
+  if (!b) return;
+  b.addEventListener('click', function(){
+    if (!confirm('Delete ALL recorded visits permanently?\\n\\nThis clears every stat and cannot be undone.')) return;
+    b.disabled = true; b.textContent = 'Resetting…';
+    fetch(${JSON.stringify(RESET_PATH + '?token=' + encodeURIComponent(d.token))}, { method: 'POST' })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if (j && j.ok) { location.reload(); } else { alert('Reset failed — try again.'); b.disabled = false; b.textContent = '↺ Reset data'; } })
+      .catch(function(e){ alert('Reset failed: ' + e); b.disabled = false; b.textContent = '↺ Reset data'; });
+  });
+})();
+</script>
+</body></html>`;
 }
 
 /* --------------------- tiny user-agent parser -------------------------- */
