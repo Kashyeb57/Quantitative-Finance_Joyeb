@@ -57,10 +57,16 @@ h1, h2, h3 {
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-/* ── Navbar: frosted glass ─────────────────────────────────────────── */
-.navbar {
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
+/* ── Navbar: frosted glass (desktop only) ──────────────────────────────
+   Scope the blur to desktop widths. On mobile the .navbar hosts the
+   slide-in menu drawer; a backdrop-filter here turns .navbar into the
+   containing block for that fixed-position drawer, which collapses it
+   behind the page (menu opens "empty"). Desktop has no drawer, so it's safe. */
+@media (min-width: 997px) {
+  .navbar {
+    backdrop-filter: saturate(160%) blur(12px);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+  }
 }
 
 [data-theme='light'] .navbar {
