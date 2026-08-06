@@ -103,6 +103,102 @@
   margin: 0 0 2rem;
 }
 
+/* Article meta line */
+.articleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin: -0.5rem 0 1.5rem;
+  font-size: 0.82rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.developing {
+  font-weight: 700;
+  color: var(--viz-crit);
+  border: 1px solid var(--viz-crit);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* In-page table of contents */
+.toc {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 12px;
+  background: var(--ifm-background-surface-color);
+  padding: 1rem 1.3rem 1.1rem;
+  margin: 1.5rem 0;
+}
+
+.tocTitle {
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 0.6rem;
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  columns: 2;
+  column-gap: 1.75rem;
+}
+
+.tocList li {
+  margin: 0.3rem 0;
+  break-inside: avoid;
+}
+
+.tocList a {
+  color: var(--ifm-color-emphasis-800);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.tocList a:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}
+
+.tocNum {
+  display: inline-block;
+  min-width: 1.6em;
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .tocList { columns: 1; }
+}
+
+/* Learn-the-concepts box */
+.learnBox {
+  border: 1px solid var(--ifm-toc-border-color);
+  border-left: 4px solid var(--viz-s1);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  padding: 1rem 1.3rem;
+  margin: 1.5rem 0;
+}
+
+.learnBox > strong {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.learnBox ul { margin: 0; padding-left: 1.1rem; }
+.learnBox li { margin: 0.4rem 0; line-height: 1.55; }
+
+/* Sticky-navbar offset for anchor jumps */
+.section h2 { scroll-margin-top: 90px; }
+
 /* Plain-English summary box */
 .plainBox {
   border: 1px solid var(--ifm-toc-border-color);

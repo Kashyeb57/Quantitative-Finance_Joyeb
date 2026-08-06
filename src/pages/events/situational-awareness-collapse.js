@@ -199,6 +199,10 @@ export default function SituationalAwarenessCollapse() {
       <main className="container" style={{ padding: '2rem 1rem 4rem' }}>
         <article className={styles.article}>
           <Link className={styles.backLink} to="/events">← All Big Events</Link>
+          <div className={styles.articleMeta}>
+            <span className={styles.developing}>Post-mortem</span>
+            <span>Compiled August 2026 · ~15 min read · by Joyeb Kashyeb</span>
+          </div>
 
           <p className={styles.dek}>
             The person who wrote the most influential essay on AI&rsquo;s trajectory built a hedge
@@ -233,6 +237,25 @@ export default function SituationalAwarenessCollapse() {
             {STATS.map((s) => <Stat key={s.label} s={s} />)}
           </div>
 
+          <nav className={styles.toc} aria-label="Table of contents">
+            <div className={styles.tocTitle}>In this post-mortem</div>
+            <ol className={styles.tocList}>
+              <li><a href="#s-man"><span className={styles.tocNum}>1</span>The man &amp; the manifesto</a></li>
+              <li><a href="#s-fund"><span className={styles.tocNum}>2</span>The fund &amp; the run</a></li>
+              <li><a href="#s-book"><span className={styles.tocNum}>3</span>The concentrated book</a></li>
+              <li><a href="#s-hedge"><span className={styles.tocNum}>4</span>The hedges that weren&rsquo;t</a></li>
+              <li><a href="#s-lev"><span className={styles.tocNum}>5</span>Leverage, both ways</a></li>
+              <li><a href="#s-trigger"><span className={styles.tocNum}>6</span>The trigger</a></li>
+              <li><a href="#s-sixdays"><span className={styles.tocNum}>7</span>Six days of margin calls</a></li>
+              <li><a href="#s-letters"><span className={styles.tocNum}>7½</span>The two letters</a></li>
+              <li><a href="#s-exit"><span className={styles.tocNum}>8</span>The exit to Citadel</a></li>
+              <li><a href="#s-bounce"><span className={styles.tocNum}>9</span>The tell: the bounce</a></li>
+              <li><a href="#s-after"><span className={styles.tocNum}>10</span>The aftermath</a></li>
+              <li><a href="#s-risk"><span className={styles.tocNum}>11</span>How to survive it</a></li>
+              <li><a href="#s-lessons"><span className={styles.tocNum}>★</span>The lessons &amp; history</a></li>
+            </ol>
+          </nav>
+
           <div className={styles.glossary}>
             <strong>Terms used on this page</strong>
             <dl>
@@ -246,7 +269,7 @@ export default function SituationalAwarenessCollapse() {
           </div>
 
           <section className={styles.section}>
-            <h2>1. The man and the manifesto</h2>
+            <h2 id="s-man">1. The man and the manifesto</h2>
             <p>
               Aschenbrenner is a German-born prodigy (born ~2001) who graduated top of his class at
               Columbia at 19. He joined OpenAI in 2023 on the &ldquo;Superalignment&rdquo; team
@@ -267,7 +290,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>2. The fund and the run</h2>
+            <h2 id="s-fund">2. The fund and the run</h2>
             <p>
               Situational Awareness LP launched in late 2024 with a reported <strong>~$225 million</strong>,
               backed by Stripe&rsquo;s Patrick and John Collison, Daniel Gross and Nat Friedman. Its
@@ -311,7 +334,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>3. The book: concentration as a feature — then a bug</h2>
+            <h2 id="s-book">3. The book: concentration as a feature — then a bug</h2>
             <p>
               The fund&rsquo;s edge was conviction, and its Q1-2026 13F showed just how much: a{' '}
               <strong>$1.86 billion disclosed long book across only 26 names</strong>, with the{' '}
@@ -377,7 +400,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>4. The hedges that weren&rsquo;t</h2>
+            <h2 id="s-hedge">4. The hedges that weren&rsquo;t</h2>
             <p>
               Aschenbrenner wasn&rsquo;t naked-long &mdash; he thought he was protected. Against the
               longs he ran a large short/optioned book: roughly <strong>$8.5 billion in put options</strong>{' '}
@@ -397,7 +420,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>5. Leverage: the multiplier in both directions</h2>
+            <h2 id="s-lev">5. Leverage: the multiplier in both directions</h2>
             <p>
               The same ~4× gross leverage that manufactured the +439% is what made a rough month
               lethal. At 4×, a <strong>25% fall in the underlying positions mathematically wipes out
@@ -428,7 +451,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>6. The trigger: July&rsquo;s AI-infrastructure crack</h2>
+            <h2 id="s-trigger">6. The trigger: July&rsquo;s AI-infrastructure crack</h2>
             <p>
               The unwind had two fuses. On <strong>July 10</strong>, SK Hynix &mdash; one of the
               largest longs &mdash; listed in the U.S., which set off an unwind of crowded, leveraged
@@ -465,7 +488,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>7. Six days: the letter and the margin calls</h2>
+            <h2 id="s-sixdays">7. Six days: the letter and the margin calls</h2>
             <p>
               What makes this a classic isn&rsquo;t just the loss &mdash; it&rsquo;s the timing. On{' '}
               <strong>July 24</strong>, already deep in the red, Aschenbrenner sent investors a letter
@@ -485,7 +508,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>7½. The letters: five days, two completely different realities</h2>
+            <h2 id="s-letters">7½. The letters: five days, two completely different realities</h2>
             <p>
               There were two letters to investors. Reading them back to back is the most concise
               possible education in what leverage does to time horizons. The first was written five
@@ -580,7 +603,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>8. The exit: one block, one buyer</h2>
+            <h2 id="s-exit">8. The exit: one block, one buyer</h2>
             <p>
               Before the open on <strong>July 30</strong>, the fund sold its <strong>entire public
               book &mdash; longs and shorts together</strong> &mdash; in a single negotiated block to
@@ -594,7 +617,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>9. The tell: the bounce</h2>
+            <h2 id="s-bounce">9. The tell: the bounce</h2>
             <p>
               Here is the most revealing part. The instant the forced seller was gone, the exact same
               stocks ripped higher — by 3 p.m. that day Nebius was +27%, IREN +26%, Bloom Energy +26%,
@@ -628,7 +651,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>10. The aftermath</h2>
+            <h2 id="s-after">10. The aftermath</h2>
             <p>
               July closed with the fund down about <strong>67%</strong>. What survived was largely{' '}
               <strong>illiquid</strong>: a private stake in Anthropic reported around <strong>$5 billion</strong>,
@@ -637,6 +660,57 @@ export default function SituationalAwarenessCollapse() {
               man who literally authored &ldquo;Situational Awareness&rdquo; was undone by a blind spot
               in his own &mdash; the tail risk hiding inside his leverage and his hedges.
             </p>
+          </section>
+
+          <section className={styles.section}>
+            <h2 id="s-risk">11. The version that survives: how a risk desk would have caught it</h2>
+            <p>
+              None of this required hindsight. Every guardrail that would have saved the fund is
+              standard practice on any institutional risk desk. The <em>thesis</em> didn&rsquo;t have
+              to change &mdash; only the <em>sizing</em>.
+            </p>
+            <div className={styles.lessons}>
+              <ul>
+                <li>
+                  <strong>Concentration limits.</strong> A hard cap of ~10% gross per name and ~35%
+                  across the top five forces real diversification. SA ran its top five at ~76% and
+                  held 8% of one company&rsquo;s float — a position you cannot exit without moving the
+                  price against yourself.
+                </li>
+                <li>
+                  <strong>Liquidity-adjusted leverage.</strong> Leverage should scale to how fast you
+                  can get out. 4× on small, thinly-traded neoclouds is a different animal from 4× on
+                  mega-caps. A liquidity-weighted limit would have pinned this book closer to ~2×.
+                </li>
+                <li>
+                  <strong>Correlation-aware hedging.</strong> Hedge with the thing you actually own.
+                  Shorting low-beta mega-cap semis to cover high-beta small-caps is a hedge ratio well
+                  under 1 — it was always going to pay pennies in a panic.
+                </li>
+                <li>
+                  <strong>Stress tests, not just averages.</strong> One scenario — &ldquo;AI complex
+                  −30%, correlations → 1&rdquo; — run at 4× prints a <em>&gt;100% equity loss</em>.
+                  That is a number a risk committee vetoes before the trade is ever put on.
+                </li>
+              </ul>
+            </div>
+            <p className={styles.analogy}>
+              <strong>The counterfactual:</strong> at <strong>2× instead of 4×</strong>, that same
+              ~30% drop is roughly a 60% gross hit — brutal, but with the hedges clawing part of it
+              back, survivable. No margin call forces the door; you live to see the very next day,
+              when the same names bounced 20&ndash;30%. Halving the leverage doesn&rsquo;t just halve
+              the loss — it changes the outcome from <em>terminal</em> to <em>temporary</em>. That is
+              the whole game: size so that being early is survivable.
+            </p>
+            <div className={styles.learnBox}>
+              <strong>Learn the concepts behind this story →</strong>
+              <ul>
+                <li><Link to="/docs/Finance/valuation-and-risk">Valuation &amp; risk</Link> — VaR, stress testing and position limits.</li>
+                <li><Link to="/docs/Finance/derivatives">Derivatives</Link> — how the put-option hedges here actually work.</li>
+                <li><Link to="/docs/Probability/stochastic-processes">Stochastic processes</Link> — why correlations drift toward 1 in a crisis.</li>
+                <li><Link to="/terminal">Market terminal</Link> — watch some of these very tickers move in real time.</li>
+              </ul>
+            </div>
           </section>
 
           <section className={styles.section}>
@@ -652,7 +726,7 @@ export default function SituationalAwarenessCollapse() {
           </section>
 
           <section className={styles.section}>
-            <h2>Why it matters — the lessons</h2>
+            <h2 id="s-lessons">Why it matters — the lessons</h2>
             <div className={styles.lessons}>
               <ul>
                 <li>
