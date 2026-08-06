@@ -364,6 +364,14 @@ function filterLink(token, obj) {
   return `${LOGS_PATH}?${p.toString()}`;
 }
 
+// A pill on/off toggle rendered as a link. Clicking navigates to `href` (the URL
+// representing the flipped state), keeping all filtering server-side.
+function toggleSwitch(label, isOn, href) {
+  return `<a class="toggle${isOn ? ' on' : ''}" href="${esc(href)}" role="switch" aria-checked="${isOn ? 'true' : 'false'}" title="${esc(label)}">` +
+    `<span class="tgTrack"><span class="tgKnob"></span></span>` +
+    `<span class="tgLbl">${esc(label)}</span></a>`;
+}
+
 // Human-friendly duration: 8s, 1m 12s, 3m.
 function fmtDur(secs) {
   const s = parseInt(secs, 10);
@@ -434,18 +442,23 @@ function renderDashboard(d) {
 
   // filter-bar links
   const hidingSelf = d.ownerIp && d.hide.includes(d.ownerIp);
+  // Filters as on/off toggle switches: clicking navigates to the flipped-state
+  // URL, so the actual filtering stays server-side (no client state needed).
   const selfLink = d.ownerIp
-    ? (hidingSelf
-        ? `<a href="${esc(filterLink(d.token, { hide: d.hide.filter((x) => x !== d.ownerIp), humans: d.humans }))}">Show my visits</a>`
-        : `<a href="${esc(filterLink(d.token, { hide: [...d.hide, d.ownerIp], humans: d.humans }))}">Exclude my visits</a>`)
+    ? toggleSwitch('Exclude my visits', hidingSelf,
+        hidingSelf
+          ? filterLink(d.token, { hide: d.hide.filter((x) => x !== d.ownerIp), humans: d.humans })
+          : filterLink(d.token, { hide: [...d.hide, d.ownerIp], humans: d.humans }))
     : '';
-  const humansLink = d.humans
-    ? `<a href="${esc(filterLink(d.token, { hide: d.hide, humans: false }))}">Include bots</a>`
-    : `<a href="${esc(filterLink(d.token, { hide: d.hide, humans: true }))}">Humans only</a>`;
-  const allLink = `<a href="${esc(LOGS_PATH + '?token=' + encodeURIComponent(d.token))}">Show all</a>`;
-  const activeNote = (d.hide.length || d.humans)
-    ? `<span class="fnote">active: ${[d.hide.length ? `hiding ${d.hide.length} IP` : '', d.humans ? 'humans only' : ''].filter(Boolean).join(' · ')}</span>`
-    : `<span class="fnote">showing everything</span>`;
+  const humansLink = toggleSwitch('Humans only', d.humans,
+    d.humans
+      ? filterLink(d.token, { hide: d.hide, humans: false })
+      : filterLink(d.token, { hide: d.hide, humans: true }));
+  // "Show all" clears every filter — only shown when a filter is active.
+  const allLink = (d.hide.length || d.humans)
+    ? `<a class="clearLink" href="${esc(LOGS_PATH + '?token=' + encodeURIComponent(d.token))}">Show all</a>`
+    : '';
+  const activeNote = '';
 
   return `<!doctype html>
 <html lang="en"><head>
@@ -468,6 +481,13 @@ function renderDashboard(d) {
     background: #2a1618; border: 1px solid #5a2a2e; color: #ff9b9b; padding: 5px 11px; border-radius: 8px; }
   .fbar button.danger:hover { border-color: #e06c75; color: #ffc2c2; }
   .fbar button.danger:disabled { opacity: .6; cursor: default; }
+  .fbar .toggle { display: inline-flex; align-items: center; gap: 8px; color: #aeb4bd; }
+  .fbar .toggle:hover { border-color: #3a4048; }
+  .fbar .toggle.on { color: #e6e8eb; border-color: #2b4a44; }
+  .fbar .toggle .tgTrack { position: relative; flex: none; width: 32px; height: 18px; background: #3a4048; border-radius: 999px; transition: background .15s; }
+  .fbar .toggle .tgKnob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #cfd3d9; border-radius: 50%; transition: left .15s ease, background .15s; }
+  .fbar .toggle.on .tgTrack { background: #25c2a0; }
+  .fbar .toggle.on .tgKnob { left: 16px; background: #14161a; }
   .fnote { color: #6b727c; }
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 14px; margin-bottom: 22px; }
   .card { background: #1c1f26; border: 1px solid #262b34; border-radius: 12px; padding: 14px 16px; }
