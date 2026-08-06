@@ -1,24 +1,195 @@
 ---
 title: Regression Analysis
-description: Linear and multiple regression, assumptions, and diagnostics. Notes in progress.
-sidebar_class_name: soon
+description: Simple, multiple, and logistic regression seen through the unifying lens of generalized linear models (GLMs) — with runnable examples and a Bayesian ROPE-based view of when an effect actually matters.
 ---
 
 # Regression Analysis
 
-Linear and multiple regression, assumptions, and diagnostics.
+Regression is the workhorse of applied statistics: it answers *"how does the thing I care about move when the things I can measure move?"* The big idea worth carrying around is that **simple regression, multiple regression, t-tests, ANOVA, and logistic regression are all the same machine** — a **generalized linear model (GLM)** — differing only in the outcome's distribution and the *link* between the predictors and that outcome. Learn the machine once and the rest are settings.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Simple and multiple OLS regression',
-    'The Gauss–Markov assumptions',
-    'R², t-statistics, and residual diagnostics',
-    'Multicollinearity, heteroskedasticity, autocorrelation',
-    'Factor models (CAPM, Fama–French)',
-  ]}
-  meanwhile={[
-    { label: 'CAPM & Asset Pricing', to: '/docs/Finance/capm' },
-    { label: 'ML: Regression & Classification', to: '/docs/Machine_Learning/regression-and-classification' },
-  ]}
-/>
+## 1. Simple linear regression
+
+Model a response $y$ as a straight-line function of one predictor $x$, plus noise:
+
+$$
+y = \alpha + \beta x + \varepsilon, \qquad \varepsilon \sim \mathcal{N}(0, \sigma^2)
+$$
+
+**Ordinary Least Squares (OLS)** picks the $\alpha, \beta$ that minimize the sum of squared residuals, and there's a closed form:
+
+$$
+\hat\beta = \frac{\operatorname{Cov}(x, y)}{\operatorname{Var}(x)}, \qquad \hat\alpha = \bar y - \hat\beta\,\bar x
+$$
+
+In finance this line has a name: regress a stock's returns on the market's returns and the slope **is the stock's beta** (the heart of CAPM). Two numbers tell you how much to trust it:
+
+- **$R^2$** — the fraction of the response's variance the model explains ($0$ to $1$).
+- **the $t$-statistic** $\hat\beta / \operatorname{SE}(\hat\beta)$ — how many standard errors the slope sits from zero.
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+mkt   = rng.normal(0, 1.0, 500)                       # market daily returns (%)
+stock = 0.02 + 1.3 * mkt + rng.normal(0, 0.8, 500)    # true beta = 1.3
+
+X = np.column_stack([np.ones_like(mkt), mkt])         # design matrix [1, x]
+beta = np.linalg.lstsq(X, stock, rcond=None)[0]
+resid = stock - X @ beta
+r2 = 1 - (resid**2).sum() / ((stock - stock.mean())**2).sum()
+se_beta = np.sqrt((resid**2).sum() / (len(mkt) - 2) * np.linalg.inv(X.T @ X)[1, 1])
+
+print(f"alpha = {beta[0]:+.3f}")
+print(f"beta  = {beta[1]:.3f}   (t = {beta[1]/se_beta:.1f})")
+print(f"R^2   = {r2:.3f}")
+```
+
+Run it: the estimated beta lands near the true $1.3$, the $t$-stat is huge (the slope is unmistakably non-zero), and $R^2$ tells you how tightly the stock tracks the market.
+
+## 2. Multiple linear regression
+
+Real outcomes have more than one driver, so add predictors:
+
+$$
+y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \cdots + \varepsilon
+$$
+
+Each $\beta_j$ is now a **partial effect**: the change in $y$ per unit of $x_j$ *holding the other predictors fixed*. A useful habit from Bayesian GLM practice is to **mean-center** the predictors — subtract each column's mean — which makes the intercept equal the average response and keeps the slopes interpretable.
+
+Here's the exact question from my Applied Statistical Methods term project: **do the broad market (SPY) and a peer tech name (META) both help predict NVDA's daily return?**
+
+```python
+import numpy as np
+rng = np.random.default_rng(7)
+n = 263                                   # ~one trading year
+
+spy  = rng.normal(0, 1.3, n)
+meta = 0.7 * spy + rng.normal(0, 1.0, n)  # META is correlated with SPY (~0.7)
+nvda = 1.6 * spy + 0.05 * meta + rng.normal(0, 1.6, n)   # SPY dominates; META ~ 0
+
+# center predictors, then OLS
+Xc = np.column_stack([np.ones(n), spy - spy.mean(), meta - meta.mean()])
+b  = np.linalg.lstsq(Xc, nvda, rcond=None)[0]
+resid = nvda - Xc @ b
+s2 = (resid**2).sum() / (n - 3)
+se = np.sqrt(np.diag(s2 * np.linalg.inv(Xc.T @ Xc)))
+r2 = 1 - (resid**2).sum() / ((nvda - nvda.mean())**2).sum()
+
+for name, est, e in zip(["alpha", "b_SPY", "b_META"], b, se):
+    print(f"{name:6s} = {est:+.3f}   (t = {est/e:+.1f})")
+print(f"R^2    = {r2:.3f}")
+```
+
+This mirrors what I actually found on real Apr-2025→Apr-2026 data: **$\beta_{SPY} \approx 1.6$** with a $t$ around $14$ (NVDA amplifies the market), while **$\beta_{META} \approx 0.06$** with $t \approx 1.1$ — statistically indistinguishable from zero once SPY is in the model. $R^2 \approx 0.61$. The takeaway: META's *apparent* link to NVDA is mostly just both of them following the market.
+
+:::tip Watch out for multicollinearity
+SPY and META are ~0.7 correlated. When predictors overlap like this, the model can't cleanly attribute credit, and the standard errors on their slopes **inflate** — which is part of why $\beta_{META}$ looks so uncertain. Always check how correlated your predictors are before trusting individual slopes.
+:::
+
+## 3. Everything is a GLM
+
+The unifying view that ties the whole toolkit together:
+
+| Classic name | Predictors | Outcome | It's really… |
+|---|---|---|---|
+| One-sample / two-sample **t-test** | a group indicator | continuous | linear model with a 0/1 predictor |
+| **ANOVA** | categorical group | continuous | linear model with dummy variables |
+| **Linear regression** | continuous | continuous, $\mathcal{N}$ | identity link |
+| **Logistic regression** | anything | binary $\{0,1\}$ | logit link, Bernoulli outcome |
+
+Same engine — a linear predictor $\eta = \alpha + \sum \beta_j x_j$ — wrapped in a **link function** and an outcome distribution. That's why "learn regression" really means "learn GLMs."
+
+## 4. Logistic regression (binary outcomes)
+
+When the outcome is yes/no — *survived / didn't*, *defaulted / didn't*, *up day / down day* — a straight line is the wrong tool (it predicts probabilities above 1 and below 0). Instead model the **log-odds** as linear:
+
+$$
+\log\!\frac{p}{1-p} = \alpha + \beta x \quad\Longleftrightarrow\quad p = \frac{1}{1 + e^{-(\alpha + \beta x)}}
+$$
+
+The classic teaching example is Titanic survival (survival vs. sex, class, age); the finance version is a **probability-of-default** or an up/down-day classifier. Fit it by maximizing the Bernoulli likelihood — here by simple gradient descent:
+
+```python
+import numpy as np
+rng = np.random.default_rng(3)
+n = 400
+
+x = rng.normal(0, 1, n)                          # a standardized feature
+p_true = 1 / (1 + np.exp(-(-0.3 + 1.8 * x)))     # true log-odds
+y = (rng.random(n) < p_true).astype(float)       # binary outcome
+
+X, w, lr = np.column_stack([np.ones(n), x]), np.zeros(2), 0.1
+for _ in range(3000):                            # gradient ascent on the log-likelihood
+    pred = 1 / (1 + np.exp(-X @ w))
+    w -= lr * X.T @ (pred - y) / n
+
+print(f"intercept = {w[0]:+.2f}   (true -0.30)")
+print(f"slope     = {w[1]:+.2f}   (true +1.80)")
+```
+
+The recovered coefficients land near the truth. To read a logistic slope: $e^{\beta}$ is the **odds ratio** — how the odds multiply per one-unit rise in $x$.
+
+## 5. Beyond the p-value: the ROPE decision
+
+Classical testing stops at *"is $\beta$ exactly zero?"* and answers with a $p$-value. But in markets almost nothing is *exactly* zero — the real question is whether an effect is **big enough to matter**. The Bayesian approach I studied answers that directly with a **Region of Practical Equivalence (ROPE)**: a band around zero, say $[-0.1, +0.1]$, that you'd treat as "practically no effect." Fit the model, then ask *how much of the coefficient's posterior distribution falls inside that band.*
+
+$$
+P\big(\beta \in [-0.1, +0.1] \mid \text{data}\big) \;\begin{cases} > 0.99 & \Rightarrow \text{accept "no effect"} \\ < 0.01 & \Rightarrow \text{reject "no effect"} \\ \text{else} & \Rightarrow \text{inconclusive} \end{cases}
+$$
+
+For NVDA~SPY+META, my project found $P(\beta_{META} \in \text{ROPE}) \approx 0.76$ — a lot of mass near zero, but not the 99% needed to *declare* it negligible: an honest **"inconclusive,"** which is more informative than a bare "p > 0.05." See the [Bayesian Inference](/docs/Statistics/bayesian-inference) page for how those posteriors are built.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'In a regression of a stock’s returns on the market’s returns, the slope coefficient is…',
+    options: ['the stock’s alpha', 'the stock’s beta', 'the R²', 'the residual variance'],
+    answer: 1,
+    explain: 'Slope = Cov(x,y)/Var(x); regressing stock returns on market returns gives beta — the stock’s sensitivity to the market, the core of CAPM.',
+  },
+  {
+    q: 'Why did β_META come out statistically indistinguishable from zero once SPY was in the model?',
+    options: [
+      'META has no relationship with NVDA at all',
+      'SPY and META are highly correlated, so SPY absorbs most of the shared signal and META’s partial effect shrinks',
+      'The sample was too small',
+      'Logistic regression was used',
+    ],
+    answer: 1,
+    explain: 'This is multicollinearity. META correlates ~0.7 with SPY; once SPY explains the market-wide movement, little independent variation is left for META, and its slope’s standard error inflates.',
+  },
+  {
+    q: 'A t-test, ANOVA, and linear regression are best understood as…',
+    options: [
+      'completely unrelated procedures',
+      'special cases of the same generalized linear model',
+      'all forms of logistic regression',
+      'nonparametric methods',
+    ],
+    answer: 1,
+    explain: 'They’re all linear models — a t-test is a regression on a 0/1 group indicator, ANOVA uses dummy variables, and linear regression is the identity-link GLM. One engine, different settings.',
+  },
+  {
+    q: 'Why model the log-odds linearly in logistic regression instead of the probability directly?',
+    options: [
+      'It runs faster',
+      'A linear model of probability can predict values below 0 or above 1; the logit keeps predictions in (0,1)',
+      'Log-odds are always integers',
+      'It avoids needing any data',
+    ],
+    answer: 1,
+    explain: 'The logit link maps (0,1) probabilities to the whole real line, so a linear predictor can range freely while the implied probability stays valid.',
+  },
+  {
+    q: 'Under a ROPE-based decision, an "inconclusive" result for a coefficient means…',
+    options: [
+      'the coefficient is exactly zero',
+      'most posterior mass is near zero but not enough (e.g. <99%) to declare the effect practically nil',
+      'the model failed to converge',
+      'the p-value was below 0.05',
+    ],
+    answer: 1,
+    explain: 'ROPE asks how much of the posterior sits inside a "practically zero" band. Substantial-but-not-overwhelming mass (like ~76%) is an honest "we can’t call it either way yet."',
+  },
+]} />
