@@ -51,6 +51,18 @@ Experiments worth running:
 
 The normal–normal example is the friendly special case — the posterior has a closed form. Most real models don't cooperate: a stochastic-volatility model or a hierarchical model of many assets produces a posterior you can write down only up to that proportionality sign. **Markov Chain Monte Carlo** solves this by constructing a Markov chain whose stationary distribution *is* the posterior: you take a random walk through parameter space, accepting or rejecting proposed moves (Metropolis–Hastings) so that the chain spends time in each region in proportion to its posterior probability. Run the chain long enough, discard the burn-in, and the samples you collect are draws from the posterior — histograms of those samples give you means, credible intervals, and tail probabilities no formula could. Modern samplers like NUTS (used by PyMC and Stan) automate the hard parts.
 
+## Making the call: credible intervals and the ROPE
+
+Once you hold posterior draws, you *summarize* them. The **credible interval** is the Bayesian cousin of the confidence interval — but with the interpretation people wrongly wish confidence intervals had: a 95% credible interval genuinely carries a 95% posterior probability of containing the parameter.
+
+For actual decisions, credible intervals pair beautifully with a **Region of Practical Equivalence (ROPE)** — a band around a null value (say $[-0.1, +0.1]$) you'd treat as "practically zero." Rather than testing whether an effect is *exactly* zero (almost never true in markets), you ask how much of the posterior lands inside that practically-zero band:
+
+$$
+P(\theta \in \text{ROPE} \mid \text{data}) \;\begin{cases} > 0.99 & \Rightarrow \text{accept "no practical effect"} \\ < 0.01 & \Rightarrow \text{the effect is real} \\ \text{else} & \Rightarrow \textbf{inconclusive} \end{cases}
+$$
+
+That middle verdict — impossible to state cleanly with a p-value — is often the most honest answer. I leaned on exactly this in a term project regressing NVDA on SPY and META: the peer stock's coefficient carried ~76% of its posterior inside the ROPE — plenty of mass near zero, but short of the 99% needed to *declare* it negligible. You can see it applied in [Regression Analysis](/docs/Statistics/regression-analysis).
+
 ## Check your understanding
 
 <Quiz questions={[

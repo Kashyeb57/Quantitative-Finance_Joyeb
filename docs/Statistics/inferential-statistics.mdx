@@ -1,24 +1,147 @@
 ---
 title: Inferential Statistics & Hypothesis Testing
-description: Sampling, confidence intervals, and hypothesis testing. Notes in progress.
-sidebar_class_name: soon
+description: Sampling, confidence intervals, t-tests and ANOVA, the pitfalls of p-values, and the ROPE — a decision rule that asks whether an effect is big enough to actually matter.
 ---
 
 # Inferential Statistics & Hypothesis Testing
 
-Sampling, confidence intervals, and hypothesis testing.
+Inference is the art of saying something about a whole **population** from a limited **sample**. You never get to see all future returns, every customer, or the "true" mean — you get a handful of noisy observations and have to reason back to the thing that generated them, honestly quantifying how sure you're allowed to be.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Sampling distributions and the Central Limit Theorem',
-    'Confidence intervals',
-    'Hypothesis tests (t, z, chi-square)',
-    'p-values, significance, and the multiple-testing trap',
-    'Type I / Type II errors and statistical power',
-  ]}
-  meanwhile={[
-    { label: 'Bayesian Inference (live lab)', to: '/docs/Statistics/bayesian-inference' },
-    { label: 'StatQuest (resources)', to: '/resources' },
-  ]}
-/>
+## From sample to population
+
+Take a sample of size $n$, compute its mean $\bar x$. Do it again with a fresh sample and you'll get a slightly different $\bar x$. The distribution of those means across hypothetical repeated samples is the **sampling distribution**, and the **Central Limit Theorem** says something almost magical: for large $n$, that distribution is approximately normal *regardless of the shape of the underlying data*, centered on the true mean $\mu$ with a spread — the **standard error** — of
+
+$$
+\operatorname{SE} = \frac{\sigma}{\sqrt{n}}.
+$$
+
+The $\sqrt{n}$ is the tax on precision: to halve your uncertainty you need **four times** the data. It's why a year of daily returns still leaves a stock's mean return badly pinned down.
+
+## Confidence intervals
+
+A 95% **confidence interval** is $\bar x \pm 1.96\,\operatorname{SE}$ (using the normal approximation). The honest interpretation is subtle: across many repeated samples, 95% of such intervals would contain the true $\mu$. It's a statement about the *procedure*, not a 95% probability about this one interval — that stronger claim is what the Bayesian **credible interval** gives you (see [Bayesian Inference](/docs/Statistics/bayesian-inference)).
+
+## Hypothesis testing: the classic recipe
+
+1. State a **null hypothesis** $H_0$ (usually "no effect," e.g. two groups have equal means) and an **alternative** $H_1$.
+2. Compute a **test statistic** measuring how far the data sits from $H_0$, in standard-error units.
+3. Get a **p-value**: the probability of a result at least this extreme *if $H_0$ were true*.
+4. If $p$ is below a threshold $\alpha$ (often 0.05), reject $H_0$.
+
+### Two groups: the t-test
+
+Does using your phone slow your reaction time? Two samples, one test:
+
+```python
+import numpy as np
+from scipy import stats
+rng = np.random.default_rng(0)
+
+no_phone = rng.normal(520, 60, 40)   # reaction times (ms)
+phone    = rng.normal(560, 60, 40)   # true effect: +40 ms slower
+
+t, p = stats.ttest_ind(phone, no_phone)
+print(f"mean difference = {phone.mean() - no_phone.mean():.1f} ms")
+print(f"t = {t:.2f},  p = {p:.4f}")
+```
+
+The $t$-statistic is (difference in means) ÷ (standard error of that difference). A big $|t|$ and a small $p$ say the gap is hard to explain as luck.
+
+## Comparing many groups: ANOVA
+
+With three or more groups, running lots of pairwise t-tests inflates your error rate. **ANOVA** tests them all at once by comparing the variance *between* groups to the variance *within* them — a big **F-statistic** means the groups differ by more than noise:
+
+```python
+import numpy as np
+from scipy import stats
+rng = np.random.default_rng(1)
+
+group_a = rng.normal(30.0, 2.0, 30)   # lap times (s), training method A
+group_b = rng.normal(31.0, 2.0, 30)   # method B
+group_c = rng.normal(28.0, 2.0, 30)   # method C
+
+F, p = stats.f_oneway(group_a, group_b, group_c)
+print(f"F = {F:.2f},  p = {p:.4f}")
+```
+
+An ANOVA with a group predictor is, once again, just a [linear model / GLM](/docs/Statistics/regression-analysis) with dummy variables — same engine.
+
+## Two ways to be wrong
+
+| | $H_0$ true | $H_0$ false |
+|---|---|---|
+| **Reject $H_0$** | Type I error (false positive), rate $\alpha$ | ✅ correct |
+| **Fail to reject** | ✅ correct | Type II error (false negative), rate $\beta$ |
+
+**Power** is $1-\beta$: the chance of detecting a real effect. It rises with sample size and effect size. Underpowered studies both miss real effects *and* — because only large flukes clear the bar — exaggerate the ones they do report.
+
+## The trouble with p-values
+
+- **"Not significant" ≠ "no effect."** It may just mean too little data.
+- **Statistical ≠ practical.** With enough data, a trivially small effect becomes "significant." A tradable edge has to clear costs, not just $p<0.05$.
+- **Multiple testing.** Test 20 strategies at $\alpha=0.05$ and you expect one "winner" by pure chance. Backtests are a p-hacking minefield.
+
+## A better question: the ROPE
+
+Instead of *"is the effect exactly zero?"* (almost never true in markets), ask *"is it big enough to care about?"* Define a **Region of Practical Equivalence (ROPE)** — a band around zero you'd treat as negligible, say $[-0.1, +0.1]$ — and, using the Bayesian posterior, measure how much of the effect's probability falls inside it:
+
+$$
+P(\theta \in \text{ROPE} \mid \text{data}) \;\begin{cases} > 0.99 & \text{practically zero} \\ < 0.01 & \text{a real effect} \\ \text{else} & \text{inconclusive} \end{cases}
+$$
+
+That middle "inconclusive" verdict — impossible to state cleanly with a p-value — is often the most honest thing you can say. It's the framework I used to judge a peer stock's effect in the [regression worked example](/docs/Statistics/regression-analysis).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The standard error of the mean scales as σ/√n. To cut your uncertainty in half, you need…',
+    options: ['twice as much data', 'four times as much data', 'half as much data', 'the same data, longer'],
+    answer: 1,
+    explain: 'SE ∝ 1/√n, so halving SE requires √n to double, i.e. n to quadruple. Precision is expensive.',
+  },
+  {
+    q: 'A p-value is…',
+    options: [
+      'the probability that H₀ is true',
+      'the probability of data at least this extreme, assuming H₀ is true',
+      'the probability the effect is large',
+      'the false-positive rate of the study',
+    ],
+    answer: 1,
+    explain: 'A p-value is computed *assuming H₀*. It is not P(H₀ is true) — a very common misreading.',
+  },
+  {
+    q: 'Why prefer ANOVA over many pairwise t-tests when comparing several groups?',
+    options: [
+      'ANOVA is Bayesian',
+      'Running many t-tests inflates the chance of a false positive; ANOVA tests all groups at once',
+      'ANOVA needs less data',
+      't-tests can’t handle continuous data',
+    ],
+    answer: 1,
+    explain: 'Each test carries its own Type-I risk; do 10 of them and false positives pile up. ANOVA controls this with a single omnibus F-test.',
+  },
+  {
+    q: 'In a backtest, why is “p < 0.05” especially dangerous?',
+    options: [
+      'p-values don’t exist for time series',
+      'Testing many strategies means some will look significant by pure chance (multiple testing / p-hacking)',
+      'Markets are always normal',
+      'Because power is always 1',
+    ],
+    answer: 1,
+    explain: 'Search enough strategies and chance alone hands you a “significant” winner. Out-of-sample validation and multiple-testing corrections are essential.',
+  },
+  {
+    q: 'The ROPE framework improves on a bare p-value mainly by…',
+    options: [
+      'eliminating the need for data',
+      'asking whether an effect is large enough to matter, and allowing an honest “inconclusive”',
+      'guaranteeing significance',
+      'removing all uncertainty',
+    ],
+    answer: 1,
+    explain: 'ROPE reframes the question around practical size, and its middle zone lets you say “not enough evidence either way” instead of forcing a reject/accept.',
+  },
+]} />

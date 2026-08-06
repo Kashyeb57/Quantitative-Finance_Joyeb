@@ -1,0 +1,114 @@
+---
+title: Causal Inference & DAGs
+description: Correlation is not causation — and directed acyclic graphs (DAGs) are the tool that tells you which variables to control for, which to leave alone, and when a regression coefficient can be read as an effect.
+---
+
+# Causal Inference & DAGs
+
+Every quant eventually learns the hard way that **correlation is not causation** — but far fewer learn the tool that tells you *what to do about it*. A **directed acyclic graph (DAG)** is a picture of your causal assumptions: variables are nodes, and an arrow $X \to Y$ says "$X$ has a direct causal influence on $Y$." Draw the graph honestly and it tells you exactly which variables to control for to get an unbiased effect — and, just as important, which ones you must **not** touch.
+
+> The framing here follows Richard McElreath's *Statistical Rethinking*, the source my Applied Statistical Methods course drew its DAG material from.
+
+## Three building blocks
+
+Every causal graph is assembled from three elementary shapes. Knowing how information flows through each is 90% of the game.
+
+**The fork (confounder)** — $X \leftarrow Z \to Y$
+A common cause $Z$ drives both $X$ and $Y$. This manufactures a correlation between $X$ and $Y$ even when neither causes the other. **You must control for $Z$** to see the true $X\to Y$ effect. This is *the* classic trap.
+
+**The pipe (mediator)** — $X \to Z \to Y$
+$X$ affects $Y$ *through* $Z$. If you control for $Z$ here, you accidentally erase the very effect you were trying to measure. **Leave mediators alone** (unless you specifically want the direct-only effect).
+
+**The collider** — $X \to Z \leftarrow Y$
+$X$ and $Y$ both cause $Z$, but are otherwise unrelated. Here the danger is the opposite: **controlling for $Z$ creates a fake correlation** between $X$ and $Y$ that wasn't there. Conditioning on a collider is a subtle, common way to fool yourself.
+
+## The confounder, in code
+
+A market example: an interest-rate regime $Z$ pushes both a bond ETF's returns ($X$) and a utility stock's returns ($Y$). Neither causes the other, yet they'll look strongly linked — until you control for the regime.
+
+```python
+import numpy as np
+rng = np.random.default_rng(1)
+n = 1000
+
+Z = rng.normal(0, 1, n)                 # hidden regime (e.g. rate shock)
+X = 0.8 * Z + rng.normal(0, 0.5, n)     # X is driven by Z
+Y = 0.8 * Z + rng.normal(0, 0.5, n)     # Y is driven by Z — NOT by X
+
+# 1) Naive: correlate X and Y directly
+naive = np.corrcoef(X, Y)[0, 1]
+
+# 2) Control for Z: regress Y on X *and* Z, read X's coefficient
+M = np.column_stack([np.ones(n), X, Z])
+b = np.linalg.lstsq(M, Y, rcond=None)[0]
+
+print(f"naive corr(X, Y)              = {naive:+.2f}")
+print(f"effect of X after adjusting Z = {b[1]:+.2f}")
+```
+
+The naive correlation looks large and convincing (~0.6); the moment you put the confounder $Z$ in the regression, $X$'s coefficient collapses to ~0 — the honest answer. **The entire skill is knowing that $Z$ needed to be there.** A DAG is how you know.
+
+## Why this matters for markets
+
+- **Spurious signals.** Two assets co-moving because both react to rates, the dollar, or risk-on/risk-off is confounding, not a tradable relationship. Control for the common driver before believing a pairs trade.
+- **Bad controls.** Throwing "everything" into a regression is not safe — adding a mediator or a collider can *bias* the coefficient you care about. More variables ≠ more truth.
+- **Backtest survivorship** is a collider bias in disguise: selecting on "still-listed" (an outcome of past returns) distorts the very relationships you're studying.
+
+## The intervention: do(·)
+
+Causation is about **interventions**, not passive observation. The *do-operator* $P(Y \mid \operatorname{do}(X=x))$ asks "what would $Y$ be if I *reached in and set* $X$ to $x$?" — different from $P(Y \mid X=x)$, which merely observes $X$ happening to equal $x$ (and drags all its confounders along). A correctly-adjusted regression, guided by the DAG, is one way to estimate that interventional effect from observational data.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'In a fork X ← Z → Y, to estimate the true causal effect of X on Y you should…',
+    options: [
+      'never control for Z',
+      'control for the confounder Z',
+      'control for X only',
+      'condition on a collider instead',
+    ],
+    answer: 1,
+    explain: 'Z is a common cause that induces a spurious X–Y association. Adjusting for Z removes the backdoor path and reveals the true effect (which may be zero).',
+  },
+  {
+    q: 'In a pipe X → Z → Y, controlling for the mediator Z will…',
+    options: [
+      'reveal the total effect of X',
+      'block part or all of the effect you were trying to measure',
+      'have no consequence',
+      'always create a collider',
+    ],
+    answer: 1,
+    explain: 'Z carries X’s influence to Y. Conditioning on it removes that pathway, shrinking or erasing the very effect of interest.',
+  },
+  {
+    q: 'Conditioning on a collider (X → Z ← Y) tends to…',
+    options: [
+      'remove confounding',
+      'induce a spurious association between X and Y that wasn’t there',
+      'estimate the causal effect perfectly',
+      'do nothing',
+    ],
+    answer: 1,
+    explain: 'Selecting on or controlling for a common effect opens a non-causal path, manufacturing correlation. It’s a classic way analyses go wrong.',
+  },
+  {
+    q: 'Two assets are strongly correlated only because both respond to interest-rate shocks. This is an example of…',
+    options: ['a genuine causal link', 'confounding by a common driver', 'a mediator effect', 'perfect hedging'],
+    answer: 1,
+    explain: 'The rate regime is a fork/confounder driving both. Control for it and the direct asset-to-asset “relationship” typically vanishes.',
+  },
+  {
+    q: 'P(Y | do(X=x)) differs from P(Y | X=x) because…',
+    options: [
+      'they are always identical',
+      'do(·) represents actively setting X (an intervention), cutting its incoming causes, while conditioning merely observes X and keeps its confounders',
+      'do(·) only works for binary variables',
+      'conditioning requires an experiment',
+    ],
+    answer: 1,
+    explain: 'The do-operator severs the arrows into X, isolating X’s effect; passive conditioning lets confounders ride along, which is why observational correlations mislead.',
+  },
+]} />
