@@ -18,6 +18,8 @@ $$
 \text{Gini} = 1 - \sum_k p_k^2, \qquad \text{Entropy} = -\sum_k p_k \log_2 p_k
 $$
 
+**Choosing a split on a numerical feature:** the tree sorts the feature's values, treats the midpoints between consecutive values as candidate thresholds, and greedily picks the threshold that most reduces impurity — one node at a time. A **regression tree** works identically but predicts the **mean** of the samples in each leaf and splits to most reduce **variance (MSE)**, producing a piecewise-constant fit.
+
 A single tree is wonderfully **interpretable** — you can read the rules — but on its own it **overfits badly**: grow it deep enough and it memorizes noise. Its predictions have **low bias but high variance**. That weakness is exactly what ensembles fix.
 
 ## 2. Bagging &amp; random forests
@@ -114,6 +116,8 @@ print("RBF SVM    CV accuracy:", round(cross_val_score(SVC(kernel='rbf'),    X, 
 ```
 
 On the interleaving-crescents data a linear boundary is hopeless; the RBF kernel handles it easily. SVMs shine on **small, clean, high-dimensional** datasets — but they scale poorly to huge samples and need careful feature scaling.
+
+**SVR — the regression twin.** The same margin idea works for regression: **Support Vector Regression** fits a tube of width $\varepsilon$ around the function and only penalizes points that fall *outside* it. Errors inside the tube are ignored, which makes SVR robust to noise; with an RBF kernel it fits non-linear curves. In scikit-learn it's `SVR(kernel="rbf", C=..., epsilon=...)`.
 
 ## 5. Which one — and when (a quant's cheat sheet)
 

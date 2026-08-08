@@ -102,6 +102,15 @@ clf.fit(X, y)
 print("example predicted P(class=1):", round(clf.predict_proba(X[:1])[0, 1], 3))
 ```
 
+### Beyond two classes: One-vs-Rest and softmax
+
+Logistic regression is binary by nature, but two schemes extend it to **multiclass**:
+
+- **One-vs-Rest (OVR)** — train one binary classifier per class ("class *k* vs. everything else"), then at prediction time pick the class whose classifier is most confident.
+- **Multinomial / softmax** — a single model whose **softmax** output gives a probability for *every* class at once, all summing to 1. Usually better-calibrated than OVR.
+
+In scikit-learn it's a one-line switch — `LogisticRegression(multi_class="ovr")` or `"multinomial"` — and everything else (the linear score, log-loss, regularization) carries over unchanged.
+
 ## 5. k-Nearest Neighbors (KNN)
 
 KNN is the poster child for **instance-based** learning: it stores the training data and, to predict a new point, looks at its **k nearest neighbors** and takes a vote (classification) or average (regression). No training, no model — just distance.
@@ -126,6 +135,8 @@ for k in [1, 5, 25, 100]:
 
 You'll see accuracy rise then fall — the classic bias–variance arc as `k` grows.
 
+**Finding neighbors fast.** Naively, each prediction compares the query to *every* training point — $O(n)$ per lookup, painful on big data. scikit-learn can instead index the training set in a **KD-Tree** (recursively splits space along feature axes) or a **Ball-Tree** (nested hyperspheres, which hold up better in higher dimensions), dropping neighbor search to roughly $O(\log n)$. Set `algorithm="kd_tree"`, `"ball_tree"`, or just `"auto"` and let scikit-learn choose.
+
 ## 6. Naive Bayes
 
 Naive Bayes applies **Bayes' theorem** with one bold simplifying assumption: that the features are **conditionally independent** given the class. That assumption is almost never true ("naive"), yet the classifier works remarkably well — especially for **text**.
@@ -135,6 +146,8 @@ P(\text{class} \mid \mathbf{x}) \;\propto\; P(\text{class})\prod_j P(x_j \mid \t
 $$
 
 Variants match the data: **Gaussian NB** for continuous features, **Multinomial NB** for word counts, **Bernoulli NB** for binary features. It's blazing fast, needs little data, and is the classic baseline for **spam detection and sentiment** — which is why it reappears when we reach natural-language processing.
+
+One gotcha it must fix: if a feature value never appeared with a class in training, its conditional probability is zero — and since everything is *multiplied*, that single zero wipes out the whole prediction. **Laplace (additive) smoothing** adds a small count to every term so no probability is ever exactly zero. (In practice the products are also computed in **log-space** — summing log-probabilities instead of multiplying tiny numbers — to avoid numerical underflow.)
 
 ```python
 import numpy as np

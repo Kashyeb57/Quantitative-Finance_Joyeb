@@ -99,6 +99,17 @@ print("f1       :", round(f1_score(yte, pred), 3))
 print("confusion matrix  [[TN FP][FN TP]]:\n", confusion_matrix(yte, pred))
 ```
 
+### Handling the imbalance
+
+Picking the right metric tells you there's a problem; these techniques help the model actually *learn* the rare class:
+
+- **Class weights** — tell the model to penalize minority-class mistakes more (`class_weight="balanced"` on most scikit-learn estimators). Simplest — no data changes.
+- **Random undersampling** — drop majority-class rows to even things out (fast, but throws away data).
+- **Random oversampling** — duplicate minority rows (uses all the data, but can overfit the copies).
+- **SMOTE** — *synthesize* new minority examples by interpolating between a point and its neighbors rather than copying them. The standard go-to.
+
+The rule you must not break: **resample only the training fold, never the test set**, and do it *inside* cross-validation. Balancing the whole dataset before you split leaks synthetic/duplicated rows into the test data and inflates the score.
+
 ## Why financial cross-validation is different
 
 This is the section that separates quants from Kagglers. **Regular k-fold shuffles the rows** — which, for a time series, means the model trains on the *future* and tests on the *past*. That's **look-ahead bias / leakage**, and it produces gorgeous, completely fake results.
