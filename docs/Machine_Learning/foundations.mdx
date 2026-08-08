@@ -1,25 +1,178 @@
 ---
 title: ML Foundations
-description: Supervised vs. unsupervised learning and the model development pipeline. Notes in progress.
-sidebar_class_name: soon
+description: What machine learning actually is — AI vs ML vs DL vs data science, every type of learning, instance- vs model-based learning, the geometry of the hyperplane, and the end-to-end project lifecycle, framed for a quant.
 ---
 
 # ML Foundations
 
-Supervised vs. unsupervised learning and the model development pipeline.
+Before any specific model, it pays to get the map straight: **what machine learning *is*, what kinds of problems it solves, and how a real project flows from raw data to a monitored, deployed model.** This page is that map. Everything else in this section — regression, trees, deep learning — is a specific tool that lives somewhere on it.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Supervised vs. unsupervised learning',
-    'The train / validation / test split',
-    'Features, labels, and the model pipeline',
-    'Overfitting and generalization',
-    'A first look at the bias–variance tradeoff',
-  ]}
-  meanwhile={[
-    { label: 'Machine Learning overview', to: '/docs/Machine_Learning/overview' },
-    { label: 'Regression Analysis (statistics)', to: '/docs/Statistics/regression-analysis' },
-    { label: 'StatQuest (resources)', to: '/resources' },
-  ]}
-/>
+## What machine learning actually is
+
+Traditional programming is: *you write the rules*, the computer applies them to data, and out comes an answer. Machine learning flips that: *you show the computer data and answers*, and it **learns the rules itself**.
+
+$$
+\text{Classic:}\quad \text{rules} + \text{data} \rightarrow \text{answers}
+\qquad\qquad
+\text{ML:}\quad \text{data} + \text{answers} \rightarrow \text{rules}
+$$
+
+You'd use ML precisely when the rules are **too complex or too subtle to write by hand** — like *"is this transaction fraud?"* or *"will this stock be up tomorrow?"* Nobody can write those `if`-statements, but a model can learn an approximation from examples.
+
+## AI vs ML vs DL vs Data Science
+
+These terms get thrown around interchangeably; they're actually **nested**:
+
+- **Artificial Intelligence (AI)** — the broadest: any technique that lets machines mimic intelligent behavior (including old-school hard-coded rule engines).
+- **Machine Learning (ML)** — a subset of AI: systems that **learn from data** instead of being explicitly programmed.
+- **Deep Learning (DL)** — a subset of ML: **neural networks with many layers**, which learn their own features from raw data (great for images, audio, text).
+- **Data Science** — an overlapping *field*, not a subset: it uses ML **plus** statistics, data engineering, and domain knowledge to **extract insight and drive decisions**. A quant is, essentially, a data scientist pointed at markets.
+
+> Think of it as Russian dolls for the first three (DL ⊂ ML ⊂ AI), with data science as the *practice* that wraps around them and adds the "so what does this mean for the business/portfolio?" layer.
+
+## The three (and a half) types of learning
+
+**1. Supervised learning** — you have **labeled** data: input features $X$ *and* the correct answer $y$. The model learns the mapping $X \rightarrow y$. Two flavors:
+   - **Classification** — the label is a **category**: fraud / not-fraud, up-day / down-day, credit default / no-default.
+   - **Regression** — the label is a **continuous number**: tomorrow's return, a house price, a bond's yield.
+
+**2. Unsupervised learning** — **no labels**, just $X$. The model finds structure on its own:
+   - **Clustering** — group similar rows (customer segments, market regimes).
+   - **Dimensionality reduction** — compress many features into a few (PCA).
+   - **Anomaly detection** — flag the rows that don't fit (fraud, outlier trades).
+
+**3. Reinforcement learning** — an **agent** takes actions in an environment and learns from **rewards** and penalties (think an execution algo learning to minimize slippage). See [Reinforcement Learning](/docs/Machine_Learning/reinforcement-learning).
+
+**3½. Semi-supervised** — a little labeled data plus a lot of unlabeled data; common when labels are expensive to obtain.
+
+## Instance-based vs model-based learning
+
+A second, orthogonal split — *how* the algorithm generalizes:
+
+- **Instance-based ("lazy")** — it **memorizes the training data** and, at prediction time, compares a new point to the stored examples. There's no compact "model," just the data itself. **K-Nearest Neighbors** is the poster child: to classify a new point, look at its nearest neighbors and vote.
+- **Model-based ("eager")** — it **learns parameters** that summarize the data into a compact model (the slope and intercept of a line, the weights of a network), then can **throw the training data away**. Linear regression, logistic regression, and neural nets are all model-based.
+
+The trade-off: instance-based methods train instantly but predict slowly and store everything; model-based methods train harder but predict fast from a small set of parameters.
+
+## The geometry: features as points, models as boundaries
+
+Here's the mental picture that unifies half of ML. **Each sample is a point in space**, one axis per feature — a stock-day might be the point `(momentum, volatility, volume)`. A model's job is to carve that space up.
+
+The simplest carver is a **line** (in 2D) or, in general, a **hyperplane**:
+
+$$
+w_1 x_1 + w_2 x_2 + \cdots + w_n x_n + b = 0 \quad\Longleftrightarrow\quad \mathbf{w}\cdot\mathbf{x} + b = 0
+$$
+
+- The vector $\mathbf{w}$ is **perpendicular** to the hyperplane — it points in the direction the output increases.
+- Plug a point in: if $\mathbf{w}\cdot\mathbf{x} + b > 0$ it's on one side (class A), if $< 0$ the other side (class B). The **sign is the decision**; the **magnitude** is how confident/far from the boundary.
+
+This one equation is the skeleton of **linear regression, logistic regression, and SVMs** — they differ mainly in *how they choose* $\mathbf{w}$ and $b$. A supervised model learning that hyperplane looks like this:
+
+```python
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+# Two features per sample (say: momentum, volatility). Label = up-day (1) / down-day (0).
+rng = np.random.default_rng(0)
+X = rng.normal(0, 1, (200, 2))
+y = (X[:, 0] + 0.5 * X[:, 1] > 0).astype(int)      # the "true" hidden boundary
+
+clf = LogisticRegression().fit(X, y)
+w, b = clf.coef_[0], clf.intercept_[0]
+print("Learned hyperplane:  w1*x1 + w2*x2 + b = 0")
+print(f"  w = {np.round(w, 2)},   b = {round(b, 2)}")
+print("training accuracy:", round(clf.score(X, y), 3))
+```
+
+The model recovers a $\mathbf{w}$ close to the true `(1, 0.5)` direction — it *learned the boundary from examples*. (First run downloads scikit-learn into your browser; give it a few seconds.)
+
+Contrast that with an **unsupervised** model, which gets **no labels** and still finds structure:
+
+```python
+import numpy as np
+from sklearn.cluster import KMeans
+
+rng = np.random.default_rng(1)
+X = np.vstack([rng.normal([-2, -2], 0.7, (100, 2)),   # two blobs...
+               rng.normal([ 2,  2], 0.7, (100, 2))])   # ...but we never say which is which
+labels = KMeans(n_clusters=2, n_init=10, random_state=0).fit_predict(X)
+print("cluster sizes found (no labels used):", np.bincount(labels))
+```
+
+## The words you'll hear constantly
+
+- **Features / inputs / $X$** — the columns you feed the model. **Labels / targets / $y$** — what you're predicting (supervised only).
+- **Training / validation / test split** — fit on the training set, tune choices on the validation set, and report the honest score on the **untouched** test set. Peeking at the test set is how people fool themselves.
+- **Generalization** — the whole point: doing well on **data the model has never seen**, not just the data it trained on.
+- **Overfitting** — the model memorizes noise and quirks of the training data and fails on new data. **Underfitting** — the model is too simple to capture the real pattern. The tension between them is the **bias–variance trade-off**, covered in depth in [Model Evaluation](/docs/Machine_Learning/model-evaluation).
+
+## The ML project lifecycle
+
+A model is maybe 10% of a real project. The full loop:
+
+1. **Frame the problem** — what exactly are you predicting, and what decision does it drive? (A 51%-accurate up/down classifier can still be very profitable — or useless — depending on costs.)
+2. **Collect & clean data** — the unglamorous 80%. Missing values, bad ticks, survivorship bias.
+3. **Explore (EDA)** — distributions, correlations, leakage checks. *Look before you model.*
+4. **Feature engineering** — turn raw data into informative inputs (returns from prices, ratios, lags), and **scale** them so no feature dominates by units alone.
+5. **Choose & train models** — start with a strong simple baseline (linear model, random forest), then escalate.
+6. **Evaluate honestly** — with the right split. In finance that means **time-aware** validation (walk-forward), never a shuffled k-fold that leaks the future.
+7. **Deploy** — put the model behind an API / into the pipeline.
+8. **Monitor** — data drifts, markets change; a model that was great last year can quietly rot. Watch it and retrain.
+
+The quant-specific warning that colors every step: **financial data is non-stationary and noisy.** The failure mode isn't a bad algorithm — it's a beautiful backtest built on leaked information. Respect the lifecycle and you avoid most of the traps.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The core difference between classic programming and machine learning is that ML…',
+    options: [
+      'is always more accurate',
+      'learns the rules from data + answers, instead of you writing the rules',
+      'never needs data',
+      'only works for images',
+    ],
+    answer: 1,
+    explain: 'Classic: rules + data → answers. ML: data + answers → rules. You use ML when the rules are too complex to hand-write.',
+  },
+  {
+    q: 'How do AI, ML, and DL relate?',
+    options: [
+      'They are three unrelated fields',
+      'Deep learning ⊂ machine learning ⊂ artificial intelligence',
+      'AI ⊂ ML ⊂ DL',
+      'They are all the same thing',
+    ],
+    answer: 1,
+    explain: 'Nested dolls: DL is a kind of ML (neural nets with many layers), and ML is a kind of AI (systems that learn from data).',
+  },
+  {
+    q: 'Predicting a continuous number like tomorrow’s return is…',
+    options: ['classification', 'regression', 'clustering', 'reinforcement learning'],
+    answer: 1,
+    explain: 'Continuous target = regression. A categorical target (up/down, fraud/not) would be classification. Both are supervised.',
+  },
+  {
+    q: 'K-Nearest Neighbors is an example of…',
+    options: [
+      'model-based learning that discards the data after training',
+      'instance-based ("lazy") learning that stores the data and compares new points to it',
+      'unsupervised learning',
+      'reinforcement learning',
+    ],
+    answer: 1,
+    explain: 'KNN keeps the training data and, at prediction time, looks at the nearest stored examples. It builds no compact model — that’s instance-based learning.',
+  },
+  {
+    q: 'For the equation w·x + b = 0, the sign of w·x + b for a new point tells you…',
+    options: [
+      'the exact probability',
+      'which side of the hyperplane the point is on (i.e., its predicted class)',
+      'the number of features',
+      'nothing useful',
+    ],
+    answer: 1,
+    explain: 'The hyperplane splits space in two; the sign says which side a point falls on (its class), and the magnitude reflects distance/confidence. This geometry underlies linear/logistic regression and SVMs.',
+  },
+]} />
