@@ -1,0 +1,9 @@
+{
+  "label": "3. Summary Measures",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "3. Summary Measures",
+    "description": "The core numbers that describe a dataset: central tendency, dispersion, why sample variance divides by n−1, and standard deviation — which for a quant is volatility."
+  }
+}

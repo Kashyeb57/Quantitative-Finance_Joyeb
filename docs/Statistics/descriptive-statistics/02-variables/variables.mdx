@@ -1,0 +1,49 @@
+---
+title: "Variables"
+sidebar_position: 1
+---
+
+# Variables
+
+A **variable** is any measurable property that can take different values from one observation to the next. Age, height, gender, price, return — each is a variable because it *varies* across the things you measure.
+
+- $\text{Age} = 25$, $\text{Gender} = \text{Male}$, $\text{Height} = 172$ cm — each a single value of a variable.
+- Across five people, $\text{Ages} = \left[12, 20, 25, 36, 70\right]$ — the variable "age" taking five values.
+
+Before you summarize *anything*, you have to know which **type** of variable you're holding, because the type decides which summaries even make sense.
+
+## The family tree
+
+```
+                     Variable
+                    /         \
+          Quantitative        Qualitative
+           (numeric)          (categorical)
+          /         \
+    Discrete      Continuous
+```
+
+## Quantitative variables (numbers you can do arithmetic on)
+
+- **Discrete** — countable, usually whole numbers with gaps between them. *Number of students in a class* (50), *number of trades in a day*, *shares held*. You can't have 50.5 students.
+- **Continuous** — any value on a range, decimals and all, limited only by measuring precision. *Height* (175.5 cm), *weight* (72.5 kg, 72.57 kg…), *price*, *return*, *time to expiry*.
+
+The test: *can it, in principle, take a fractional value between any two others?* Yes → continuous. No → discrete.
+
+## Qualitative / categorical variables (labels, not magnitudes)
+
+These record a category, not a quantity. *Gender* (male/female), *color* (red/green/blue), *sector* (tech/energy/financials), *credit rating* (AAA/BB/…). They split further:
+
+- **Nominal** — no natural order. Sector and color are just names; "tech > energy" is meaningless.
+- **Ordinal** — ordered, but the gaps aren't necessarily equal. Credit ratings run AAA > AA > BBB, but the distance between AAA and AA isn't the "same size" as between BBB and BB.
+
+## Why the type is a guardrail
+
+The type dictates the valid summary:
+
+- A **mean** is meaningful for a quantitative variable (average return) but **nonsense** for a nominal one — the "average sector" doesn't exist. There you summarize with a **mode** or a frequency count.
+- Distances and standard deviations assume the numbers are real magnitudes, so applying them to arbitrary category codes (encoding sector as 1, 2, 3…) produces numbers that look fine and mean nothing.
+
+**In a quant dataset**, every column is a variable of some type, and the type drives how you handle it. Returns and volatilities are *continuous*; a count of up-days is *discrete*; sector and exchange are *nominal*; a risk bucket or credit rating is *ordinal*. Machine-learning pipelines lean on exactly this distinction — categorical features have to be **encoded** before a model can use them, while numeric features can be fed in and scaled directly (see [Regression & Classification](/docs/Machine_Learning/regression-and-classification)).
+
+The next page takes the idea one step further, to variables whose value is set by a *random process* — [random variables](./random-variables), the bridge from describing data to modelling probability.

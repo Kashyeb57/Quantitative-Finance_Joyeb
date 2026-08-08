@@ -1,0 +1,10 @@
+{
+  "label": "Descriptive Statistics",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Descriptive Statistics",
+    "slug": "/Statistics/descriptive-statistics",
+    "description": "The first thing a quant does to any dataset — summarize it honestly, before any model. Five modules, worked one lecture at a time: the foundations (what statistics is, population vs sample), the variables you measure, the summary measures (center, spread, and why sample variance divides by n−1), the shape and position of a distribution (histograms, percentiles, the 5-number summary), and how two variables move together (covariance and correlation). Every page has a runnable in-browser example and its markets application. (Study reference: the 'Getting Started With Statistics' section of a Complete Data Science bootcamp — all notes and code are my own.)"
+  }
+}

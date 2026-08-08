@@ -1,0 +1,83 @@
+---
+title: "Measures of Dispersion"
+sidebar_position: 2
+---
+
+# Measures of Dispersion
+
+Center isn't enough. Two datasets can share the *exact same mean* and be completely different — one tightly clustered, one wildly spread. **Dispersion** measures that spread, and for a quant it's where **risk** lives.
+
+$$
+\text{Ages}_1 = \left[2, 2, 4, 4\right] \qquad \text{Ages}_2 = \left[1, 1, 5, 5\right]
+$$
+
+Both have mean 3. But the second is spread twice as far from that center. A measure of central tendency can't tell them apart; a measure of dispersion is exactly what does.
+
+## Variance
+
+**Variance** is the average *squared* deviation from the mean. Squaring does two jobs: it makes every deviation positive (so they don't cancel), and it punishes big deviations far harder than small ones.
+
+$$
+\sigma^2 = \frac{1}{N}\sum_{i=1}^{N}(x_i-\mu)^2 \;\;\text{(population)} \qquad
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})^2 \;\;\text{(sample)}
+$$
+
+Work the two examples by hand (population form, dividing by $N$):
+
+- $\text{Ages}_1 = \left[2,2,4,4\right]$, $\mu = 3$: deviations $\left[-1,-1,1,1\right]$, squares $\left[1,1,1,1\right]$, so $\sigma^2 = \frac{4}{4} = 1$.
+- $\text{Ages}_2 = \left[1,1,5,5\right]$, $\mu = 3$: deviations $\left[-2,-2,2,2\right]$, squares $\left[4,4,4,4\right]$, so $\sigma^2 = \frac{16}{4} = 4$.
+
+Same mean, variance of 1 vs 4 — the numbers now capture what the eye saw: the second dataset is four times as "spread" in squared terms.
+
+```python
+import numpy as np
+
+calm = np.array([0.1, -0.1, 0.2, -0.2, 0.0])   # daily returns (%)
+wild = np.array([2.0, -2.1, 1.9, -1.8, 0.0])
+
+for name, r in [("calm", calm), ("wild", wild)]:
+    # ddof=1 -> sample variance (divide by n-1); see the next page for why
+    print(f"{name}: mean={r.mean():+.2f}%   sample variance={r.var(ddof=1):.3f}")
+```
+
+Notice the sample formula divides by $n-1$, not $n$. That's deliberate and important enough to get [its own page](./why-n-minus-1).
+
+## The one catch: units
+
+Variance has an awkward flaw — its **units are squared**. If returns are in percent, variance is in "percent-squared," which nobody can interpret intuitively. The fix is to take the square root and get back to the original scale: that's the [standard deviation](./standard-deviation), the number people actually quote.
+
+## Why a quant cares
+
+Dispersion *is* risk. Two assets can offer the identical average return and be worlds apart:
+
+- The **calm** asset drifts gently; the **wild** one whipsaws. Same mean, but the wild one can be uninvestable — a big enough swing wipes you out before the average ever pays off.
+- Portfolio construction, position sizing, and Value-at-Risk are all built on measures of dispersion. "How much does this bounce around?" is often a more urgent question than "what's its average?"
+
+The next two pages finish the story: [why we divide by n−1](./why-n-minus-1), and [standard deviation](./standard-deviation) — which in finance has a more famous name: **volatility**.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Two datasets have the same mean. What does that tell you about their dispersion?',
+    options: [
+      'they must have the same dispersion too',
+      'nothing — equal means say nothing about spread; you need a dispersion measure to compare them',
+      'the one with more values has more dispersion',
+      'their dispersion must be zero',
+    ],
+    answer: 1,
+    explain: 'Central tendency and dispersion are independent. [2,2,4,4] and [1,1,5,5] share a mean of 3 but have variances of 1 and 4.',
+  },
+  {
+    q: 'Why does variance square the deviations from the mean?',
+    options: [
+      'to keep them positive so they do not cancel, and to penalize large deviations more heavily',
+      'to make the units easier to read',
+      'because it is faster to compute',
+      'to turn the result into a probability',
+    ],
+    answer: 0,
+    explain: 'Without squaring, positive and negative deviations cancel to zero. Squaring makes them all positive and weights big misses far more than small ones. The squared units are the price — fixed by taking the square root (standard deviation).',
+  },
+]} />

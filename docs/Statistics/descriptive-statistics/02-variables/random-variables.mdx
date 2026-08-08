@@ -1,0 +1,42 @@
+---
+title: "Random Variables"
+sidebar_position: 2
+---
+
+# Random Variables
+
+A **random variable** is a function that assigns a number to each outcome of a random process or experiment. The randomness lives in the process (a coin flip, a dice roll, tomorrow's market); the random variable is just the rule that turns each possible outcome into a value you can do math on.
+
+$$
+\text{outcome of a random process} \;\xrightarrow{\;\text{random variable } X\;}\; \text{a number}
+$$
+
+Think of it as a machine: an input outcome goes in, a number comes out — the same way an ordinary function $y = 5x + 2$ maps an input $x$ to an output $y$. The difference is only that *which* outcome occurs is left to chance.
+
+## Examples
+
+- **Tossing a coin.** Let $X$ map heads to 0 and tails to 1. Then $X \in \{0, 1\}$.
+- **Rolling a fair die.** Let $X$ be the face shown: $X \in \{1, 2, 3, 4, 5, 6\}$.
+- **Tomorrow's return.** Let $X$ be a stock's return tomorrow. $X$ could be any value on a continuous range — $-3\%$, $+0.4\%$, $+1.15\%$…
+
+## Discrete vs. continuous random variables
+
+The same split as ordinary [variables](./variables), now driven by chance:
+
+- **Discrete random variable** — countable outcomes. Coin toss, dice roll, number of trades that fill in the next minute.
+- **Continuous random variable** — any value on a range. *How many inches it rains tomorrow* ($0, 1.1, 5.5, 10.75, \ldots$); the *height* of the next person through the door; a stock's *return*.
+
+## The bridge to probability — and why it's on this page
+
+Here's the connection that ties this module to the rest of the section:
+
+> **Tomorrow's return is a continuous random variable.** The return series you already have is a set of *realized draws* from it.
+
+That single sentence maps the whole territory:
+
+- **Descriptive statistics** (this section) summarizes the draws you've *already observed* — their mean, spread, shape.
+- **Probability** studies the random variable *itself* — the distribution of values it *would* produce and with what likelihood, before you observe anything.
+
+They're two views of the same object: probability reasons from the distribution to the data; statistics reasons from the data back to the distribution. When you compute a sample mean $\bar{x}$, you're estimating the random variable's true expected value $\mu = E[X]$ — the parameter you [can never directly see](/docs/Statistics/descriptive-statistics/foundations/population-vs-sample).
+
+To go deeper on the distribution side — expected value, variance of a random variable, and the named distributions (normal, Student-t, and the fat-tailed shapes markets actually follow) — head to the [Probability section](/docs/Probability/foundations), starting with [distributions](/docs/Probability/distributions).

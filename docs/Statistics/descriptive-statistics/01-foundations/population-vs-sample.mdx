@@ -1,0 +1,44 @@
+---
+title: "Population vs. Sample"
+sidebar_position: 3
+---
+
+# Population vs. Sample
+
+This distinction looks trivial and is anything but — it's the hinge the entire discipline turns on, and getting the notation right is the difference between *"what I measured"* and *"what's actually true."*
+
+## The two groups
+
+- **Population** — *every* member of the group you care about. Its size is written $N$. Summaries of a population are called **parameters** — the true mean $\mu$, the true standard deviation $\sigma$. These are usually *unknown and unknowable*.
+- **Sample** — a subset you actually measure, size $n$. Summaries of a sample are called **statistics** — the sample mean $\bar{x}$, the sample standard deviation $s$. These you *compute*, and they *estimate* the parameters.
+
+A quick way to keep them straight: **populatioN uses N and Greek letters; sample uses n and Latin letters.**
+
+| | Population (parameter) | Sample (statistic) |
+|---|---|---|
+| Size | $N$ | $n$ |
+| Mean | $\mu$ | $\bar{x}$ |
+| Std. deviation | $\sigma$ | $s$ |
+| Known? | almost never | yes — you calculate it |
+
+## Why we sample at all
+
+Because measuring the whole population is usually impossible or pointless:
+
+- **Cost and time** — an exit poll asks 10,000 people, not 100 million voters, and gets a good answer for a tiny fraction of the effort.
+- **The population is infinite or future** — "the average weight of all people" or "all the returns this stock could produce" isn't a list you can finish counting.
+
+So you take a representative sample of size $n$, compute a statistic, and use it to *infer* the parameter — the move from the [previous page](./types-of-statistics).
+
+## The quant's reality: you never own the population
+
+In most fields the population is at least *conceptually* available — you could, in principle, measure every student in a college. In markets that comfort is gone:
+
+> The "true" distribution of a stock's daily return is an abstraction. All you ever hold is a **finite sample of history**, and tomorrow is a fresh draw from the same unknown process.
+
+This has hard consequences:
+
+- Your estimate of a stock's mean return or volatility is a **sample statistic** with real uncertainty — not the truth. A year of daily data (about 252 points) pins the mean down surprisingly poorly.
+- A backtest is performance on *one sample* of history. Whether it generalizes to the unseen "population" of future returns is exactly the inferential question — and the reason careful quants distrust a backtest that looks too good.
+
+Keeping $\mu$ (the truth you want) mentally separate from $\bar{x}$ (the noisy estimate you have) is a discipline that pays off on every page that follows — starting with why the [sample variance divides by n−1](/docs/Statistics/descriptive-statistics/summary-measures/why-n-minus-1) rather than $n$.

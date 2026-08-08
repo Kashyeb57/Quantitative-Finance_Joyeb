@@ -1,0 +1,108 @@
+---
+title: "Covariance"
+sidebar_position: 1
+---
+
+# Covariance
+
+Everything so far described **one** variable at a time. Covariance is the first tool that describes how **two** variables move *together* — the raw material of diversification, hedging, and factor models.
+
+## The idea
+
+**Covariance measures whether two variables tend to change in the same direction.** Quantify the relationship between $X$ and $Y$:
+
+- When both sit **above** their means together (and **below** together), they move in sync → **positive** covariance.
+- When one is **above** its mean while the other is **below** → they move oppositely → **negative** covariance.
+
+A homely example: house **size** and house **price**. Bigger houses ($X\uparrow$) tend to cost more ($Y\uparrow$); size and price move together, so their covariance is positive.
+
+## The formula
+
+$$
+\operatorname{Cov}(X,Y) = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})
+$$
+
+Read the term inside the sum: $(x_i-\bar{x})$ is how far the $x$-point is from its mean, $(y_i-\bar{y})$ the same for $y$. Their **product** is positive when both deviate the *same* way (both up or both down) and negative when they deviate *oppositely*. Sum those products and you get the net direction of co-movement.
+
+### Worked example: hours studied vs. exam score
+
+$$
+X = \left[2,3,4,5,6\right]\;(\bar{x}=4), \qquad Y = \left[50,60,70,80,90\right]\;(\bar{y}=70)
+$$
+
+The products $(x_i-\bar{x})(y_i-\bar{y})$:
+
+$$
+(-2)(-20) + (-1)(-10) + (0)(0) + (1)(10) + (2)(20) = 40+10+0+10+40 = 100
+$$
+
+Now divide. Dividing by $n-1 = 4$ (the [sample](/docs/Statistics/descriptive-statistics/summary-measures/why-n-minus-1) covariance) gives $\operatorname{Cov}(X,Y) = 25$; dividing by $n = 5$ (the population form) gives $20$. Either way the number is **positive** — more study hours go with higher scores, exactly as expected.
+
+### A negative example
+
+$$
+X = \left[7,6,5,4\right], \qquad Y = \left[10,12,14,16\right]
+$$
+
+As $X$ falls, $Y$ rises — they move oppositely, so the covariance is **negative**.
+
+## A useful identity: Cov(X, X) = Var(X)
+
+Set $Y = X$ in the formula and the two deviations become the same:
+
+$$
+\operatorname{Cov}(X,X) = \frac{1}{n-1}\sum (x_i-\bar{x})(x_i-\bar{x}) = \frac{1}{n-1}\sum (x_i-\bar{x})^2 = \operatorname{Var}(X)
+$$
+
+**The covariance of a variable with itself is just its variance.** This is why a covariance matrix has variances down its diagonal — a fact you'll lean on constantly in portfolio math.
+
+```python
+import numpy as np
+
+x = np.array([2, 3, 4, 5, 6], dtype=float)
+y = np.array([50, 60, 70, 80, 90], dtype=float)
+
+cov = np.cov(x, y, ddof=1)         # 2x2 covariance matrix
+print("covariance matrix:\n", cov)
+print(f"\nCov(X, Y) = {cov[0,1]:.1f}   (positive: they move together)")
+print(f"Cov(X, X) = {cov[0,0]:.1f} = Var(X) = {x.var(ddof=1):.1f}   (the diagonal)")
+```
+
+## The flaw that forces us to go further
+
+Covariance nails the *direction* of a relationship but is almost useless for its *strength*, for one reason: **its magnitude is unbounded and unit-dependent.**
+
+$$
+\operatorname{Cov}(X,Y) \in (-\infty, +\infty)
+$$
+
+Measure the same houses in square *feet* instead of square *meters* and the covariance changes, even though the relationship didn't. A covariance of 25 tells you the sign is positive — but is that a strong link or a weak one? You can't say, and you can't compare it against another pair measured in different units.
+
+The fix is to **normalize** covariance into a fixed, comparable range. That's [correlation](./correlation), the next page — and the number quants actually use.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A positive covariance between two variables means…',
+    options: [
+      'they are unrelated',
+      'they tend to move in the same direction (both above or both below their means together)',
+      'one causes the other',
+      'they always move by the same amount',
+    ],
+    answer: 1,
+    explain: 'Positive covariance means the deviation products are net positive — the variables tend to be above/below their means together. It says nothing about causation or equal magnitude.',
+  },
+  {
+    q: 'Why is covariance a poor measure of the *strength* of a relationship?',
+    options: [
+      'it is always zero',
+      'its magnitude is unbounded and depends on the units, so you cannot tell a strong link from a weak one or compare across pairs',
+      'it cannot be negative',
+      'it only works for three or more variables',
+    ],
+    answer: 1,
+    explain: 'Covariance ranges over (−∞, ∞) and rescales with the data’s units. It gives the sign but not an interpretable, comparable strength — which is exactly what correlation fixes.',
+  },
+]} />

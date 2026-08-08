@@ -1,0 +1,78 @@
+---
+title: "Standard Deviation"
+sidebar_position: 4
+---
+
+# Standard Deviation
+
+[Variance](./dispersion) measures spread but leaves it in awkward squared units. **Standard deviation is simply its square root** — which puts the measure of spread back into the *original units of the data*, and that's why it's the number people actually quote.
+
+$$
+\sigma = \sqrt{\sigma^2} \;\;\text{(population)} \qquad s = \sqrt{s^2} \;\;\text{(sample)}
+$$
+
+Intuitively, standard deviation answers: **on average, how far is a data point from the mean?** A small standard deviation means the data huddles near its center; a large one means it sprawls.
+
+## Recap: the four formulas in one place
+
+It's worth seeing the whole [population-vs-sample](/docs/Statistics/descriptive-statistics/foundations/population-vs-sample) picture at once, because standard deviation is just the last step of each column:
+
+| | Population | Sample |
+|---|---|---|
+| Mean | $\mu = \dfrac{1}{N}\sum x_i$ | $\bar{x} = \dfrac{1}{n}\sum x_i$ |
+| Variance | $\sigma^2 = \dfrac{1}{N}\sum (x_i-\mu)^2$ | $s^2 = \dfrac{1}{n-1}\sum (x_i-\bar{x})^2$ |
+| Std. deviation | $\sigma = \sqrt{\sigma^2}$ | $s = \sqrt{s^2}$ |
+
+## Why a quant cares: standard deviation is volatility
+
+This is the payoff of the whole module: **in finance, the standard deviation of returns has a household name — volatility.** It's the single most important risk number in markets. When someone says a stock "has 20% vol," they mean the standard deviation of its annualized returns is 20%.
+
+Two assets with the same average return but different standard deviations carry different risk — and the higher-vol one may be uninvestable regardless of its average.
+
+```python
+import numpy as np
+
+calm = np.array([0.1, -0.1, 0.2, -0.2, 0.0])   # daily returns (%)
+wild = np.array([2.0, -2.1, 1.9, -1.8, 0.0])
+
+for name, r in [("calm", calm), ("wild", wild)]:
+    print(f"{name}: mean={r.mean():+.2f}%   volatility (sample std)={r.std(ddof=1):.2f}%")
+```
+
+## Annualizing: the square-root-of-time rule
+
+Volatility is usually measured on daily returns but quoted per year, and the two are linked by a clean rule: **standard deviation scales with the square root of the horizon.** With about 252 trading days in a year,
+
+$$
+\sigma_{\text{annual}} = \sigma_{\text{daily}} \times \sqrt{252}
+$$
+
+```python
+import numpy as np
+daily_vol = 1.0                                  # 1% daily
+print(f"{daily_vol}% daily vol  ->  {daily_vol*np.sqrt(252):.1f}% annualized")
+```
+
+So a modest-sounding 1% *daily* volatility is roughly a 16% *annual* volatility. (This is the same $\sqrt{n}$ law that shows up as the "standard error" tax on precision in [inferential statistics](/docs/Statistics/inferential-statistics) — seen from the other direction.)
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Why is standard deviation usually reported instead of variance?',
+    options: [
+      'it is always smaller',
+      'it is in the same units as the data (variance is in squared units), so it is directly interpretable',
+      'it ignores outliers',
+      'it does not require the mean',
+    ],
+    answer: 1,
+    explain: 'Variance lives in squared units (percent-squared for returns), which is hard to interpret. Taking the square root returns to the original scale, giving a spread you can read directly.',
+  },
+  {
+    q: 'A strategy has 1% daily volatility. Its approximate annualized volatility is…',
+    options: ['1%', 'about 16%', '252%', 'about 5%'],
+    answer: 1,
+    explain: 'Volatility scales with the square root of time: 1% × √252 ≈ 15.9%, about 16%.',
+  },
+]} />

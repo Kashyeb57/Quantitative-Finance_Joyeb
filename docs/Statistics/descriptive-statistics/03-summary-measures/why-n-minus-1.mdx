@@ -1,0 +1,82 @@
+---
+title: "Why Sample Variance Divides by n−1"
+sidebar_position: 3
+---
+
+# Why Sample Variance Divides by n−1
+
+This is a classic interview question, and there's a reason it gets asked: it tests whether you actually understand the [population-vs-sample](/docs/Statistics/descriptive-statistics/foundations/population-vs-sample) distinction or just memorized a formula. Here's the honest answer.
+
+$$
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})^2
+$$
+
+The short version: **dividing by $n$ underestimates the true variance, and $n-1$ corrects that bias.**
+
+## The intuition
+
+To compute a variance you need a center to measure deviations from. But you don't know the true population mean $\mu$ — so you use the **sample mean $\bar{x}$**, which you calculated *from the very same data*.
+
+And that's the whole subtlety. The sample mean sits, by construction, as close to *your particular sample* as any single number can — that's what "mean" does, it minimizes the squared distances to your points. So it's on average a little **closer** to your data than the true $\mu$ would be. Which means the deviations $x_i - \bar{x}$ are, on average, a touch **smaller** than the real deviations $x_i - \mu$ you actually wanted.
+
+Sum those slightly-too-small squared deviations, divide by $n$, and you land **below** the true variance — *every time, on average*. It's a systematic undershoot, not bad luck.
+
+## Degrees of freedom
+
+The formal way to say it: you **spent one piece of information estimating $\bar{x}$.** Once the mean and the first $n-1$ deviations are fixed, the last deviation isn't free — it's forced, because all $n$ deviations from the sample mean must sum to zero. So there are only $n-1$ **independent** deviations, or **degrees of freedom**. Averaging over $n-1$ instead of $n$ accounts for that, and makes $s^2$ an **unbiased estimator** — right *on average* across many samples.
+
+This is **Bessel's correction**. Its effect is largest for small samples (dividing by 4 instead of 5 is a real nudge) and vanishes as $n$ grows.
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+true_var = 4.0                      # population variance: draws from N(0, sigma=2)
+biased, unbiased = [], []
+for _ in range(20000):
+    s = rng.normal(0, 2, size=5)    # a tiny sample of 5
+    biased.append(s.var(ddof=0))    # divide by n
+    unbiased.append(s.var(ddof=1))  # divide by n-1
+
+print(f"true variance:            {true_var:.3f}")
+print(f"avg of  /n   estimates:   {np.mean(biased):.3f}   <- systematically too low")
+print(f"avg of  /(n-1) estimates: {np.mean(unbiased):.3f}   <- centered on the truth")
+```
+
+Run it: the $/n$ estimates average around 3.2 against a true 4.0 — a persistent 20% undershoot with $n=5$ — while the $/(n-1)$ estimates sit right on 4.0.
+
+## The gotcha every quant hits
+
+A direct, practical consequence:
+
+- **NumPy's `.var()` and `.std()` default to `ddof=0`** — they divide by $n$ (the *population* formula).
+- **pandas' `.var()` and `.std()` default to `ddof=1`** — they divide by $n-1$ (the *sample* formula).
+
+So the same return series can give two slightly different volatilities depending on which library computed it. When a risk number looks subtly off between two scripts, this is the usual culprit. Pass `ddof=1` in NumPy whenever you want the unbiased sample estimate — which, since you [never hold the population](/docs/Statistics/descriptive-statistics/foundations/population-vs-sample), is almost always.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Sample variance divides by n−1 instead of n because…',
+    options: [
+      'it makes the number bigger for no particular reason',
+      'deviations are measured from the sample mean, which sits closer to the data than the true mean, so dividing by n underestimates the variance; n−1 removes that bias',
+      'n−1 is computationally faster',
+      'it only applies when the data is normal',
+    ],
+    answer: 1,
+    explain: 'The sample mean is fitted to the same data, so deviations from it are too small on average. One degree of freedom was spent estimating it, so you average over n−1 to get an unbiased estimate — Bessel’s correction.',
+  },
+  {
+    q: 'You compute a volatility in NumPy with default settings and get a slightly smaller number than pandas gives. Why?',
+    options: [
+      'pandas rounds differently',
+      'NumPy defaults to ddof=0 (divide by n) while pandas defaults to ddof=1 (divide by n−1)',
+      'NumPy uses the median internally',
+      'they should always be identical',
+    ],
+    answer: 1,
+    explain: 'NumPy’s var/std default to the population formula (ddof=0); pandas defaults to the sample formula (ddof=1). Dividing by n gives the smaller number. Pass ddof=1 in NumPy for the unbiased sample estimate.',
+  },
+]} />

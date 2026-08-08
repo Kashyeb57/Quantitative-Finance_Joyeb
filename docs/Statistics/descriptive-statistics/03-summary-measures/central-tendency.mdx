@@ -1,0 +1,88 @@
+---
+title: "Measures of Central Tendency"
+sidebar_position: 1
+---
+
+# Measures of Central Tendency
+
+A measure of central tendency answers the first question you ask of any dataset: **where is it centered?** There are three answers, and the gaps between them are as informative as the numbers themselves.
+
+## Mean
+
+The **arithmetic mean** is the average — sum the values, divide by how many. It uses *every* data point, which is both its strength and its weakness.
+
+$$
+\mu = \frac{1}{N}\sum_{i=1}^{N} x_i \;\;\text{(population)} \qquad
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i \;\;\text{(sample)}
+$$
+
+For ages $\left[1, 3, 4, 5\right]$: $\bar{x} = \frac{1+3+4+5}{4} = \frac{13}{4} = 3.25$.
+
+## Median
+
+The **median** is the middle value once the data is **sorted**. It depends only on rank, so it ignores *how* extreme the extremes are.
+
+- **Odd count** → the single middle value. Sort $\left[4, 3, 1, 5, 100\right]$ to $\left[1, 3, 4, 5, 100\right]$; the median is the 3rd value, **4**.
+- **Even count** → the average of the two middle values. Sort $\left[4, 3, 1, 5, 100, 200\right]$ to $\left[1, 3, 4, 5, 100, 200\right]$; the middle two are 4 and 5, so the median is $\frac{4+5}{2} = 4.5$.
+
+## Mode
+
+The **mode** is the most frequently occurring value. It's the only measure of center that works on [categorical data](/docs/Statistics/descriptive-statistics/variables/variables) (the most common sector, the most common rating) and it's useful for discrete counts. A dataset can have one mode, several, or none.
+
+## The key difference: robustness to outliers
+
+This is the practical lesson. Watch what one extreme value does.
+
+Ages $\left[1, 3, 4, 5\right]$: mean $= 3.25$, median $= 3.5$ — they agree. Now add a 100-year-old:
+
+$$
+\text{Ages} = \left[1, 3, 4, 5, 100\right] \Rightarrow \bar{x} = \frac{113}{5} = 22.6, \quad \text{median} = 4
+$$
+
+One outlier dragged the **mean** from ~3 to 22.6 — a value that describes *none* of the data. The **median** barely moved, from 3.5 to 4. The mean is pulled by extremes; the median shrugs them off. That property is called **robustness**.
+
+```python
+import numpy as np
+
+# daily returns (%), with one crash day
+rets = np.array([0.4, -0.2, 0.1, 0.3, -0.1, 0.2, -9.0])
+
+print(f"mean:   {np.mean(rets):+.3f}%   <- dragged negative by the single crash")
+print(f"median: {np.median(rets):+.3f}%   <- barely moves; robust to the outlier")
+```
+
+## Why a quant cares
+
+Market returns are **skewed and fat-tailed**, so the mean and median disagree far more than in a textbook — and the disagreement is a signal:
+
+- A month of 19 quiet days plus one $-9\%$ crash has a **negative mean** but a mildly **positive median**. Which you report changes the entire story of that month.
+- The **gap** between mean and median is itself a rough read on skew: mean below median hints at a fat *left* tail (crash risk); mean above median hints at a fat *right* tail.
+- Because a single print can hijack the mean, robust centers (the median, and its cousins in [robust statistics](/docs/Statistics/robust-statistics)) are often the safer summary of "typical" behavior.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A month of daily returns is 19 quiet days near 0% and one −9% crash. Compared with the median, the mean will be…',
+    options: [
+      'about the same — outliers do not affect the mean',
+      'noticeably lower, because the mean uses every value and is pulled down by the crash',
+      'noticeably higher',
+      'undefined',
+    ],
+    answer: 1,
+    explain: 'The mean incorporates every observation, so one extreme day drags it toward the extreme. The median depends only on the middle rank and barely moves — it is robust.',
+  },
+  {
+    q: 'The median of the sorted data [1, 3, 4, 5, 100, 200] is…',
+    options: ['4', '4.5', '52.2', '100'],
+    answer: 1,
+    explain: 'Even count, so average the two middle values: (4 + 5) / 2 = 4.5. Note how little the two large values matter to the median.',
+  },
+  {
+    q: 'Which measure of central tendency can you use on a purely categorical variable like sector?',
+    options: ['the mean', 'the median', 'the mode', 'none of them'],
+    answer: 2,
+    explain: 'Mean and median need numeric magnitudes/order. The mode — the most frequent category — is the only center that makes sense for nominal data.',
+  },
+]} />

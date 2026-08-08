@@ -1,0 +1,9 @@
+{
+  "label": "5. Covariance & Correlation",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "5. Covariance & Correlation",
+    "description": "How two variables move together — covariance and its limits, then correlation (Pearson and Spearman): the foundation of diversification, hedging, and feature selection."
+  }
+}

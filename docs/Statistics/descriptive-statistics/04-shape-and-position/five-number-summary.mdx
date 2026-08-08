@@ -1,0 +1,83 @@
+---
+title: "The 5-Number Summary"
+sidebar_position: 3
+---
+
+# The 5-Number Summary
+
+Five [percentiles](./percentiles-and-quartiles) capture the entire skeleton of a distribution — its center, its spread, and its extremes — in one compact summary. It's the basis of the **box plot** and of a beautifully simple, distribution-free way to flag **outliers**.
+
+## The five numbers
+
+$$
+\text{minimum}, \quad Q_1, \quad \text{median}, \quad Q_3, \quad \text{maximum}
+$$
+
+- **Minimum** — the smallest value
+- **Q1** — 25th percentile (bottom of the middle 50%)
+- **Median** — 50th percentile (the center)
+- **Q3** — 75th percentile (top of the middle 50%)
+- **Maximum** — the largest value
+
+For the sorted set $\left[1,2,2,2,3,3,4,5,5,5,6,6,6,6,7,8,8,9\right]$: minimum $=1$, $Q_1=3$, median $=5$, $Q_3=7$, maximum $=9$.
+
+## The box plot
+
+A **box plot** draws exactly these five numbers: a box spanning $Q_1$ to $Q_3$ (the middle 50% of the data), a line inside it at the median, and "whiskers" reaching out to the smallest and largest *non-outlier* values. It turns the five-number summary into a picture you can scan at a glance — and compare across many series side by side.
+
+## The IQR and the outlier fences
+
+The width of the box is the **interquartile range** — the spread of the middle half of the data, and a robust alternative to standard deviation:
+
+$$
+\text{IQR} = Q_3 - Q_1
+$$
+
+The IQR also gives a distribution-free rule for flagging **outliers**. Anything beyond the *fences* is suspect:
+
+$$
+\text{lower fence} = Q_1 - 1.5\,\text{IQR}, \qquad \text{upper fence} = Q_3 + 1.5\,\text{IQR}
+$$
+
+Worked through with $Q_1=3$, $Q_3=7$: $\text{IQR}=4$, lower fence $=3-1.5(4)=-3$, upper fence $=7+1.5(4)=13$. So any value below $-3$ or above $13$ is an outlier. Append a **27** to that dataset and it lands far past the upper fence — flagged.
+
+```python
+import numpy as np
+
+data = np.array([1,2,2,2,3,3,4,5,5,5,6,6,6,6,7,8,8,9, 27.0])  # 27 is a suspect
+q1, med, q3 = np.percentile(data, [25, 50, 75])
+iqr = q3 - q1
+lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr
+outliers = data[(data < lo) | (data > hi)]
+
+print(f"min={data.min():.0f}  Q1={q1:.1f}  median={med:.1f}  Q3={q3:.1f}  max={data.max():.0f}")
+print(f"IQR={iqr:.1f}   fences=[{lo:.1f}, {hi:.1f}]   outliers={outliers}")
+```
+
+(One footnote: NumPy *interpolates* quartiles, so its $Q_1/Q_3$ can differ slightly from the hand-counted position method — both are accepted conventions, and the outlier verdict is the same.)
+
+## Why a quant cares
+
+The IQR fence is a cheap, **assumption-free** filter — it doesn't care whether your data is normal, which matters because [returns aren't](./histograms). Quants use it to flag **bad ticks** and fat-finger prints in raw price feeds, and to spotlight genuinely extreme return days for a closer look. Because it's built on quartiles rather than the mean and standard deviation, a single wild value can't corrupt the very fence that's supposed to catch it — the same robustness logic behind the median and [robust statistics](/docs/Statistics/robust-statistics).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A dataset has Q1 = 3 and Q3 = 7. By the 1.5×IQR rule, values above which threshold are flagged as outliers?',
+    options: ['above 7', 'above 10', 'above 13', 'above 27'],
+    answer: 2,
+    explain: 'IQR = 7 − 3 = 4. Upper fence = Q3 + 1.5×IQR = 7 + 6 = 13. Anything above 13 is flagged.',
+  },
+  {
+    q: 'Why is the IQR-based outlier rule useful for financial data specifically?',
+    options: [
+      'it assumes the data is normally distributed',
+      'it is distribution-free and built on quartiles, so it works on non-normal, fat-tailed returns and a single extreme value cannot corrupt the fence',
+      'it requires the mean and standard deviation',
+      'it only works if there are no outliers',
+    ],
+    answer: 1,
+    explain: 'Returns are non-normal, so mean/standard-deviation rules mislead. Quartiles are robust — the fence resists being dragged by the very outliers it is meant to catch.',
+  },
+]} />

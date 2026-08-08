@@ -1,0 +1,89 @@
+---
+title: "Histograms"
+sidebar_position: 1
+---
+
+# Histograms
+
+Central tendency and dispersion each compress a dataset to a single number. A **histogram** shows you the whole *shape* at once — it's the fastest way to see whether data is symmetric, skewed, or hiding fat tails.
+
+## How it's built
+
+You chop the range of the data into equal-width intervals called **bins**, then count how many observations fall in each. The bar heights are those counts — the **frequency** in each bin.
+
+Take a set of ages:
+
+$$
+X = \left[23, 24, 25, 30, 34, 36, 40, 50, 60, 75, 80\right]
+$$
+
+With bins of width 10, count the frequency in each:
+
+| Bin | Count |
+|---|---|
+| 20–30 | 4 |
+| 30–40 | 3 |
+| 40–50 | 1 |
+| 50–60 | 1 |
+| 60–70 | 0 |
+| 70–80 | 2 |
+
+That table *is* the histogram — a **frequency distribution** showing where the data piles up (the 20s) and where it thins out (the 60s).
+
+## Bin width is a choice
+
+There's no single "correct" histogram, because the bin width is a knob you turn:
+
+- **Too wide** → you blur real structure into a few fat bars and lose detail.
+- **Too narrow** → every bar is 0 or 1 and you're looking at noise, not shape.
+
+A good bin width is wide enough to be smooth but narrow enough to reveal the real peaks.
+
+## From bars to a smooth curve: KDE
+
+A histogram's hard bin edges are a bit arbitrary. A **kernel density estimate (KDE)** fixes that by replacing the bars with a smooth curve: instead of dropping each point into a bin, it lays a small bump (a *kernel*) over each point and adds them all up. The result is a continuous estimate of the distribution's shape — a "smoothed histogram."
+
+## A text histogram you can run
+
+Here's a deliberately **fat-tailed** return series binned into a text histogram — the tails show up as sparse, far-flung bars:
+
+```python
+import numpy as np
+rng = np.random.default_rng(1)
+
+rets = rng.standard_t(df=3, size=1000)          # Student-t: fat-tailed daily returns
+counts, edges = np.histogram(rets, bins=9)
+for c, lo, hi in zip(counts, edges[:-1], edges[1:]):
+    print(f"[{lo:6.2f}, {hi:6.2f}) {'#'*c}  ({c})")
+```
+
+## Why a quant cares
+
+Plot a histogram of *real* market returns and you learn something the summary numbers hide: **it is not a clean bell curve.** Compared with a normal distribution it's more **peaked** in the middle (lots of tiny days) and has **fatter tails** (extreme days happen far more often than "normal" predicts). Seeing that shape with your own eyes is what stops you trusting a model that assumes normality — and therefore badly understates crash risk. Line the histogram of your data up against the [theoretical distributions](/docs/Probability/distributions) and the *mismatch* is the story.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'What does the height of a histogram bar represent?',
+    options: [
+      'the average value in that bin',
+      'the number (frequency) of observations that fall in that bin',
+      'the width of the bin',
+      'the probability the data is normal',
+    ],
+    answer: 1,
+    explain: 'A histogram bins the range and the bar height is the count of observations in each bin — a frequency distribution showing where data concentrates.',
+  },
+  {
+    q: 'A histogram of real daily stock returns, versus a normal bell curve, typically looks…',
+    options: [
+      'identical',
+      'more peaked in the middle with fatter tails (extreme days more common than normal predicts)',
+      'perfectly flat',
+      'shifted far to the right',
+    ],
+    answer: 1,
+    explain: 'Returns are leptokurtic: a taller central peak and heavier tails than the normal distribution. Assuming normality understates the frequency of extreme moves.',
+  },
+]} />

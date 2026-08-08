@@ -1,0 +1,58 @@
+---
+title: "Types of Statistics"
+sidebar_position: 2
+---
+
+# Types of Statistics
+
+Statistics splits into two branches. Almost everything you'll ever do falls into one or the other, and confusing them is the single most common beginner mistake.
+
+```
+                    Statistics
+                   /          \
+         Descriptive          Inferential
+   (organize & summarize)  (generalize from a
+    the data you have       sample to a population)
+```
+
+## Descriptive statistics
+
+**Descriptive statistics organizes and summarizes the data you actually have** — no claims beyond it. It answers *"what does this dataset look like?"* with a handful of numbers and pictures:
+
+- **Measures of central tendency** — mean, median, mode (where is the data centered?)
+- **Measures of dispersion** — variance, standard deviation, range (how spread out is it?)
+- **Shape and position** — histograms, percentiles, the 5-number summary
+
+If you record every trade you made last month and report your average profit, your win rate, and your worst loss, that's purely descriptive. You're describing a closed set of facts.
+
+## Inferential statistics
+
+**Inferential statistics generalizes from a sample to the larger population it came from** — and quantifies how confident you're allowed to be. It answers *"what can I say about the thing I *couldn't* fully measure?"*
+
+The workflow:
+
+1. **Collect a sample** — a manageable subset of the population.
+2. **Run some test or experiment** on it (a z-test, a t-test, a confidence interval — the machinery of [Inferential Statistics](/docs/Statistics/inferential-statistics)).
+3. **Draw a conclusion or inference** about the whole population, with an honest margin of error.
+
+An exit poll is the classic case: you can't ask 100 million voters, so you ask 10,000 and *infer* the result — accepting that your estimate could be off by a few points.
+
+## The two, side by side
+
+Take College A again, with its 1,000 students (the **population**). You measure a **sample** of heights: 180, 170, 162, 150, 160 cm.
+
+- **Descriptive:** the average of *this sample* is about 164 cm. A fact about the five numbers, full stop.
+- **Inferential:** *therefore* the average height of all 1,000 students is probably around 164 cm, give or take — a claim about people you never measured.
+
+| | Descriptive | Inferential |
+|---|---|---|
+| Scope | the data in hand | beyond the data, to a population |
+| Question | "what is it?" | "what does it imply?" |
+| Certainty | exact | estimated, with error |
+| Tools | mean, median, spread, plots | tests, confidence intervals, p-values |
+
+## The quant's twist
+
+Here's the uncomfortable truth that shapes this whole section: **for a quant, almost everything is secretly inferential.** The returns you have are only ever a *sample* of the process that generates them; the "true" distribution is a population you never get to see, and next year is a fresh draw from it. So even when you're computing something descriptive — an average return, a volatility — the reason you care is inferential: you're hoping it tells you something about returns you haven't observed yet.
+
+That's why the next page, [Population vs. Sample](./population-vs-sample), matters more than it first appears.
