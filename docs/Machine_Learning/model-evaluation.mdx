@@ -1,24 +1,186 @@
 ---
 title: Bias-Variance & Model Evaluation
-description: The bias-variance tradeoff, cross-validation, and metrics. Notes in progress.
-sidebar_class_name: soon
+description: The bias-variance tradeoff, train/validation/test discipline, every kind of cross-validation, regression and classification metrics (and why accuracy lies), plus the leakage traps that make financial validation different.
 ---
 
 # Bias-Variance & Model Evaluation
 
-The bias-variance tradeoff, cross-validation, and metrics.
+Fitting a model is the easy part. **Knowing whether to trust it** is the whole game — and it's where careless work gets punished fastest, especially in finance. This page is about doing evaluation *honestly*: the bias-variance tradeoff, the right way to split data, the metrics that actually mean something, and the leakage traps that turn a beautiful backtest into a lie.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'The bias–variance decomposition',
-    'Cross-validation (k-fold and walk-forward)',
-    'Metrics (accuracy, precision/recall, ROC-AUC, RMSE)',
-    'Learning curves',
-    'Why financial CV is different (leakage, look-ahead bias)',
-  ]}
-  meanwhile={[
-    { label: 'ML Foundations', to: '/docs/Machine_Learning/foundations' },
-    { label: 'Inferential Statistics', to: '/docs/Statistics/inferential-statistics' },
-  ]}
-/>
+## The bias-variance tradeoff
+
+Every model's error on unseen data decomposes into three parts:
+
+$$
+\text{Expected error} = \underbrace{\text{Bias}^2}_{\text{too simple}} + \underbrace{\text{Variance}}_{\text{too sensitive}} + \underbrace{\text{Irreducible noise}}_{\text{can't fix}}
+$$
+
+- **High bias = underfitting.** The model is too simple to capture the real pattern (a straight line through a curve). It's wrong in the same way on train *and* test data.
+- **High variance = overfitting.** The model is so flexible it memorizes the training noise. It's near-perfect on train data and bad on test data.
+- **Irreducible noise** is the randomness no model can predict — in markets, that's *most* of it.
+
+The two trade off: making a model more complex lowers bias but raises variance. The art is finding the **sweet spot**, and the tell-tale sign of overfitting is a **big gap between training score and test score**.
+
+## Train / validation / test
+
+You cannot judge a model on the data it learned from — of course it does well there. Split your data three ways:
+
+- **Training set** — fit the model.
+- **Validation set** — tune choices (which model, which hyperparameters, degree of regularization).
+- **Test set** — touched **once**, at the very end, for the honest final number.
+
+The cardinal sin is letting the test set influence any decision. The moment you tune to the test set, it stops being an unbiased estimate of real-world performance — you've just overfit at a higher level.
+
+## Cross-validation
+
+Holding out a single validation set wastes data and is noisy. **k-fold cross-validation** does better: split the data into *k* folds, train on *k−1* and validate on the held-out fold, rotate through all *k*, and average. Every row gets used for both training and validation, and you get a **mean ± spread** of performance.
+
+Variants worth knowing:
+- **Stratified k-fold** — preserves the class balance in each fold (essential for imbalanced classification).
+- **Leave-One-Out (LOO)** — k = n; thorough but expensive.
+- **TimeSeriesSplit / walk-forward** — the *only* correct choice for time series (below).
+
+## Regression metrics
+
+| Metric | Formula (gist) | Reads as |
+|---|---|---|
+| **MAE** | mean of \|error\| | average error, in the target's units; robust to outliers |
+| **MSE** | mean of error² | punishes big misses hard |
+| **RMSE** | √MSE | like MAE but outlier-sensitive; same units as target |
+| **R²** | 1 − SSE/SST | fraction of variance explained (1 = perfect, 0 = no better than the mean) |
+
+```python
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+y_true = np.array([3.0, -0.5, 2.0, 7.0, 4.2])
+y_pred = np.array([2.5,  0.0, 2.1, 7.8, 3.9])
+print("MAE :", round(mean_absolute_error(y_true, y_pred), 3))
+print("RMSE:", round(mean_squared_error(y_true, y_pred) ** 0.5, 3))
+print("R^2 :", round(r2_score(y_true, y_pred), 3))
+```
+
+## Classification metrics — and why accuracy lies
+
+On **imbalanced** data — fraud, defaults, rare up-moves — **accuracy is a trap.** If 95% of days are "no default," a model that always says "no default" is 95% accurate and completely useless. You need the **confusion matrix** and the metrics built from it:
+
+$$
+\text{Precision} = \frac{TP}{TP+FP} \quad(\text{of my "yes" calls, how many were right?})
+$$
+$$
+\text{Recall} = \frac{TP}{TP+FN} \quad(\text{of the real "yes" cases, how many did I catch?})
+$$
+
+- **Precision** matters when false positives are costly (flagging a good client as fraud).
+- **Recall** matters when false negatives are costly (missing an actual default).
+- **F1** is their harmonic mean — a single number when you care about both.
+- **ROC-AUC** measures ranking quality across all thresholds (0.5 = coin flip, 1.0 = perfect).
+
+Watch accuracy deceive you on a 95/5 split:
+
+```python
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (confusion_matrix, precision_score,
+                             recall_score, f1_score, accuracy_score)
+
+X, y = make_classification(n_samples=2000, weights=[0.95], n_features=6,
+                           n_informative=3, random_state=0)          # 95% class 0
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0)
+clf = LogisticRegression(max_iter=1000).fit(Xtr, ytr)
+pred = clf.predict(Xte)
+
+print("accuracy :", round(accuracy_score(yte, pred), 3), "  <- looks impressive")
+print("precision:", round(precision_score(yte, pred), 3))
+print("recall   :", round(recall_score(yte, pred), 3),  "  <- but did it catch the rare class?")
+print("f1       :", round(f1_score(yte, pred), 3))
+print("confusion matrix  [[TN FP][FN TP]]:\n", confusion_matrix(yte, pred))
+```
+
+## Why financial cross-validation is different
+
+This is the section that separates quants from Kagglers. **Regular k-fold shuffles the rows** — which, for a time series, means the model trains on the *future* and tests on the *past*. That's **look-ahead bias / leakage**, and it produces gorgeous, completely fake results.
+
+The fix is **walk-forward validation**: always train on the past, test on the future, and roll forward. Compare the two:
+
+```python
+import numpy as np
+from sklearn.model_selection import KFold, TimeSeriesSplit
+
+X = np.arange(12)   # 12 time-ordered observations
+
+print("Regular k-fold (SHUFFLES time -> leaks the future into training):")
+for tr, te in KFold(n_splits=3, shuffle=True, random_state=0).split(X):
+    print("  train:", sorted(X[tr].tolist()), " test:", sorted(X[te].tolist()))
+
+print("\nTimeSeriesSplit (walk-forward -> always trains on the PAST):")
+for tr, te in TimeSeriesSplit(n_splits=3).split(X):
+    print("  train:", X[tr].tolist(), " test:", X[te].tolist())
+```
+
+Notice the walk-forward test sets are always *later* than their training sets. Beyond this, serious financial ML adds **purging and embargoing** — dropping samples right around each test window so overlapping labels don't leak. The rule of thumb: **if a backtest looks too good, assume leakage until you've proven otherwise.**
+
+## Learning curves — a quick diagnosis
+
+Plot training and validation score as you add data:
+- **Both low, close together** → **underfitting** (high bias): get a more complex model or better features; more data won't help.
+- **Big gap, train ≫ validation** → **overfitting** (high variance): regularize, simplify, or get more data.
+
+That single picture tells you which direction to move — bias or variance — instead of guessing.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A model scores 0.99 on training data but 0.62 on the test set. This is a classic sign of…',
+    options: ['high bias (underfitting)', 'high variance (overfitting)', 'irreducible noise', 'good generalization'],
+    answer: 1,
+    explain: 'A large train-vs-test gap means the model memorized the training data (high variance / overfitting). Regularize, simplify, or add data.',
+  },
+  {
+    q: 'On a dataset that is 95% class 0, why is accuracy a misleading metric?',
+    options: [
+      'Accuracy is never useful',
+      'A model that always predicts the majority class scores 95% while catching none of the rare class',
+      'Accuracy only works for regression',
+      'It requires cross-validation',
+    ],
+    answer: 1,
+    explain: 'The "always say no" baseline is 95% accurate and useless. Use precision, recall, F1, or ROC-AUC to see whether the rare (usually important) class is actually detected.',
+  },
+  {
+    q: 'Recall answers which question?',
+    options: [
+      'Of the cases I flagged positive, how many were truly positive?',
+      'Of the truly positive cases, how many did I catch?',
+      'What fraction of all predictions were correct?',
+      'How fast is the model?',
+    ],
+    answer: 1,
+    explain: 'Recall = TP/(TP+FN) — coverage of the actual positives. Precision = TP/(TP+FP) is the other one (correctness of your positive calls).',
+  },
+  {
+    q: 'Why is a shuffled k-fold split dangerous for a financial time series?',
+    options: [
+      'It is computationally slow',
+      'Shuffling puts future data in the training folds, leaking information and inflating results (look-ahead bias)',
+      'It cannot compute accuracy',
+      'It needs stratification',
+    ],
+    answer: 1,
+    explain: 'Time order matters. Shuffling trains the model on the future and tests on the past — pure leakage. Use TimeSeriesSplit / walk-forward, and consider purging and embargoing.',
+  },
+  {
+    q: 'A learning curve shows training and validation scores that are both low and close together. The model is…',
+    options: [
+      'overfitting — regularize it',
+      'underfitting (high bias) — needs more complexity or better features, not more data',
+      'perfect',
+      'suffering from leakage',
+    ],
+    answer: 1,
+    explain: 'Both scores low and converged = high bias. More data won’t help; you need a richer model or more informative features.',
+  },
+]} />

@@ -19,7 +19,7 @@ These pages are being written in roadmap order:
 | Topic | Status |
 |---|---|
 | [ML Foundations](/docs/Machine_Learning/foundations) | ● Available |
-| [Bias-Variance & Model Evaluation](/docs/Machine_Learning/model-evaluation) | ○ Coming soon |
+| [Bias-Variance & Model Evaluation](/docs/Machine_Learning/model-evaluation) | ● Available |
 | [Regression & Classification](/docs/Machine_Learning/regression-and-classification) | ● Available |
 | [Trees, Ensembles & SVM](/docs/Machine_Learning/ensembles-and-svm) | ● Available |
 | [Neural Networks & Deep Learning](/docs/Machine_Learning/deep-learning) | ○ Coming soon |
