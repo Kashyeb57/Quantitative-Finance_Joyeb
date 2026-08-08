@@ -24,7 +24,7 @@ These pages are being written in roadmap order:
 | [Trees, Ensembles & SVM](/docs/Machine_Learning/ensembles-and-svm) | ● Available |
 | [Unsupervised Learning](/docs/Machine_Learning/unsupervised-learning) | ● Available |
 | [Natural Language Processing](/docs/Machine_Learning/nlp) | ● Available |
-| [Neural Networks & Deep Learning](/docs/Machine_Learning/deep-learning) | ○ Coming soon |
+| [Neural Networks & Deep Learning](/docs/Machine_Learning/deep-learning) | ● Available |
 | [Reinforcement Learning](/docs/Machine_Learning/reinforcement-learning) | ○ Coming soon |
 | [ML for Finance](/docs/Machine_Learning/ml-for-finance) | ○ Coming soon |
 

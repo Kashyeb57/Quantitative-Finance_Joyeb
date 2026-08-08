@@ -1,24 +1,153 @@
 ---
 title: Neural Networks & Deep Learning
-description: Perceptrons, backpropagation, RNNs, and LSTMs. Notes in progress.
-sidebar_class_name: soon
+description: From a single artificial neuron to deep nets — layers and the forward pass, activation functions, loss functions, backpropagation, optimizers (SGD → Adam), weight initialization, and CNNs/RNNs — with runnable examples and a quant framing.
 ---
 
 # Neural Networks & Deep Learning
 
-Perceptrons, backpropagation, RNNs, and LSTMs.
+Neural networks stack simple units into a machine that can approximate almost any function. For **tabular** finance data, tree ensembles usually win — but for **images, audio, text, and sequences** (like price series), deep learning is the tool. This page builds the intuition from one neuron up to CNNs and RNNs.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Perceptrons and activation functions',
-    'Backpropagation and gradient descent',
-    'Feedforward networks',
-    'RNNs, LSTMs, and sequence models',
-    'When deep learning beats — and loses to — trees on tabular data',
-  ]}
-  meanwhile={[
-    { label: 'ML Foundations', to: '/docs/Machine_Learning/foundations' },
-    { label: 'Bias-Variance & Model Evaluation', to: '/docs/Machine_Learning/model-evaluation' },
-  ]}
-/>
+## The artificial neuron
+
+A single neuron does two things: take a **weighted sum** of its inputs plus a bias, then pass it through a non-linear **activation**:
+
+$$
+a = \phi\big(\mathbf{w}\cdot\mathbf{x} + b\big)
+$$
+
+That's the same $\mathbf{w}\cdot\mathbf{x}+b$ hyperplane from [Foundations](/docs/Machine_Learning/foundations), wrapped in a squashing function. Stack neurons into **layers**, and layers into a network — **input layer → hidden layers → output layer** — where each layer transforms the previous one's output. Data flowing input-to-output is the **forward pass**:
+
+```python
+import numpy as np
+def relu(z): return np.maximum(0, z)
+
+x  = np.array([0.5, -1.2, 2.0])                 # 3 inputs
+W1 = np.array([[ 0.2, 0.8, -0.5],               # hidden layer: 2 neurons, each with 3 weights
+               [-0.3, 0.1,  0.9]])
+b1 = np.array([0.1, -0.2])
+
+h = relu(W1 @ x + b1)                            # weighted sum -> activation
+print("hidden-layer activations:", np.round(h, 3))
+```
+
+The **depth** (many hidden layers) is what "deep" means, and it lets the network learn **hierarchical features** — early layers catch simple patterns, later layers combine them into complex ones.
+
+## Activation functions — where the power comes from
+
+Without a non-linear activation, stacking layers collapses to a single linear model (a line composed with a line is still a line). The activation is what lets networks bend:
+
+- **Sigmoid** — squashes to $(0,1)$; historically popular but **saturates** (gradients vanish at the extremes).
+- **Tanh** — like sigmoid but $(-1,1)$ and zero-centered; still saturates.
+- **ReLU** — $\max(0, z)$. Cheap, doesn't saturate for positive values, and is the **default hidden-layer activation** in modern nets. (Variants like Leaky ReLU fix its "dying" zero region.)
+- **Softmax** — the **output** activation for multi-class classification; turns raw scores into probabilities that sum to 1.
+
+## How a network learns
+
+1. **Loss function** — measure how wrong the output is. **MSE** for regression, **cross-entropy** for classification (same choices as [regression & classification](/docs/Machine_Learning/regression-and-classification)).
+2. **Backpropagation** — the chain rule, applied efficiently, to compute the gradient of the loss with respect to *every* weight in the network.
+3. **Gradient descent** — nudge each weight a little in the direction that reduces the loss. Repeat over many passes (**epochs**) through the data.
+
+That loop — forward pass → loss → backprop → update — is all of deep learning, run millions of times.
+
+## Optimizers: how you take the step
+
+Plain gradient descent works but is slow and fiddly. Optimizers improve *how* the weights update:
+
+- **SGD** — update on small **mini-batches** instead of the whole dataset (faster, noisier, often generalizes better).
+- **Momentum** — accumulate a velocity so updates keep rolling through flat spots and small bumps.
+- **RMSProp** — scale each weight's step by its recent gradient size (adaptive per-parameter learning rate).
+- **Adam** — **momentum + RMSProp combined**; the robust default first choice.
+
+The **learning rate** is the single most important knob: too high and training diverges, too low and it crawls.
+
+## Weight initialization
+
+You can't start all weights at zero (every neuron would learn the same thing) or too large (activations explode). Schemes like **Xavier/Glorot** (for tanh/sigmoid) and **He** (for ReLU) set the initial scale so signals and gradients stay healthy through deep networks — a small detail that decides whether a net trains or stalls.
+
+## A network in action
+
+`MLPClassifier` is a full feed-forward net. Watch it crush a problem a linear model can't touch — the interleaving crescents:
+
+```python
+import numpy as np
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.datasets import make_moons
+from sklearn.model_selection import cross_val_score
+
+X, y = make_moons(n_samples=500, noise=0.2, random_state=0)
+
+print("logistic (linear) CV accuracy:", round(cross_val_score(LogisticRegression(), X, y, cv=5).mean(), 3))
+mlp = MLPClassifier(hidden_layer_sizes=(16, 16), max_iter=2000, random_state=0)
+print("neural network    CV accuracy:", round(cross_val_score(mlp, X, y, cv=5).mean(), 3))
+```
+
+Two 16-neuron hidden layers learn the curved boundary the straight line never could — that's the non-linearity from ReLU at work.
+
+## Specialized architectures
+
+- **CNN (Convolutional Neural Network)** — for grid data (images). Instead of connecting every pixel to every neuron, **convolution** slides small learnable filters across the input to detect local patterns (edges → shapes → objects), and **pooling** downsamples. Far fewer parameters, and translation-invariant.
+- **RNN / LSTM / GRU** — for **sequences**, where order matters — natural for **time series** and text. They carry a hidden "memory" across steps; LSTMs/GRUs add gates so they remember long-range dependencies without the gradients vanishing.
+- **Transformers** — the attention-based architecture behind modern LLMs; now dominant for text and increasingly for sequences.
+
+## Deep learning in quant — with caution
+
+DL shines in finance on **sequence and alternative data**: LSTMs/transformers on price and order-flow series, CNNs on limit-order-book "images," transformers on news text. But two warnings loom larger here than anywhere:
+
+- **Data hunger vs. scarcity.** Deep nets need a lot of data; financial history is short and **non-stationary**, so they overfit easily. Often a regularized linear model or gradient boosting beats a neural net on tabular signals.
+- **Evaluation discipline.** Everything in [Model Evaluation](/docs/Machine_Learning/model-evaluation) applies double — walk-forward validation, no leakage, and deep suspicion of a backtest that looks too good.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Why does a neural network need non-linear activation functions?',
+    options: [
+      'To run faster',
+      'Without them, stacking layers collapses into a single linear model — no extra power',
+      'To remove the need for data',
+      'Only to prevent overfitting',
+    ],
+    answer: 1,
+    explain: 'A composition of linear maps is still linear. Non-linear activations (ReLU, etc.) are what let deep networks approximate complex, curved functions.',
+  },
+  {
+    q: 'ReLU is the default hidden-layer activation mainly because…',
+    options: [
+      'it outputs probabilities',
+      'it is cheap and does not saturate for positive inputs, avoiding the vanishing-gradient problem',
+      'it is the only option',
+      'it works only on images',
+    ],
+    answer: 1,
+    explain: 'Sigmoid/tanh saturate and kill gradients in deep nets. ReLU = max(0, z) keeps gradients alive for positive values and is very cheap to compute.',
+  },
+  {
+    q: 'Backpropagation computes…',
+    options: [
+      'the final prediction',
+      'the gradient of the loss with respect to every weight, via the chain rule',
+      'the number of layers',
+      'the learning rate',
+    ],
+    answer: 1,
+    explain: 'Backprop is the efficient application of the chain rule to get all weight gradients, which gradient descent then uses to update the weights.',
+  },
+  {
+    q: 'Adam is a popular optimizer because it combines…',
+    options: [
+      'two loss functions',
+      'momentum with per-parameter adaptive learning rates (RMSProp)',
+      'CNNs and RNNs',
+      'training and testing',
+    ],
+    answer: 1,
+    explain: 'Adam merges momentum (velocity through the loss surface) with RMSProp’s adaptive per-weight step sizes, making it a robust default optimizer.',
+  },
+  {
+    q: 'Which architecture is designed for sequential data like a price time series?',
+    options: ['CNN', 'RNN / LSTM', 'K-Means', 'PCA'],
+    answer: 1,
+    explain: 'RNNs (and LSTMs/GRUs) carry a hidden memory across time steps, making them natural for ordered sequences; transformers are the modern alternative.',
+  },
+]} />
