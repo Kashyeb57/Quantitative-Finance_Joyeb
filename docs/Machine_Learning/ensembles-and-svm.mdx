@@ -1,24 +1,154 @@
 ---
 title: Trees, Ensembles & SVM
-description: Decision trees, random forests, gradient boosting, and SVMs. Notes in progress.
-sidebar_class_name: soon
+description: Decision trees, random forests, boosting (AdaBoost / Gradient Boosting / XGBoost) and support vector machines — how each works, when to reach for it, and runnable examples with a quant framing.
 ---
 
 # Trees, Ensembles & SVM
 
-Decision trees, random forests, gradient boosting, and SVMs.
+For the **tabular** data that fills most of finance — a row per day or per company, columns of features — this family of models is the workhorse. Neural nets win on images and text, but on spreadsheets of factors, fundamentals, and technical signals, **tree ensembles and SVMs are usually the models to beat.** This page walks from a single decision tree up to the boosting methods that win most tabular competitions, then covers SVMs.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Decision trees and splitting criteria',
-    'Bagging and random forests',
-    'Gradient boosting (XGBoost, LightGBM)',
-    'Support vector machines and kernels',
-    'Feature importance',
-  ]}
-  meanwhile={[
-    { label: 'Regression & Classification', to: '/docs/Machine_Learning/regression-and-classification' },
-    { label: 'ML for Finance', to: '/docs/Machine_Learning/ml-for-finance' },
-  ]}
-/>
+## 1. Decision trees
+
+A decision tree splits the data with a sequence of yes/no questions — *"is the 10-day momentum &gt; 2%?"* — carving the feature space into rectangular regions and predicting a constant in each. Training is **greedy**: at each node it picks the split that most improves a purity score.
+
+- **Classification** splits to reduce **Gini impurity** or **entropy** (how mixed the labels are).
+- **Regression** splits to reduce **variance** (MSE) of the target within each region.
+
+$$
+\text{Gini} = 1 - \sum_k p_k^2, \qquad \text{Entropy} = -\sum_k p_k \log_2 p_k
+$$
+
+A single tree is wonderfully **interpretable** — you can read the rules — but on its own it **overfits badly**: grow it deep enough and it memorizes noise. Its predictions have **low bias but high variance**. That weakness is exactly what ensembles fix.
+
+## 2. Bagging &amp; random forests
+
+**Bagging** (bootstrap aggregating) is the first fix: train many trees, each on a different **bootstrap sample** (a random resample-with-replacement of the rows), then **average** their predictions. Averaging many noisy-but-unbiased trees cancels the noise — variance drops, bias stays low.
+
+A **random forest** adds one more trick: at each split, each tree may only choose from a **random subset of features**. This *decorrelates* the trees so their errors are more independent, which makes the average even better. Two free bonuses fall out:
+
+- **Out-of-bag (OOB) error** — each tree never saw ~1/3 of the rows, so you get a validation estimate for free.
+- **Feature importance** — how much each feature reduced impurity across the forest.
+
+```python
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+
+X, y = make_classification(n_samples=800, n_features=8, n_informative=4, random_state=0)
+
+tree   = DecisionTreeClassifier(random_state=0)
+forest = RandomForestClassifier(n_estimators=200, random_state=0)
+
+print("single tree    CV accuracy:", round(cross_val_score(tree,   X, y, cv=5).mean(), 3))
+print("random forest  CV accuracy:", round(cross_val_score(forest, X, y, cv=5).mean(), 3))
+
+forest.fit(X, y)
+print("feature importances:", np.round(forest.feature_importances_, 3))
+```
+
+Run it: the forest beats the lone tree by several points, purely from **variance reduction** — same idea as diversifying a portfolio to cut idiosyncratic risk. (The first run downloads scikit-learn into your browser, so give it a few seconds.)
+
+## 3. Boosting: learning from your mistakes
+
+Bagging builds trees **in parallel** and averages them. **Boosting** builds them **sequentially**, each new tree focused on the errors the previous ones made. Done right, boosting turns many *weak* learners (shallow "stumps") into one very strong model.
+
+- **AdaBoost** — after each round, **up-weight the misclassified points** so the next tree pays them more attention.
+- **Gradient Boosting** — the general version: each new tree is fit to the **negative gradient of the loss** (for squared error, that's just the **residuals**). You're doing gradient descent, but in *function* space.
+- **XGBoost / LightGBM / CatBoost** — fast, **regularized** implementations of gradient boosting. These are the default first choice for tabular problems and dominate Kaggle.
+
+```python
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import cross_val_score
+
+X, y = make_classification(n_samples=800, n_features=8, n_informative=4, random_state=0)
+
+gb = GradientBoostingClassifier(n_estimators=300, learning_rate=0.05, max_depth=3, random_state=0)
+print("gradient boosting CV accuracy:", round(cross_val_score(gb, X, y, cv=5).mean(), 3))
+```
+
+The key knobs are the **learning rate** (how much each tree contributes) and the **number of trees** — they trade off, and a small learning rate with many trees usually generalizes best. Boosting is powerful but **easier to overfit** than a random forest, so honest cross-validation matters even more.
+
+## 4. Support Vector Machines
+
+An SVM takes a different geometric view: find the hyperplane that separates the classes with the **widest possible margin**. Only the points on the edge — the **support vectors** — determine the boundary; everything else is irrelevant. A soft-margin parameter **C** trades off margin width against misclassifications.
+
+The magic is the **kernel trick**: instead of manually engineering non-linear features, a kernel (e.g. the **RBF** kernel) implicitly maps the data into a higher-dimensional space where a straight hyperplane *can* separate curved boundaries — without ever computing the mapping explicitly.
+
+```python
+import numpy as np
+from sklearn.datasets import make_moons
+from sklearn.svm import SVC
+from sklearn.model_selection import cross_val_score
+
+X, y = make_moons(n_samples=400, noise=0.25, random_state=0)   # two interleaving crescents
+
+print("linear SVM CV accuracy:", round(cross_val_score(SVC(kernel='linear'), X, y, cv=5).mean(), 3))
+print("RBF SVM    CV accuracy:", round(cross_val_score(SVC(kernel='rbf'),    X, y, cv=5).mean(), 3))
+```
+
+On the interleaving-crescents data a linear boundary is hopeless; the RBF kernel handles it easily. SVMs shine on **small, clean, high-dimensional** datasets — but they scale poorly to huge samples and need careful feature scaling.
+
+## 5. Which one — and when (a quant's cheat sheet)
+
+| Model | Strengths | Watch out for | Typical finance use |
+|---|---|---|---|
+| **Decision tree** | Fully interpretable, fast | Overfits alone | A readable first cut / rules |
+| **Random forest** | Robust, little tuning, feature importance | Less accurate than boosting | Strong baseline; factor screening |
+| **Gradient boosting / XGBoost** | Usually best on tabular | Overfits if untuned | Default-risk, return-direction models |
+| **SVM (RBF)** | Great on small, clean data | Slow at scale, needs scaling | Regime classification on few features |
+
+The models are the *easy* part. In finance the trap is **evaluation**: markets are non-stationary, so a plain random k-fold split leaks the future into the past. Use **time-aware validation** (walk-forward / purged CV), and treat a suspiciously high backtest score as a bug, not a discovery — see [Model Evaluation](/docs/Machine_Learning/model-evaluation) and [ML for Finance](/docs/Machine_Learning/ml-for-finance).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A single deep decision tree typically has…',
+    options: ['high bias, low variance', 'low bias, high variance', 'high bias, high variance', 'low bias, low variance'],
+    answer: 1,
+    explain: 'A deep tree can fit almost anything (low bias) but is unstable — small data changes swing it a lot (high variance). Ensembles exist to tame that variance.',
+  },
+  {
+    q: 'What extra randomness does a random forest add on top of plain bagging?',
+    options: [
+      'It boosts misclassified points',
+      'At each split it considers only a random subset of features, decorrelating the trees',
+      'It uses a different loss function',
+      'It scales the features',
+    ],
+    answer: 1,
+    explain: 'Random feature subsets at each split make the trees less alike, so averaging their errors helps more. That decorrelation is the "random" in random forest.',
+  },
+  {
+    q: 'In gradient boosting, each new tree is trained to predict…',
+    options: [
+      'the original target from scratch',
+      'the negative gradient of the loss (for squared error, the residuals of the current model)',
+      'a bootstrap sample of the data',
+      'the average of all previous trees',
+    ],
+    answer: 1,
+    explain: 'Boosting is gradient descent in function space: each tree fits the current errors (residuals for MSE), nudging the ensemble downhill on the loss.',
+  },
+  {
+    q: 'Which points define an SVM’s decision boundary?',
+    options: ['all training points equally', 'only the support vectors (those on/near the margin)', 'the class means', 'the outliers only'],
+    answer: 1,
+    explain: 'Only the support vectors matter; moving other points doesn’t change the max-margin hyperplane. That’s what makes SVMs memory-efficient at prediction time.',
+  },
+  {
+    q: 'Why is a plain random k-fold split dangerous for a financial time series?',
+    options: [
+      'It is too slow',
+      'It lets future data land in the training folds, leaking information and inflating the score',
+      'It cannot handle classification',
+      'It requires scaling',
+    ],
+    answer: 1,
+    explain: 'Shuffling breaks time order, so the model trains on the future and tests on the past. Use walk-forward / purged CV to keep evaluation honest on non-stationary data.',
+  },
+]} />

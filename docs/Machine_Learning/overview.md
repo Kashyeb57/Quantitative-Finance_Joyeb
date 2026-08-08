@@ -21,7 +21,7 @@ These pages are being written in roadmap order:
 | [ML Foundations](/docs/Machine_Learning/foundations) | ○ Coming soon |
 | [Bias-Variance & Model Evaluation](/docs/Machine_Learning/model-evaluation) | ○ Coming soon |
 | [Regression & Classification](/docs/Machine_Learning/regression-and-classification) | ○ Coming soon |
-| [Trees, Ensembles & SVM](/docs/Machine_Learning/ensembles-and-svm) | ○ Coming soon |
+| [Trees, Ensembles & SVM](/docs/Machine_Learning/ensembles-and-svm) | ● Available |
 | [Neural Networks & Deep Learning](/docs/Machine_Learning/deep-learning) | ○ Coming soon |
 | [Reinforcement Learning](/docs/Machine_Learning/reinforcement-learning) | ○ Coming soon |
 | [ML for Finance](/docs/Machine_Learning/ml-for-finance) | ○ Coming soon |
