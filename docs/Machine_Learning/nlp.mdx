@@ -1,0 +1,155 @@
+---
+title: Natural Language Processing
+description: Turning text into numbers a model can use — tokenization, stemming/lemmatization, stopwords, POS/NER, Bag-of-Words, TF-IDF, and Word2Vec embeddings — ending in a runnable sentiment classifier, with a quant framing on news and filings.
+---
+
+# Natural Language Processing
+
+Markets run on words as much as numbers — earnings calls, headlines, 10-Ks, Fed statements, tweets. **NLP is how you turn that text into something a model can actually compute with.** The core challenge: models eat numbers, but language is messy, unordered-looking symbols. This page walks the full pipeline from raw text to a working sentiment classifier.
+
+## Step 1 — cleaning &amp; preprocessing
+
+Before any math, you normalize the text so that trivial differences don't look like different words:
+
+- **Tokenization** — split text into units (words or sub-words). *"Stocks rallied!"* → `["stocks", "rallied", "!"]`.
+- **Lowercasing** — so *"Stock"* and *"stock"* aren't treated as different.
+- **Stopword removal** — drop high-frequency, low-information words (*the, is, of, a*).
+- **Stemming vs lemmatization** — collapse word forms to a root. **Stemming** chops crudely (*running → run*, but *studies → studi*); **lemmatization** uses a dictionary to get a real base word (*studies → study*, *better → good*). Lemmatization is slower but cleaner.
+- **POS tagging** — label each token's part of speech (noun/verb/adjective).
+- **Named Entity Recognition (NER)** — pull out entities: companies, people, tickers, money, dates. Hugely useful in finance for *"which stock is this headline about?"*
+
+## Step 2 — turning text into vectors
+
+Once clean, you convert documents to numeric vectors. Two classic approaches:
+
+### Bag of Words (BoW)
+
+Represent each document by **word counts**, ignoring order. Build a vocabulary, then each doc becomes a vector of how many times each vocab word appears.
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+docs = ["stocks rally on strong earnings",
+        "earnings miss sends stocks lower",
+        "market rally continues today"]
+
+bow = CountVectorizer()
+X = bow.fit_transform(docs)
+print("vocabulary:", list(bow.get_feature_names_out()))
+print("bag-of-words counts:\n", X.toarray())
+```
+
+BoW is simple and effective but has two weaknesses: it **loses word order** (*"stocks up, not down"* ≈ *"stocks down, not up"*), and it treats a rare, meaningful word the same as a common, useless one.
+
+### TF-IDF
+
+**TF-IDF** fixes the second problem. It weights each word by **Term Frequency** (how often it appears in *this* doc) times **Inverse Document Frequency** (how *rare* it is across *all* docs). Common words that appear everywhere (*"stocks"*) get down-weighted; distinctive words that signal a document's topic get boosted.
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+docs = ["stocks rally on strong earnings",
+        "earnings miss sends stocks lower",
+        "market rally continues today"]
+
+tfidf = TfidfVectorizer()
+Xt = tfidf.fit_transform(docs)
+print("TF-IDF matrix (common words down-weighted, distinctive ones up):")
+print(Xt.toarray().round(2))
+```
+
+## Step 3 — word embeddings (Word2Vec)
+
+BoW and TF-IDF still don't understand **meaning**: to them *"profit"* and *"earnings"* are unrelated columns. **Word2Vec** learns a dense vector for each word by training a shallow network to predict a word from its neighbors (**CBOW**) or its neighbors from the word (**Skip-gram**). The magic result: **words used in similar contexts get similar vectors**, so *"profit"* and *"earnings"* end up close, and you even get analogies like *king − man + woman ≈ queen*.
+
+To vectorize a whole document you can **average** its word vectors (**Average Word2Vec**) — a compact representation that captures meaning, unlike sparse BoW. (Modern systems go further with **transformer** embeddings and LLMs, but the intuition starts here.)
+
+## Putting it together: a sentiment classifier
+
+The classic end-to-end NLP task is **text → preprocess → vectorize → classify**. Here's a tiny bullish/bearish headline classifier — TF-IDF features into a Naive Bayes model (the pairing that made [Naive Bayes](/docs/Machine_Learning/regression-and-classification) the go-to text baseline):
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import make_pipeline
+
+texts = ["great earnings beat expectations", "record profit and strong growth",
+         "shares plunge on weak guidance",  "massive loss and bankruptcy fears",
+         "solid revenue and upbeat outlook", "disappointing results, stock tumbles"]
+labels = [1, 1, 0, 0, 1, 0]          # 1 = bullish, 0 = bearish
+
+model = make_pipeline(TfidfVectorizer(), MultinomialNB()).fit(texts, labels)
+
+for headline in ["profit surges to record high", "company warns of steep losses"]:
+    p = model.predict([headline])[0]
+    print(f"{'BULLISH' if p else 'BEARISH'}  <-  {headline!r}")
+```
+
+That's the exact skeleton behind **news-sentiment signals**, spam filters, and support-ticket routing — swap the tiny corpus for thousands of labeled headlines and the pipeline is unchanged.
+
+## Where NLP meets quant
+
+- **News & headline sentiment** → a real-time bullish/bearish signal.
+- **Earnings-call / 10-K analysis** → tone, uncertainty language, risk-factor changes over time.
+- **NER + event detection** → *which* company, *what* event (M&A, downgrade, guidance cut).
+- **LLMs** now do much of this end-to-end, but the pipeline thinking — clean → represent → model → evaluate — still applies, and the evaluation traps (leakage, look-ahead) are the same as everywhere else in [ML](/docs/Machine_Learning/model-evaluation).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'What is the difference between stemming and lemmatization?',
+    options: [
+      'They are identical',
+      'Stemming crudely chops to a root; lemmatization uses a dictionary to return a real base word',
+      'Lemmatization removes stopwords',
+      'Stemming only works on numbers',
+    ],
+    answer: 1,
+    explain: 'Stemming is fast but sloppy (studies → studi); lemmatization is slower but returns valid words (studies → study, better → good).',
+  },
+  {
+    q: 'The main weakness of a Bag-of-Words representation is that it…',
+    options: [
+      'is too slow to compute',
+      'ignores word order and treats every word as an independent column with no meaning',
+      'requires labeled data',
+      'only works for one language',
+    ],
+    answer: 1,
+    explain: 'BoW throws away order and semantics — "up, not down" looks like "down, not up," and related words are unrelated columns. TF-IDF fixes weighting; embeddings fix meaning.',
+  },
+  {
+    q: 'TF-IDF down-weights a word when it…',
+    options: [
+      'appears in almost every document (low inverse document frequency)',
+      'appears only once ever',
+      'is capitalized',
+      'is a named entity',
+    ],
+    answer: 0,
+    explain: 'IDF is low for words common across all docs, so TF-IDF shrinks their weight. Distinctive, topic-specific words get boosted.',
+  },
+  {
+    q: 'The key idea behind Word2Vec is that…',
+    options: [
+      'every word gets a random vector',
+      'words appearing in similar contexts end up with similar vectors, capturing meaning',
+      'it counts words like Bag-of-Words',
+      'it removes stopwords',
+    ],
+    answer: 1,
+    explain: 'By predicting words from their neighbors (CBOW / Skip-gram), Word2Vec places contextually-similar words nearby in vector space — enabling similarity and analogies.',
+  },
+  {
+    q: 'In the sentiment pipeline, why pair TF-IDF with Naive Bayes?',
+    options: [
+      'Naive Bayes needs images',
+      'It is the classic fast, low-data text baseline — TF-IDF features feed a probabilistic classifier well',
+      'TF-IDF only works with neural nets',
+      'They cannot be combined',
+    ],
+    answer: 1,
+    explain: 'Naive Bayes is fast, handles high-dimensional sparse text, and needs little data — the standard baseline for spam/sentiment on TF-IDF or bag-of-words features.',
+  },
+]} />
