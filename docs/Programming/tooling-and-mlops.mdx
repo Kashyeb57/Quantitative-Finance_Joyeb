@@ -1,0 +1,154 @@
+---
+title: Tooling & MLOps
+description: The engineering toolchain that makes quant research reproducible and deployable — Git & GitHub for version control, Docker for reproducible environments, and MLOps (MLflow, DVC, BentoML) for tracking experiments, versioning data, and serving models.
+---
+
+# Tooling & MLOps
+
+A backtest you can't reproduce isn't a result — it's an anecdote. The gap between a notebook that "worked once" and infrastructure a desk can trust is **engineering discipline**: versioning your code, pinning your environment, tracking every experiment, and shipping models as services. This page is that toolchain.
+
+## 1. Version control with Git &amp; GitHub
+
+**Git** records the full history of your code, so you can reproduce *any* past state, experiment safely on **branches** without breaking `main`, and collaborate. **GitHub** hosts it and adds pull requests, issues, and CI/CD. The everyday loop:
+
+```bash
+git clone <repo-url>          # grab the project
+git checkout -b new-signal    # branch off to experiment safely
+# ...edit code...
+git add .                     # stage changes
+git commit -m "add momentum signal"   # snapshot with a message
+git push origin new-signal    # publish the branch; open a Pull Request to merge
+```
+
+A `.gitignore` keeps junk (data dumps, `.env` secrets, `__pycache__`) out of the repo. **Why a quant cares:** your reported Sharpe is only credible if you can point to the *exact commit* that produced it. Version control is what turns "I got 1.8 once" into "here is the reproducible pipeline." (This very site deploys on every `git push` — code is the source of truth.)
+
+## 2. Reproducible environments with Docker
+
+The oldest bug in software is *"but it works on my machine."* **Docker** kills it by packaging your code **plus its entire environment** — OS libraries, Python version, dependencies — into a portable **image**. Run that image anywhere and you get an identical **container**.
+
+```dockerfile
+# Dockerfile — a reproducible research/serving environment
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "backtest.py"]
+```
+
+```bash
+docker build -t my-strategy .     # build the image
+docker run my-strategy            # run it — same result on any machine
+```
+
+For multi-service stacks (a model API + a database + a dashboard), **docker-compose** wires them together in one file. **Why a quant cares:** the container your research ran in *is* the container production runs in — no more "the model behaves differently live" surprises from a mismatched library version.
+
+## 3. MLOps — from notebook to production
+
+**MLOps** is DevOps for machine learning: the practices and tools that get a model from your laptop into a reliable, monitored, reproducible pipeline. Three pillars:
+
+### Experiment tracking — MLflow
+
+When you're trying 50 model variants, memory and a spreadsheet won't cut it. **MLflow** logs the **parameters, metrics, and model artifact** of every run, so you can compare them and reproduce the winner exactly.
+
+```bash
+mlflow ui        # launches a dashboard of every logged run, ranked by metric
+```
+
+Each run records *what settings produced what score*, with the trained model attached — the antidote to "which config gave me that 0.62 accuracy again?"
+
+### Data &amp; model versioning — DVC
+
+Git is built for code, not multi-gigabyte datasets. **DVC (Data Version Control)** is "Git for data": it versions large datasets and model files, storing them in cloud/remote storage while tracking lightweight pointers in Git.
+
+```bash
+dvc add data/prices.parquet     # start versioning a big dataset
+git add data/prices.parquet.dvc # commit the small pointer, not the file
+dvc push                        # send the actual data to remote storage
+```
+
+**Why a quant cares double:** a result must tie to an **exact data snapshot**. If your dataset silently changes (a vendor restates history), your "reproducible" backtest quietly becomes irreproducible — and restated data is a classic source of **look-ahead bias**. DVC pins the data to the result.
+
+### Model serving — BentoML
+
+A trained model sitting in a `.pkl` file does nothing. **BentoML** (and similar tools) package it into a **production API** — a service that takes features over HTTP and returns predictions — with the environment baked in for consistent deployment.
+
+```bash
+bentoml serve service:latest      # your model is now a live prediction API
+```
+
+### And then: monitoring
+
+Deployment isn't the end. Markets drift, data pipelines break, and a model that was sharp last quarter can rot. Production MLOps **monitors** inputs and predictions for **drift** and triggers **retraining** — closing the loop back to the [ML lifecycle](/docs/Machine_Learning/foundations).
+
+## The toolchain at a glance
+
+| Tool | Job | Quant payoff |
+|---|---|---|
+| **Git / GitHub** | Version code | Reproducible research; safe experiments; a commit per result |
+| **Docker** | Version the environment | Research == production; no dependency surprises |
+| **MLflow** | Track experiments | Compare runs, reproduce the winner, no lost configs |
+| **DVC** | Version data & models | Tie every result to an exact data snapshot |
+| **BentoML** | Serve models | Turn a signal into a live API |
+
+None of this makes a strategy profitable — but all of it is what makes a strategy **trustworthy and shippable**, which is exactly the difference between a student notebook and desk-grade work.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The main reason a quant needs version control (Git) is to…',
+    options: [
+      'make the code run faster',
+      'reproduce the exact code behind any result and experiment safely on branches',
+      'store large datasets',
+      'serve models as an API',
+    ],
+    answer: 1,
+    explain: 'Git records full history, so a reported result maps to a specific commit, and branches let you try ideas without breaking main. (Large data is DVC’s job, not Git’s.)',
+  },
+  {
+    q: 'Docker solves which problem?',
+    options: [
+      'Slow model training',
+      'The "works on my machine" problem — it packages code plus its full environment into a portable, reproducible image',
+      'Choosing hyperparameters',
+      'Labeling data',
+    ],
+    answer: 1,
+    explain: 'A Docker image bundles OS libs, Python version, and dependencies, so the container runs identically anywhere — research and production match.',
+  },
+  {
+    q: 'What does MLflow primarily provide?',
+    options: [
+      'Data versioning',
+      'Experiment tracking — logging parameters, metrics, and model artifacts for every run',
+      'A web server for the site',
+      'Automatic feature engineering',
+    ],
+    answer: 1,
+    explain: 'MLflow records what settings produced what score (with the model attached), so you can compare dozens of runs and reproduce the best one.',
+  },
+  {
+    q: 'Why is DVC especially important in finance?',
+    options: [
+      'It speeds up gradient descent',
+      'It ties a result to an exact data snapshot; silently changed/restated data is a source of look-ahead bias and irreproducibility',
+      'It only versions code',
+      'It serves models',
+    ],
+    answer: 1,
+    explain: 'Restated or drifting datasets quietly break reproducibility and can inject look-ahead bias. DVC pins the data version to the result, like Git does for code.',
+  },
+  {
+    q: 'BentoML is used to…',
+    options: [
+      'track experiments',
+      'package a trained model into a production API / service',
+      'version a Git repository',
+      'clean the training data',
+    ],
+    answer: 1,
+    explain: 'Serving tools like BentoML turn a saved model into a deployable prediction service (HTTP API) with its environment bundled for consistency.',
+  },
+]} />

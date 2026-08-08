@@ -20,6 +20,7 @@ A quant's ideas are only as good as the code that tests them. Programming is whe
 | [Data Structures & Algorithms](/docs/Programming/data-structures-and-algorithms) | The toolkit behind efficient, correct programs. |
 | [Time & Space Complexity](/docs/Programming/complexity) | Big-O reasoning — knowing what will scale before you run it. |
 | [APIs & Systems](/docs/Programming/apis-and-systems) | Pulling market data and wiring components together. |
+| [Tooling & MLOps](/docs/Programming/tooling-and-mlops) | Git, Docker, and the MLOps stack — reproducible, shippable research. |
 | [Concurrency & Low-Latency](/docs/Programming/concurrency-and-low-latency) | The engineering behind high-frequency and real-time systems. |
 
 ## Where to start
