@@ -48,6 +48,7 @@ const FIELDS = [
       { label: 'Time Series (AR, MA, ARIMA, GARCH)', to: '/docs/Statistics/time-series' },
       { label: 'Bayesian Inference', to: '/docs/Statistics/bayesian-inference' },
       { label: 'Robust & Nonparametric Statistics', to: '/docs/Statistics/robust-statistics' },
+      { label: 'Causal Inference & DAGs', to: '/docs/Statistics/causal-inference' },
     ],
   },
   {

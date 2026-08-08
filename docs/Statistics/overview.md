@@ -16,17 +16,19 @@ Statistics is how a quant turns noisy data into decisions you can defend. Every 
 
 | Topic | What it covers |
 |---|---|
-| [Descriptive Statistics](/docs/Statistics/descriptive-statistics) | Summarizing data — moments, dispersion, and the shape of returns. |
+| [Descriptive Statistics](/docs/Statistics/descriptive-statistics) | Summarizing data — center, dispersion, percentiles, and covariance vs. correlation, each with a runnable example. |
 | [Inferential Statistics & Hypothesis Testing](/docs/Statistics/inferential-statistics) | Confidence intervals, p-values, and testing whether an edge is real. |
 | [Regression Analysis](/docs/Statistics/regression-analysis) | OLS, factor models, and the assumptions that make a fit trustworthy. |
 | [Time Series (AR, MA, ARIMA, GARCH)](/docs/Statistics/time-series) | Modeling and forecasting serially-dependent financial data. |
 | [Bayesian Inference](/docs/Statistics/bayesian-inference) | Priors, posteriors, and MCMC — updating beliefs as data arrives. |
 | [Robust & Nonparametric Statistics](/docs/Statistics/robust-statistics) | Methods that survive outliers and fat tails. |
+| [Causal Inference & DAGs](/docs/Statistics/causal-inference) | Why correlation isn't causation, and which variables to control for. |
 
-The **Bayesian Inference** page is fully written and has a live interactive lab — start there for a worked example.
+The **Descriptive Statistics** and **Bayesian Inference** pages are fully written and hands-on — the Bayesian page has a live interactive lab.
 
 ## Where to start
 
-- The [Bayesian Inference](/docs/Statistics/bayesian-inference) page is the most complete, with a prior→posterior updater you can drag.
+- Begin with [Descriptive Statistics](/docs/Statistics/descriptive-statistics) — the foundation everything else builds on, from central tendency and volatility to percentiles (Value-at-Risk) and correlation, all with runnable in-browser examples.
+- The [Bayesian Inference](/docs/Statistics/bayesian-inference) page has a prior→posterior updater you can drag.
 - For intuition-first video explanations of every core method, [StatQuest](https://www.youtube.com/@statquest) is the channel I lean on (linked on [Resources](/resources)).
 - Probability is the prerequisite — see the [Probability section](/docs/Probability/foundations).

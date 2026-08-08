@@ -1,24 +1,337 @@
 ---
+sidebar_position: 2
 title: Descriptive Statistics
-description: Measures of central tendency, dispersion, and distribution shape. Notes in progress.
-sidebar_class_name: soon
+description: The first thing a quant does to any dataset — summarize it honestly. Population vs sample, central tendency and dispersion (and why sample variance divides by n−1), variable types, histograms, percentiles and the 5-number summary, and covariance vs correlation, each with a runnable example and its markets application.
 ---
 
 # Descriptive Statistics
 
-Measures of central tendency, dispersion, and distribution shape.
+Descriptive statistics is the craft of **organizing and summarizing data** — turning a wall of numbers into a handful of measures that describe its center, its spread, and its shape. It's the very first thing you do to a return series, *before* any model, and it's where most real understanding of a dataset actually comes from.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Mean, median, and mode — and when each matters',
-    'Variance, standard deviation, and volatility',
-    'Skewness and kurtosis (fat tails)',
-    'Covariance and correlation',
-    'Visualizing return distributions',
-  ]}
-  meanwhile={[
-    { label: 'Distributions (live bell-curve lab)', to: '/docs/Probability/distributions' },
-    { label: 'Bayesian Inference', to: '/docs/Statistics/bayesian-inference' },
-  ]}
-/>
+It's worth being precise about where this sits. Statistics splits into two branches:
+
+- **Descriptive** — summarize the data *you have*. No claims beyond it. (This page.)
+- **Inferential** — generalize from a *sample* to the larger *population* it came from, with honest uncertainty. (See [Inferential Statistics](/docs/Statistics/inferential-statistics).)
+
+If you measure the height of every student in a 1,000-person college and report the average, that's descriptive. If you measure 50 of them and try to say something about all 1,000 — or about next year's intake — that's inference. **For a quant, almost everything is secretly inferential**, because the data you have (past returns) is only ever a *sample* of the process you actually care about (all the returns the market could produce). That gap is the theme this whole section keeps returning to — and it starts right here, with the difference between a population and a sample.
+
+## Population vs. sample
+
+- **Population** — *every* member of the group you care about. Its size is written $N$, and summaries of it are called **parameters** (the true mean $\mu$, the true standard deviation $\sigma$).
+- **Sample** — a subset you actually measure, size $n$. Summaries of it are called **statistics** ($\bar{x}$, $s$) and they *estimate* the parameters.
+
+A pollster can't ask all 100 million voters, so they ask 10,000 and infer — an exit poll is a sample standing in for a population. In markets the divide is sharper and less obvious: **you never possess the population.** The "true" distribution of a stock's daily return is an abstraction; all you ever hold is a finite sample of history, and next year is drawn from the same unknown process. This is why the notation matters — mixing up a sample statistic with a population parameter is mixing up *"what I measured"* with *"what's actually true."*
+
+| | Population (parameter) | Sample (statistic) |
+|---|---|---|
+| Size | $N$ | $n$ |
+| Mean | $\mu = \frac{1}{N}\sum_{i=1}^{N} x_i$ | $\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$ |
+| Variance | $\sigma^2 = \frac{1}{N}\sum (x_i-\mu)^2$ | $s^2 = \frac{1}{n-1}\sum (x_i-\bar{x})^2$ |
+| Std. deviation | $\sigma$ | $s$ |
+
+Notice the sample variance divides by $n-1$, not $n$ — [that's deliberate, and we'll see why below](#why-sample-variance-divides-by-n1).
+
+## What kind of variable is it?
+
+A **variable** is any measurable property that varies from one observation to the next. Before summarizing anything, know which *type* you have, because it decides which summaries even make sense.
+
+- **Quantitative** (numeric) — you can do arithmetic on it.
+  - **Discrete** — countable, usually whole numbers: number of trades in a day, shares held, up-days in a month.
+  - **Continuous** — any value on a range, decimals and all: price, return, volatility, time-to-expiry.
+- **Qualitative / categorical** — labels, not magnitudes: sector, exchange, credit rating, "up" vs "down" day.
+  - **Nominal** — no order (sector: tech, energy, financials).
+  - **Ordinal** — ordered but not evenly spaced (rating: AAA > AA > BBB).
+
+The type is a guardrail. A **mean** is meaningful for a continuous variable (average return) but nonsense for a nominal one (the "average sector" is undefined) — there you'd summarize with a **mode** or a frequency count instead.
+
+### Random variables — a bridge to probability
+
+A closely related idea: a **random variable** is a function that maps the outcomes of a random process to numbers. Toss a coin and let $X=0$ for heads, $X=1$ for tails; roll a die and $X \in \{1,2,3,4,5,6\}$. Like plain variables, they're **discrete** (coin, die — countable outcomes) or **continuous** (tomorrow's rainfall in inches; tomorrow's return — an unbroken range of possibilities).
+
+The connection to this page: **tomorrow's return is a continuous random variable**, and the return series you already have is a *sample of realized draws* from it. Descriptive statistics summarizes those realized draws; the study of the random variable's underlying *distribution* — the probabilities it would produce — lives in the [Probability section](/docs/Probability/foundations) (start with [distributions](/docs/Probability/distributions) for the bell curve and its fat-tailed cousins).
+
+## Measures of central tendency
+
+Where is the data centered? Three answers:
+
+- **Mean** — the arithmetic average, $\bar{x} = \frac{1}{n}\sum x_i$. Uses every value, which is its strength *and* its weakness.
+- **Median** — the middle value once the data is sorted. With an even count, average the two middle values. Depends only on rank, so it ignores how extreme the extremes are.
+- **Mode** — the most frequently occurring value. The only center that works for categorical data, and useful for discrete counts.
+
+The crucial difference is **robustness to outliers.** Take ages $\left[1, 3, 4, 5\right]$: the mean is $3.25$ and the median is $3.5$ — they agree. Now add one 100-year-old: the mean leaps to $22.6$ while the median barely moves to $4$. One outlier hijacked the mean; the median shrugged.
+
+```python
+import numpy as np
+
+# daily returns (%), with one crash day
+rets = np.array([0.4, -0.2, 0.1, 0.3, -0.1, 0.2, -9.0])
+
+print(f"mean:   {np.mean(rets):+.3f}%   <- dragged negative by the single crash")
+print(f"median: {np.median(rets):+.3f}%   <- barely moves; robust to the outlier")
+```
+
+**Why this matters for a quant:** return distributions are **skewed and fat-tailed**, so mean and median disagree far more than in a textbook. A month with 19 quiet days and one −9% crash has a *negative* mean but a mildly *positive* median — and which one you report changes the story. The gap between them is itself information about skew, and the median (and its robust relatives) is why [robust statistics](/docs/Statistics/robust-statistics) exists.
+
+## Measures of dispersion
+
+Center isn't enough. Two assets can share the same average return and be worlds apart in **risk** — dispersion is how you measure that spread.
+
+- **Variance** — the average *squared* deviation from the mean. Squaring makes every deviation positive and punishes big ones harder.
+$$
+\sigma^2 = \frac{1}{N}\sum_{i=1}^{N}(x_i-\mu)^2 \quad\text{(population)}\qquad
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})^2 \quad\text{(sample)}
+$$
+- **Standard deviation** — the square root of variance, $\sigma = \sqrt{\sigma^2}$. Squaring blew up the units (percent-squared); the square root brings them back to the original scale (percent), which is why std. deviation is the number people actually quote.
+
+**For a quant, this is not abstract: volatility *is* the standard deviation of returns.** It's the single most important risk number in finance. Same mean, different std means different risk — and the wild asset can be uninvestable even with an identical average.
+
+```python
+import numpy as np
+
+calm = np.array([0.1, -0.1, 0.2, -0.2, 0.0])   # daily returns (%)
+wild = np.array([2.0, -2.1, 1.9, -1.8, 0.0])
+
+for name, r in [("calm", calm), ("wild", wild)]:
+    print(f"{name}: mean={r.mean():+.2f}%   sample std (volatility)={r.std(ddof=1):.2f}%")
+
+# vols scale with the square root of time: daily -> annual uses ~252 trading days
+daily_vol = 1.0
+print(f"\n1% daily vol  ->  {daily_vol*np.sqrt(252):.1f}% annualized")
+```
+
+That `np.sqrt(252)` is the standard **annualization** rule: standard deviation grows with the square root of the horizon, so a 1% *daily* volatility is roughly a 16% *annual* volatility. (The $\sqrt{n}$ tax on precision in [inferential statistics](/docs/Statistics/inferential-statistics) is the same square-root-of-time law seen from the other side.)
+
+## Why sample variance divides by n−1
+
+This is a classic interview question, and the honest answer is short: **using $n$ underestimates the true variance, and $n-1$ corrects the bias.**
+
+Here's the intuition. To compute sample variance you first need a center — but you don't know the true mean $\mu$, so you use the *sample* mean $\bar{x}$, which was itself calculated from the very same data. The sample mean sits, by construction, as close to *your* data points as possible — closer, on average, than the true $\mu$ would. So the deviations $x_i - \bar{x}$ are on average a touch *smaller* than the real deviations $x_i - \mu$, and dividing their squared sum by $n$ lands you **below** the truth every time.
+
+You "used up" one piece of information estimating $\bar{x}$ — one **degree of freedom** — so you average over $n-1$ independent leftovers, not $n$. This is **Bessel's correction**, and it makes $s^2$ an **unbiased estimator**: right *on average* across many samples. The effect is largest for small samples (dividing by 4 instead of 5 is a big nudge) and negligible for large ones.
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+true_var = 4.0                      # population variance: draws from N(0, sigma=2)
+biased, unbiased = [], []
+for _ in range(20000):
+    s = rng.normal(0, 2, size=5)    # a tiny sample of 5
+    biased.append(s.var(ddof=0))    # divide by n
+    unbiased.append(s.var(ddof=1))  # divide by n-1
+
+print(f"true variance:            {true_var:.3f}")
+print(f"avg of  /n   estimates:   {np.mean(biased):.3f}   <- systematically too low")
+print(f"avg of  /(n-1) estimates: {np.mean(unbiased):.3f}   <- centered on the truth")
+```
+
+A practical gotcha that follows directly: **NumPy's `.var()` and `.std()` default to `ddof=0` (divide by $n$)**, while **pandas defaults to `ddof=1` (divide by $n-1$)**. If a volatility number ever looks subtly off between two scripts, this is the usual culprit — pass `ddof=1` in NumPy when you want the unbiased sample estimate.
+
+## Histograms: the shape of the data
+
+Center and spread are two numbers; a **histogram** shows the whole *shape*. You chop the range into equal **bins** and count how many observations fall in each — the bar heights are frequencies. It's the fastest way to see whether data is symmetric, skewed, or has fat tails.
+
+- **Bin width is a choice.** Too wide and you blur real structure; too narrow and you drown in noise.
+- A **kernel density estimate (KDE)** is a smoothed histogram — instead of hard bins it lays a small bump over each point and adds them up, giving a continuous curve.
+
+Here's a text histogram of a deliberately fat-tailed return series — the tails show up as sparse, far-flung bins:
+
+```python
+import numpy as np
+rng = np.random.default_rng(1)
+
+rets = rng.standard_t(df=3, size=1000)          # Student-t: fat-tailed returns
+counts, edges = np.histogram(rets, bins=9)
+for c, lo, hi in zip(counts, edges[:-1], edges[1:]):
+    print(f"[{lo:6.2f}, {hi:6.2f}) {'#'*c}  ({c})")
+```
+
+**The quant payoff:** a histogram of real market returns is *not* a clean bell curve. It's more peaked in the middle and has fatter tails — extreme days happen far more often than a normal distribution predicts. Seeing that shape is what stops you from trusting a model that assumes normality (and understates crash risk). Compare the histogram of your data against the [theoretical distributions](/docs/Probability/distributions) and the mismatch is the story.
+
+## Percentiles and quartiles
+
+A **percentile** is a value below which a given percentage of the data falls. The 90th percentile is the value that 90% of observations sit at or below. Two directions:
+
+- **Percentile of a value** — rank it: (count of values below it ÷ $n$) × 100.
+- **Value at a percentile** — a common position formula is $\frac{p}{100}\,(n+1)$, giving the rank of the value you want (interpolating between neighbors when it lands between two).
+
+**Quartiles** are just the percentiles that cut the data into four quarters:
+
+- **Q1** = 25th percentile, **Q2** = 50th = the **median**, **Q3** = 75th percentile.
+
+**Why a quant cares:** **Value-at-Risk is literally a percentile of the return distribution.** The 5% VaR is the 5th percentile — the loss you'd exceed only about one day in twenty. Quartiles and percentiles are how risk gets quantified without assuming any particular distribution shape (see [Valuation & Risk Management](/docs/Finance/valuation-and-risk)).
+
+```python
+import numpy as np
+rng = np.random.default_rng(2)
+
+rets = rng.normal(0.05, 1.0, 1000)              # daily returns (%)
+q1, med, q3 = np.percentile(rets, [25, 50, 75])
+var5 = np.percentile(rets, 5)                   # 5% Value-at-Risk
+
+print(f"Q1={q1:+.2f}%   median={med:+.2f}%   Q3={q3:+.2f}%")
+print(f"5th percentile (5% VaR): {var5:+.2f}%  <- ~1 day in 20 is worse than this")
+```
+
+## The 5-number summary and box plots
+
+Five percentiles capture a distribution's skeleton — the **5-number summary**:
+
+$$
+\text{minimum},\quad Q_1,\quad \text{median},\quad Q_3,\quad \text{maximum}
+$$
+
+A **box plot** draws exactly these: a box from Q1 to Q3 (the middle 50%), a line at the median, and "whiskers" reaching out to the non-outlier extremes. The width of the box is the **interquartile range**:
+
+$$
+\text{IQR} = Q_3 - Q_1
+$$
+
+The IQR also gives a distribution-free **outlier rule**. Anything beyond the *fences* is flagged:
+
+$$
+\text{lower fence} = Q_1 - 1.5\,\text{IQR}, \qquad \text{higher fence} = Q_3 + 1.5\,\text{IQR}
+$$
+
+```python
+import numpy as np
+
+data = np.array([1,2,2,2,3,3,4,5,5,5,6,6,6,6,7,8,8,9, 27.0])  # 27 is a suspect
+q1, med, q3 = np.percentile(data, [25, 50, 75])
+iqr = q3 - q1
+lo, hi = q1 - 1.5*iqr, q3 + 1.5*iqr
+outliers = data[(data < lo) | (data > hi)]
+
+print(f"min={data.min():.0f}  Q1={q1:.1f}  median={med:.1f}  Q3={q3:.1f}  max={data.max():.0f}")
+print(f"IQR={iqr:.1f}   fences=[{lo:.1f}, {hi:.1f}]   outliers={outliers}")
+```
+
+For a quant this is a cheap, assumption-free filter — flagging **bad ticks**, fat-finger prints, or genuinely extreme return days without first assuming the data is normal. (One footnote: NumPy interpolates quartiles, so its Q1/Q3 can differ slightly from the hand-counted "position" method — both are valid conventions.)
+
+## Covariance and correlation
+
+Everything above described *one* variable. The last piece describes how *two* move **together** — the foundation of diversification, hedging, and factor models.
+
+### Covariance
+
+**Covariance** measures whether two variables tend to move in the same direction. When both are above their means together (and below together), products $(x_i-\bar{x})(y_i-\bar{y})$ are positive and covariance is positive; when one rises as the other falls, it's negative.
+
+$$
+\operatorname{Cov}(X,Y) = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})
+$$
+
+A neat identity falls out immediately: the covariance of a variable **with itself** is just its variance —
+
+$$
+\operatorname{Cov}(X,X) = \frac{1}{n-1}\sum (x_i-\bar{x})^2 = \operatorname{Var}(X).
+$$
+
+Covariance has one fatal flaw as a summary: **its magnitude is unbounded and unit-dependent.** It can be anything from $-\infty$ to $+\infty$, and rescaling the data rescales it. A covariance of 20 tells you the *sign* of the relationship but nothing about its *strength* — you can't compare it across pairs.
+
+### Correlation
+
+**Correlation** fixes this by normalizing covariance into a fixed, comparable range.
+
+**Pearson correlation** divides by the two standard deviations, squeezing the result into $[-1, 1]$:
+
+$$
+\rho_{X,Y} = \frac{\operatorname{Cov}(X,Y)}{\sigma_X\,\sigma_Y}
+$$
+
+Now the number is interpretable: **+1** is perfect positive linear co-movement, **−1** perfect negative, **0** no *linear* relationship. Pearson measures **linear** association specifically — that qualifier matters.
+
+**Spearman rank correlation** is Pearson computed on the *ranks* of the data instead of the values. Because it only cares about order, it captures any **monotonic** relationship — even a curved one — and it's robust to outliers. If Y always rises when X rises but along a bent curve, Pearson reads less than 1 while Spearman reads exactly 1.
+
+```python
+import numpy as np
+from scipy import stats
+rng = np.random.default_rng(3)
+
+x = rng.normal(0, 1, 300)
+y = 0.8*x + rng.normal(0, 0.6, 300)             # linearly related to x
+
+print("covariance matrix (note the diagonal = variances):")
+print(np.round(np.cov(x, y), 3))
+print(f"\nPearson r (x, y):        {np.corrcoef(x, y)[0,1]: .3f}   (linear strength)")
+
+# a monotonic but strongly NON-linear link
+z = np.exp(3*x)
+print(f"Pearson  (x, e^(3x)):    {stats.pearsonr(x, z)[0]: .3f}   <- fooled by the curve")
+print(f"Spearman (x, e^(3x)):    {stats.spearmanr(x, z)[0]: .3f}   <- =1: perfectly monotonic")
+```
+
+**Why this is central to quant work:**
+
+- **Diversification and portfolio risk** are *built* on correlation. Two assets with high positive correlation give little diversification; low or negative correlation is what smooths a portfolio's equity curve. A correlation matrix is the raw material of portfolio construction.
+- **Feature selection.** When two predictive features are highly correlated they carry redundant information — you can often drop one without losing signal, which reduces overfitting. (More in [Regression & Classification](/docs/Machine_Learning/regression-and-classification).)
+- **The eternal warning: correlation is not causation.** Two series can move together because one drives the other, because a third thing drives both, or by pure chance over a short window. Knowing *which* requires more than a correlation coefficient — it needs the causal reasoning in [Causal Inference & DAGs](/docs/Statistics/causal-inference).
+
+## The thread
+
+Descriptive statistics looks humble next to models and machine learning, but it's where quality control lives. **Compute the mean, median, spread, quartiles, and correlations of any dataset before you model it** — the outlier you catch, the fat tail you notice, the redundant feature you spot, and the mismatch you find between your sample and the population you actually care about will save you from a confident, broken model later.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'You measure the return of every stock in the S&P 500 today and report the average. This is…',
+    options: [
+      'inferential statistics — you are generalizing to the future',
+      'descriptive statistics — you are summarizing the data you actually have, with no claim beyond it',
+      'a hypothesis test',
+      'a random variable',
+    ],
+    answer: 1,
+    explain: 'Summarizing the data in hand, with no generalization, is descriptive. It would become inferential the moment you used it to claim something about tomorrow or about a broader population.',
+  },
+  {
+    q: 'A month of daily returns has 19 quiet days near 0% and one −9% crash. Which is true?',
+    options: [
+      'the mean and median will be nearly identical',
+      'the mean is pulled negative by the crash while the median stays near 0 — the median is robust to the outlier',
+      'the median is pulled negative while the mean is unaffected',
+      'both are undefined because of the outlier',
+    ],
+    answer: 1,
+    explain: 'The mean uses every value, so one extreme day drags it down. The median depends only on the middle rank, so it barely moves — which is exactly why it is called robust.',
+  },
+  {
+    q: 'Sample variance divides by n−1 instead of n because…',
+    options: [
+      'it makes the number larger for no reason',
+      'the sample mean sits closer to the data than the true mean does, so dividing by n underestimates the variance; n−1 (Bessel’s correction) removes that bias',
+      'n−1 is faster to compute',
+      'it only applies to populations',
+    ],
+    answer: 1,
+    explain: 'Deviations are measured from the sample mean, which is fitted to the same data and therefore too close on average. One degree of freedom was spent estimating it, so you average over n−1 to get an unbiased estimate.',
+  },
+  {
+    q: 'In finance, the standard deviation of an asset’s returns is better known as…',
+    options: ['its beta', 'its volatility', 'its Sharpe ratio', 'its drawdown'],
+    answer: 1,
+    explain: 'Volatility is exactly the standard deviation of returns — the headline measure of risk. Annualize a daily volatility by multiplying by √252.',
+  },
+  {
+    q: 'The 5% Value-at-Risk of a return distribution corresponds to which descriptive measure?',
+    options: [
+      'the mean',
+      'the 5th percentile of the returns',
+      'the interquartile range',
+      'the mode',
+    ],
+    answer: 1,
+    explain: 'VaR is a percentile of the loss/return distribution. The 5% VaR is the 5th percentile — the threshold roughly one day in twenty is worse than, with no distributional assumption required.',
+  },
+  {
+    q: 'Two variables have a perfect monotonic but curved (non-linear) relationship. What do Pearson and Spearman report?',
+    options: [
+      'both report 1',
+      'Pearson reports less than 1 (it measures linear association); Spearman reports 1 (it works on ranks, capturing any monotonic link)',
+      'both report 0',
+      'Pearson reports 1; Spearman reports less than 1',
+    ],
+    answer: 1,
+    explain: 'Pearson only sees linear strength, so a curve pulls it below 1. Spearman uses ranks, so any strictly monotonic relationship — curved or not — reads as a perfect 1.',
+  },
+]} />
