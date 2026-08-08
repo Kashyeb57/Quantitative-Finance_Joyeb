@@ -102,6 +102,27 @@ clf.fit(X, y)
 print("example predicted P(class=1):", round(clf.predict_proba(X[:1])[0, 1], 3))
 ```
 
+**In quant terms** — logistic regression is *the* classic **probability-of-default** model in credit risk: feed it a firm's financials and it returns a default probability you can price.
+
+```python
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+rng = np.random.default_rng(7)
+n = 800
+leverage      = rng.normal(0, 1, n)
+profitability = rng.normal(0, 1, n)
+volatility    = rng.normal(0, 1, n)
+logit = 1.2*leverage - 1.0*profitability + 0.8*volatility - 0.5    # true risk drivers
+y = (rng.random(n) < 1 / (1 + np.exp(-logit))).astype(int)         # did the firm default?
+
+clf = LogisticRegression().fit(np.column_stack([leverage, profitability, volatility]), y)
+print("coefficients [leverage, profitability, volatility]:", np.round(clf.coef_[0], 2))
+print("-> higher leverage/volatility raise default odds; profitability lowers them")
+```
+
+The signs of the coefficients *are* the risk story — and because the output is a calibrated probability, it plugs straight into expected-loss and pricing calculations. The same setup predicts an **up/down day** from technical features; only the label changes.
+
 ### Beyond two classes: One-vs-Rest and softmax
 
 Logistic regression is binary by nature, but two schemes extend it to **multiclass**:
