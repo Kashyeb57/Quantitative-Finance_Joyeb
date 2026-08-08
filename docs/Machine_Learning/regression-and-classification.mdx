@@ -1,24 +1,190 @@
 ---
 title: Regression & Classification
-description: Linear/logistic regression, KNN, and classification basics. Notes in progress.
-sidebar_class_name: soon
+description: The supervised workhorses — linear and polynomial regression, L1/L2/ElasticNet regularization, logistic regression, k-Nearest Neighbors, and Naive Bayes — how each learns, when to use it, and runnable examples.
 ---
 
 # Regression & Classification
 
-Linear/logistic regression, KNN, and classification basics.
+These are the **supervised** models you'll reach for first on almost any tabular problem. **Regression** predicts a number (tomorrow's return); **classification** predicts a category (up-day / down-day, default / no-default). This page covers the core algorithms, the all-important idea of **regularization**, and how to pick between them. For the *statistical inference* side of regression (coefficients, t-stats, ROPE), see [Regression Analysis](/docs/Statistics/regression-analysis) — here we take the **prediction-first, ML** view.
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Linear and polynomial regression',
-    'Logistic regression',
-    'k-Nearest Neighbors',
-    'Regularization (L1 / L2)',
-    'Evaluating a classifier on market data',
-  ]}
-  meanwhile={[
-    { label: 'Regression Analysis (statistics)', to: '/docs/Statistics/regression-analysis' },
-    { label: 'Bias-Variance & Model Evaluation', to: '/docs/Machine_Learning/model-evaluation' },
-  ]}
-/>
+## 1. Linear regression, the ML way
+
+The model is a weighted sum of features, $\hat y = \mathbf{w}\cdot\mathbf{x} + b$. "Learning" means choosing $\mathbf{w}, b$ to minimize a **cost function** — for regression, the **Mean Squared Error**:
+
+$$
+J(\mathbf{w}, b) = \frac{1}{n}\sum_{i=1}^{n}\big(y_i - (\mathbf{w}\cdot\mathbf{x}_i + b)\big)^2
+$$
+
+There are two ways to minimize it: the **closed-form** normal equations (exact, but slow for huge feature counts) or **gradient descent** — repeatedly nudging the weights downhill along $-\nabla J$. Gradient descent is the workhorse because it scales and generalizes to models (like neural nets) that have *no* closed form.
+
+## 2. Polynomial regression &amp; the over/underfitting dial
+
+A straight line can't bend. **Polynomial regression** adds powers of the features ($x, x^2, x^3, \dots$) as new columns, letting a *linear* model fit *curved* relationships. The degree is a **complexity dial**:
+
+- **Too low** (degree 1 on a curve) → **underfitting**: high bias, misses the pattern.
+- **Too high** (degree 15) → **overfitting**: high variance, snakes through every noisy point and fails on new data.
+
+Finding the right spot on that dial is the central problem of ML — which brings us to the most important tool for controlling it.
+
+## 3. Regularization: L2, L1, and ElasticNet
+
+**Regularization** fights overfitting by adding a **penalty on large weights** to the cost. A model that must keep its weights small can't contort itself around noise.
+
+- **Ridge (L2)** adds $\lambda\sum w_j^2$. It **shrinks** all weights toward zero (never exactly zero). Great when many features each contribute a little.
+- **Lasso (L1)** adds $\lambda\sum |w_j|$. Its geometry drives some weights to **exactly zero** — so Lasso does automatic **feature selection**. Perfect when you suspect most features are useless.
+- **ElasticNet** blends both — shrinkage *and* selection.
+
+The strength $\lambda$ (called `alpha` in scikit-learn) is a knob you tune by cross-validation. Watch Lasso zero out pure-noise features:
+
+```python
+import numpy as np
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+
+rng = np.random.default_rng(0)
+n, p = 200, 20
+X = rng.normal(0, 1, (n, p))
+true_w = np.zeros(p); true_w[:5] = [3, -2, 1.5, 0.0, 2]   # only 4 of 20 features truly matter
+y = X @ true_w + rng.normal(0, 1, n)
+
+for name, model in [("OLS", LinearRegression()),
+                    ("Ridge (L2)", Ridge(alpha=10)),
+                    ("Lasso (L1)", Lasso(alpha=0.1))]:
+    model.fit(X, y)
+    nonzero = int(np.sum(np.abs(model.coef_) > 1e-4))
+    print(f"{name:11s} -> {nonzero:2d}/{p} non-zero coefficients")
+```
+
+OLS keeps all 20 (fitting noise); **Lasso keeps only the handful that matter** — a huge deal in finance, where you often throw hundreds of candidate signals at a model and need it to ignore the junk.
+
+## 4. Logistic regression (classification)
+
+Despite the name, this is a **classifier**. It takes the same linear score $z = \mathbf{w}\cdot\mathbf{x} + b$ and squashes it through the **sigmoid** into a probability in $(0,1)$:
+
+$$
+p = \sigma(z) = \frac{1}{1 + e^{-z}}
+$$
+
+It's trained to minimize **log-loss** (cross-entropy), and the decision boundary is exactly the hyperplane $z = 0$. It's the **default baseline classifier**: fast, calibrated probabilities, interpretable coefficients (via odds ratios).
+
+```python
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.datasets import make_classification
+from sklearn.model_selection import cross_val_score
+
+X, y = make_classification(n_samples=500, n_features=6, n_informative=3, random_state=1)
+clf = LogisticRegression(max_iter=1000)
+print("logistic CV accuracy:", round(cross_val_score(clf, X, y, cv=5).mean(), 3))
+clf.fit(X, y)
+print("example predicted P(class=1):", round(clf.predict_proba(X[:1])[0, 1], 3))
+```
+
+## 5. k-Nearest Neighbors (KNN)
+
+KNN is the poster child for **instance-based** learning: it stores the training data and, to predict a new point, looks at its **k nearest neighbors** and takes a vote (classification) or average (regression). No training, no model — just distance.
+
+The key knob is **k**:
+- **k = 1** → jagged, overfit boundary (high variance).
+- **k too large** → over-smoothed, underfit (high bias).
+
+Two practical warnings: KNN **requires feature scaling** (distances are meaningless if one feature is in dollars and another in percent), and it suffers the **curse of dimensionality** — in high dimensions "nearest" stops meaning anything.
+
+```python
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import make_classification
+from sklearn.model_selection import cross_val_score
+
+X, y = make_classification(n_samples=500, n_features=6, n_informative=3, random_state=1)
+for k in [1, 5, 25, 100]:
+    acc = cross_val_score(KNeighborsClassifier(n_neighbors=k), X, y, cv=5).mean()
+    print(f"k = {k:3d}   CV accuracy: {acc:.3f}")
+```
+
+You'll see accuracy rise then fall — the classic bias–variance arc as `k` grows.
+
+## 6. Naive Bayes
+
+Naive Bayes applies **Bayes' theorem** with one bold simplifying assumption: that the features are **conditionally independent** given the class. That assumption is almost never true ("naive"), yet the classifier works remarkably well — especially for **text**.
+
+$$
+P(\text{class} \mid \mathbf{x}) \;\propto\; P(\text{class})\prod_j P(x_j \mid \text{class})
+$$
+
+Variants match the data: **Gaussian NB** for continuous features, **Multinomial NB** for word counts, **Bernoulli NB** for binary features. It's blazing fast, needs little data, and is the classic baseline for **spam detection and sentiment** — which is why it reappears when we reach natural-language processing.
+
+```python
+import numpy as np
+from sklearn.naive_bayes import GaussianNB
+from sklearn.datasets import make_classification
+from sklearn.model_selection import cross_val_score
+
+X, y = make_classification(n_samples=500, n_features=6, n_informative=3, random_state=1)
+print("Gaussian Naive Bayes CV accuracy:", round(cross_val_score(GaussianNB(), X, y, cv=5).mean(), 3))
+```
+
+## 7. Which one — and when
+
+| Model | Best when | Key knob | Note |
+|---|---|---|---|
+| **Linear / Ridge / Lasso** | Relationship ~linear; many features | `alpha` (regularization) | Lasso = free feature selection |
+| **Logistic regression** | Classification baseline, want probabilities | `C` (inverse reg.) | Calibrated, interpretable |
+| **KNN** | Small data, local structure | `k`, distance metric | Scale features! Dies in high-D |
+| **Naive Bayes** | Text, high-D, little data | variant choice | Fast; ignores feature interactions |
+
+Start with a **regularized linear/logistic model** as your baseline — it's fast, honest, and hard to overfit. Only escalate to trees or boosting ([Trees, Ensembles & SVM](/docs/Machine_Learning/ensembles-and-svm)) if the extra complexity actually earns its keep on a **properly held-out** test set. And always judge classifiers with the right metrics — accuracy alone lies on imbalanced data — see [Model Evaluation](/docs/Machine_Learning/model-evaluation).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'What does Lasso (L1) regularization do that Ridge (L2) does not?',
+    options: [
+      'It always gives higher accuracy',
+      'It can drive some coefficients to exactly zero, performing feature selection',
+      'It removes the need for data',
+      'It only works for classification',
+    ],
+    answer: 1,
+    explain: 'L1’s geometry pushes weights to exactly zero, so Lasso selects features. Ridge (L2) only shrinks weights toward zero without eliminating them.',
+  },
+  {
+    q: 'Logistic regression turns the linear score z = w·x + b into a probability using…',
+    options: ['the ReLU function', 'the sigmoid function 1/(1+e^-z)', 'the mean squared error', 'a decision tree'],
+    answer: 1,
+    explain: 'The sigmoid squashes any real number into (0,1). Logistic regression is trained on log-loss, and its decision boundary is the hyperplane z = 0.',
+  },
+  {
+    q: 'As k grows large in KNN, the model tends to…',
+    options: [
+      'overfit more (higher variance)',
+      'underfit / over-smooth (higher bias)',
+      'ignore the data',
+      'become a linear model',
+    ],
+    answer: 1,
+    explain: 'Small k = jagged, high-variance boundary; large k averages over many points, smoothing the boundary and raising bias. There’s a sweet spot in between.',
+  },
+  {
+    q: 'Why must you scale features before using KNN?',
+    options: [
+      'To make training faster',
+      'Because KNN uses distances, and an unscaled large-unit feature would dominate the distance',
+      'Because KNN cannot handle negative numbers',
+      'You don’t need to',
+    ],
+    answer: 1,
+    explain: 'Distance-based methods are unit-sensitive: a feature measured in thousands swamps one measured in decimals. Standardize so every feature contributes fairly.',
+  },
+  {
+    q: 'The "naive" assumption in Naive Bayes is that…',
+    options: [
+      'the data is always Gaussian',
+      'the features are conditionally independent given the class',
+      'there are only two classes',
+      'the model needs no prior',
+    ],
+    answer: 1,
+    explain: 'It assumes P(x|class) factorizes across features. That’s rarely literally true, but the classifier is fast and works surprisingly well, especially for text.',
+  },
+]} />
