@@ -97,6 +97,8 @@ print("gradient boosting CV accuracy:", round(cross_val_score(gb, X, y, cv=5).me
 
 The key knobs are the **learning rate** (how much each tree contributes) and the **number of trees** — they trade off, and a small learning rate with many trees usually generalizes best. Boosting is powerful but **easier to overfit** than a random forest, so honest cross-validation matters even more.
 
+**Classification or regression?** Every tree method here — a single tree, random forests, and *all* the boosting variants (AdaBoost, GBM, XGBoost) — has a **regression twin** (the `...Regressor` classes in scikit-learn). The algorithm is identical; it just predicts a **number** instead of a class, splitting on variance (MSE) rather than impurity. So the same toolkit forecasts *returns* as readily as it classifies *up/down days*.
+
 ## 4. Support Vector Machines
 
 An SVM takes a different geometric view: find the hyperplane that separates the classes with the **widest possible margin**. Only the points on the edge — the **support vectors** — determine the boundary; everything else is irrelevant. A soft-margin parameter **C** trades off margin width against misclassifications.
