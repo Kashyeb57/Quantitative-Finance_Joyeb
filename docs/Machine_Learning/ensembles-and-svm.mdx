@@ -50,6 +50,29 @@ print("feature importances:", np.round(forest.feature_importances_, 3))
 
 Run it: the forest beats the lone tree by several points, purely from **variance reduction** — same idea as diversifying a portfolio to cut idiosyncratic risk. (The first run downloads scikit-learn into your browser, so give it a few seconds.)
 
+**In quant terms** — point a booster at next-day **direction** and read its feature importances to see which signals actually carry information. It's a crude but useful form of **factor discovery**:
+
+```python
+import numpy as np
+from sklearn.ensemble import GradientBoostingClassifier
+
+rng = np.random.default_rng(2)
+n = 800
+momentum = rng.normal(0, 1, n); rsi = rng.normal(0, 1, n)
+volatility = rng.normal(0, 1, n); volume = rng.normal(0, 1, n)
+
+X = np.column_stack([momentum, rsi, volatility, volume])
+score = 0.9*momentum - 0.6*volatility + rng.normal(0, 1, n)   # only momentum & vol truly matter
+y = (score > 0).astype(int)                                    # up-day?
+
+gb = GradientBoostingClassifier(n_estimators=150, max_depth=2, random_state=0).fit(X, y)
+for name, imp in sorted(zip(["momentum", "rsi", "volatility", "volume"],
+                            gb.feature_importances_), key=lambda t: -t[1]):
+    print(f"{name:11s} importance: {imp:.3f}")
+```
+
+Momentum and volatility rise to the top; RSI and volume are correctly judged near-useless. (Feature importance is a hint, not proof — always confirm out-of-sample, since a booster will happily "find" importance in noise.)
+
 ## 3. Boosting: learning from your mistakes
 
 Bagging builds trees **in parallel** and averages them. **Boosting** builds them **sequentially**, each new tree focused on the errors the previous ones made. Done right, boosting turns many *weak* learners (shallow "stumps") into one very strong model.

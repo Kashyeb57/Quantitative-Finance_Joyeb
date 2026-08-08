@@ -56,6 +56,29 @@ for name, model in [("OLS", LinearRegression()),
 
 OLS keeps all 20 (fitting noise); **Lasso keeps only the handful that matter** — a huge deal in finance, where you often throw hundreds of candidate signals at a model and need it to ignore the junk.
 
+**In quant terms** — imagine a return model fed a stack of candidate **factors** (momentum, value, size, quality) plus a pile of noise signals. Lasso does the factor selection for you:
+
+```python
+import numpy as np
+from sklearn.linear_model import LassoCV
+
+rng = np.random.default_rng(1)
+n = 500
+momentum = rng.normal(0, 1, n); value = rng.normal(0, 1, n)
+size     = rng.normal(0, 1, n); quality = rng.normal(0, 1, n)
+noise    = rng.normal(0, 1, (n, 10))                       # 10 junk "signals"
+
+X = np.column_stack([momentum, value, size, quality, noise])
+names = ["momentum", "value", "size", "quality"] + [f"noise{i}" for i in range(10)]
+y = 0.8*momentum + 0.5*value + 0.4*quality + rng.normal(0, 1, n)   # size & noise don't matter
+
+lasso = LassoCV(cv=5, random_state=0).fit(X, y)
+kept = [nm for nm, c in zip(names, lasso.coef_) if abs(c) > 1e-3]
+print("factors Lasso kept:", kept)
+```
+
+It keeps momentum, value, and quality — and drops size and every noise column. That's automated signal selection, exactly what you want when screening a factor zoo.
+
 ## 4. Logistic regression (classification)
 
 Despite the name, this is a **classifier**. It takes the same linear score $z = \mathbf{w}\cdot\mathbf{x} + b$ and squashes it through the **sigmoid** into a probability in $(0,1)$:

@@ -29,6 +29,29 @@ print("components needed for 90% of the variance:",
 
 In quant work PCA is everywhere: the first few components of a basket of yields *are* the classic **level / slope / curvature** of the term structure; PCA on a universe of stock returns recovers **market and sector factors**. Always **scale features first** — PCA chases variance, so an unscaled large-unit feature would hijack the components.
 
+**In quant terms** — run PCA on daily yields across maturities and the first **three** components explain almost everything, corresponding to level, slope, and curvature:
+
+```python
+import numpy as np
+from sklearn.decomposition import PCA
+
+rng = np.random.default_rng(3)
+mats = np.array([0.25, 0.5, 1, 2, 3, 5, 7, 10, 20, 30])   # maturities in years
+n = 400
+level = rng.normal(0, 1, n); slope = rng.normal(0, 1, n); curv = rng.normal(0, 1, n)
+curves = (level[:, None]                                    # parallel shift
+          + slope[:, None] * (mats / 30)                    # steepening/flattening
+          + curv[:, None] * np.exp(-((mats - 3) ** 2) / 8)  # a hump in the belly
+          + rng.normal(0, 0.05, (n, len(mats))))
+
+pca = PCA(n_components=3).fit(curves)
+print("variance explained by PC1, PC2, PC3:", np.round(pca.explained_variance_ratio_, 3))
+print("cumulative:", round(pca.explained_variance_ratio_.sum(), 3),
+      "-> PC1=level, PC2=slope, PC3=curvature")
+```
+
+Three numbers summarize an entire yield curve — that's the compression PCA buys you, and it's the backbone of fixed-income risk models.
+
 ## Clustering: grouping without labels
 
 ### K-Means
@@ -55,6 +78,29 @@ The silhouette peaks at **k = 3** — the algorithm recovers the true number of 
 ### Hierarchical clustering
 
 Instead of committing to *k*, **agglomerative** clustering starts with every point as its own cluster and repeatedly **merges the two closest** clusters, building a tree — the **dendrogram**. You cut the tree at whatever height gives the number of clusters you want. It's great for **exploration** (you *see* the nested structure) and doesn't assume round clusters, but it's slower on large data. The **linkage** rule (single / complete / average / Ward) controls what "closest" means.
+
+**In quant terms** — cluster stocks by their **return-correlation profile** to find groups that move together (for diversification, or a statistical alternative to sectors):
+
+```python
+import numpy as np
+from sklearn.cluster import AgglomerativeClustering
+
+rng = np.random.default_rng(4)
+T = 250                                          # trading days
+sector_factor = rng.normal(0, 1, (T, 3))         # 3 hidden "sector" drivers
+returns, truth = [], []
+for s in range(3):
+    for _ in range(5):                            # 5 stocks per sector
+        returns.append(0.8 * sector_factor[:, s] + rng.normal(0, 0.6, T))
+        truth.append(s)
+
+corr = np.corrcoef(np.array(returns))            # 15x15 correlation matrix
+labels = AgglomerativeClustering(n_clusters=3).fit_predict(corr)   # group by correlation profile
+print("clusters found:", labels.tolist())
+print("true sectors  :", truth)
+```
+
+The algorithm recovers the three hidden groups purely from how the stocks co-move — no sector labels needed. That's the idea behind correlation-based portfolio construction.
 
 ### DBSCAN — density-based
 
