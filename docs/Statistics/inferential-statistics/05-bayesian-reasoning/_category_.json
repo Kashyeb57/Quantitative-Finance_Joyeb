@@ -1,9 +1,9 @@
 {
-  "label": "3. Bayesian Reasoning",
-  "position": 3,
+  "label": "5. Bayesian Reasoning",
+  "position": 5,
   "link": {
     "type": "generated-index",
-    "title": "3. Bayesian Reasoning",
+    "title": "5. Bayesian Reasoning",
     "description": "The other way to reason under uncertainty: updating a prior belief with evidence. Bayes' theorem, conditional probability, the base-rate trap that fools even experts, and why the same machinery underlies the Naive Bayes classifier."
   }
 }

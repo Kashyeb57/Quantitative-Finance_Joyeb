@@ -84,6 +84,63 @@ export function tInv(p, df) {
   return (lo + hi) / 2;
 }
 
+// Regularized lower incomplete gamma P(a, x) — series + continued fraction
+// (Numerical Recipes). Underlies the chi-square CDF.
+export function lowerGammaP(a, x) {
+  if (x <= 0) return 0;
+  if (x < a + 1) {
+    let ap = a;
+    let del = 1 / a;
+    let sum = del;
+    for (let i = 0; i < 300; i++) {
+      ap += 1;
+      del *= x / ap;
+      sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-14) break;
+    }
+    return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+  }
+  const FPMIN = 1e-300;
+  let b = x + 1 - a;
+  let c = 1 / FPMIN;
+  let d = 1 / b;
+  let h = d;
+  for (let i = 1; i <= 300; i++) {
+    const an = -i * (i - a);
+    b += 2;
+    d = an * d + b;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = b + an / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-14) break;
+  }
+  const q = Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+  return 1 - q;
+}
+
+// Chi-square CDF with k degrees of freedom
+export function chiSquareCDF(x, k) {
+  if (x <= 0) return 0;
+  return lowerGammaP(k / 2, x / 2);
+}
+
+// Inverse chi-square CDF via bisection (critical values)
+export function chiSquareInv(p, k) {
+  if (p <= 0) return 0;
+  if (p >= 1) return Infinity;
+  let lo = 0;
+  let hi = 1000;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (chiSquareCDF(mid, k) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 // Box–Muller standard normal sample
 export function randn() {
   let u = 0;

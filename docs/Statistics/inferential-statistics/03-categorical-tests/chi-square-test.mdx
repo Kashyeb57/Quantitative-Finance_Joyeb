@@ -1,0 +1,113 @@
+---
+title: "What Is a Chi-Square Test?"
+sidebar_position: 1
+description: The chi-square goodness-of-fit test — a non-parametric test for categorical data that checks claims about population proportions by comparing an observed categorical distribution against the one a theory predicts.
+---
+
+# What Is a Chi-Square Test?
+
+Every test so far — [z](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test), [t](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test) — was about a **mean**. But a lot of data isn't numeric at all: bike colours, yes/no, left/right-handed, product categories. For that we need a different tool — the **chi-square test**, often written the **chi-square test for goodness of fit.**
+
+## What it is
+
+**The chi-square test for goodness of fit makes claims about population *proportions*.** The moment you hear "proportion," think **categorical variable** — you're counting how many fall into each bucket, not averaging a measurement.
+
+Formally, **the chi-square test is a non-parametric test that is performed on categorical data — both ordinal and nominal.** ("Non-parametric" means it makes no assumption that the data follow a normal distribution; it works directly on [category counts](/docs/Statistics/descriptive-statistics/variables/variables).)
+
+## The idea: theory vs observed
+
+Two examples make it click. Start with bikes.
+
+> There is a **population of males who like different-colour bikes.** A **theory** about the population says each colour is equally popular — $\tfrac{1}{3}$ like **yellow**, $\tfrac{1}{3}$ like **red**, $\tfrac{1}{3}$ like **orange**. Someone then collects a **sample** and finds **22** like yellow, **17** like red, and **59** like orange.
+
+Two distributions are now sitting side by side, and they have names:
+
+- The **theory** ($\tfrac13, \tfrac13, \tfrac13$) is the **theory categorical distribution** — what the claim predicts.
+- The **sample** (22, 17, 59) is the **observed categorical distribution** — what actually happened.
+
+**These two — theory and observed — are the *only* ingredients the chi-square test uses.** The whole job of the **goodness-of-fit test** is to answer one question:
+
+> *Does the observed sample information **support** the theory?*
+
+If the sample proportions are close to $\tfrac13, \tfrac13, \tfrac13$, the theory fits; if they're lopsided like 22/17/59, maybe it doesn't. Drag the observed counts and watch how far the solid bars pull away from the dashed "theory" bars — that gap is exactly what chi-square will measure:
+
+<ChiSquareGOFLab
+  showTest={false}
+  title="Bike colours — observed sample vs the theory's expected counts"
+  categories={[
+    { label: 'Yellow', observed: 22, expectedProp: 1/3, color: '#eab308' },
+    { label: 'Red', observed: 17, expectedProp: 1/3, color: '#e34948' },
+    { label: 'Orange', observed: 59, expectedProp: 1/3, color: '#f59e0b' },
+  ]}
+/>
+
+## Setting up a goodness-of-fit problem
+
+Here's the problem we'll actually **solve in the next lesson** — for now, just the setup, because getting the **Observed (O)** and **Expected (E)** columns right is the whole skill.
+
+> In a science class of **75 students**, **11 are left-handed.** Does this class fit the **theory that 12% of people are left-handed?**
+
+There are two categories — **left-handed** and **right-handed** — so we build an O and an E for each.
+
+**Observed (O)** comes straight from the sample. 11 are left-handed, so the remaining $75 - 11 = 64$ are right-handed.
+
+**Expected (E)** comes from the theory. "12% of people are left-handed," applied to 75 students:
+
+$$
+E_{\text{left}} = \frac{12}{100}\times 75 = 9, \qquad E_{\text{right}} = 75 - 9 = 66
+$$
+
+| Category | Observed (O) | Expected (E) |
+|---|---|---|
+| Left-handed | 11 | 9 |
+| Right-handed | 64 | 66 |
+| **Total** | **75** | **75** |
+
+Notice both columns sum to 75 — the expected counts just redistribute the same 75 people according to the theory. Now the test compares the two columns: **are the observed counts a good fit for the expected ones, or too far off to be chance?**
+
+$$
+\text{Observed categorical distribution} \;\overset{?}{\approx}\; \text{Theory categorical distribution}
+$$
+
+There **is** a formula that turns that comparison into a single number and a p-value — the $\chi^2$ statistic — but we'll work it, with a full decision and the Python, in the **next lesson (goodness-of-fit test).** For now the takeaway is the framing: **a chi-square test compares two categorical variables, expressed as a theory (expected) distribution and an observed distribution.**
+
+## Why a quant cares
+
+Markets are full of categorical claims that a chi-square test is built to check:
+
+- **"Is this die/model/RNG fair?"** Whether it's simulated returns landing in expected buckets, or trade outcomes across regimes, goodness of fit tests whether an observed frequency distribution matches the one your model assumes.
+- **Distributional assumptions are testable, not sacred.** A risk model that assumes returns fall into certain quantile bins can be checked: bin the realized returns (Observed) against the model's predicted counts (Expected) and let chi-square flag the misfit — a formal version of "the tails are fatter than the model says."
+- **It handles the data means can't.** Sector, rating, signal-bucket, win/loss — categorical outcomes with no meaningful average. Chi-square is the hypothesis test for *counts and proportions*, which is a huge share of real trading data.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A chi-square goodness-of-fit test is used for…',
+    options: [
+      'the mean of a continuous variable',
+      'categorical data — checking whether observed proportions match a theory (non-parametric)',
+      'comparing three group variances',
+      'the standard error of a mean',
+    ],
+    answer: 1,
+    explain: 'Chi-square is a non-parametric test on categorical (ordinal/nominal) data. It makes claims about population proportions, not means.',
+  },
+  {
+    q: 'In the bike example, the theory (⅓, ⅓, ⅓) is the ___ and the sample (22, 17, 59) is the ___.',
+    options: [
+      'observed distribution; theory distribution',
+      'theory (expected) categorical distribution; observed categorical distribution',
+      'both are observed',
+      'both are expected',
+    ],
+    answer: 1,
+    explain: 'The theory’s predicted proportions form the theory/expected categorical distribution; the collected sample is the observed categorical distribution. Goodness of fit compares them.',
+  },
+  {
+    q: 'For the class of 75 with a theory of 12% left-handed, the expected number of left-handers is…',
+    options: ['11', '12', '9 (= 12/100 × 75)', '64'],
+    answer: 2,
+    explain: 'Expected = proportion × total = 0.12 × 75 = 9 left-handed, leaving 66 right-handed. Observed was 11 and 64.',
+  },
+]} />

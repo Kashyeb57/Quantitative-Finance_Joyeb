@@ -1,0 +1,9 @@
+{
+  "label": "3. Categorical Tests (Chi-Square)",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "3. Categorical Tests (Chi-Square)",
+    "description": "Tests for counts and proportions rather than means. The chi-square test — a non-parametric test on categorical data — and its goodness-of-fit form, which asks whether an observed categorical distribution matches the one a theory predicts."
+  }
+}

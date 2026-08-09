@@ -17,6 +17,7 @@ import CLTLab from '@site/src/components/Interactive/CLTLab';
 import HypothesisTestLab from '@site/src/components/Interactive/HypothesisTestLab';
 import BayesTheoremLab from '@site/src/components/Interactive/BayesTheoremLab';
 import ConfidenceIntervalLab from '@site/src/components/Interactive/ConfidenceIntervalLab';
+import ChiSquareGOFLab from '@site/src/components/Interactive/ChiSquareGOFLab';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 // Every component listed here can be used in any .mdx file without an import.
@@ -40,5 +41,6 @@ export default {
   HypothesisTestLab,
   BayesTheoremLab,
   ConfidenceIntervalLab,
+  ChiSquareGOFLab,
   CalcPlot,
 };
