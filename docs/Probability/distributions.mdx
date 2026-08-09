@@ -29,6 +29,21 @@ Experiments worth running:
 4. **Tail risk:** set a=−8, b=−3 with μ=0, σ=1. That tiny sliver is a "3-sigma event" — rarer than
    0.2%. Markets produce them far more often than the Gaussian says they should (fat tails!).
 
+## The bell in 3D
+
+The curve above is one variable. Put **two** independent normal variables together and their **joint density** becomes a 3D bell — the natural generalization. Drag it to rotate:
+
+<Surface3D
+  title="Joint density of two independent standard normals"
+  xLabel="X"
+  yLabel="Y"
+  zLabel="density"
+  f={(x, y) => Math.exp(-(x * x + y * y) / 2)}
+  caption="Two independent normals give a perfectly round, symmetric hill — the height at each (X, Y) is how likely that combination is. Introduce correlation and this hill stretches into a diagonal ridge; see the Correlation lesson to rotate that version."
+/>
+
+Correlation reshapes this hill: at $\rho = 0$ it's the round bell above, but as $\rho \to \pm 1$ it collapses into a **ridge** along the diagonal — the geometry of two variables that move together. There's a rotatable $\rho = 0.8$ version on the [Correlation page](/docs/Statistics/descriptive-statistics/covariance-and-correlation/correlation).
+
 ## Check your understanding
 
 <Quiz questions={[
