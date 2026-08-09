@@ -1,0 +1,191 @@
+---
+title: "Types of ANOVA"
+sidebar_position: 3
+description: The three types of ANOVA — one-way (one factor, independent levels), repeated-measures (one factor, dependent levels), and factorial (two or more factors) — each with its worked example and the independent-vs-dependent distinction that separates them.
+---
+
+# Types of ANOVA
+
+There are **three types of ANOVA**, and which one you use depends on **how many factors** you have and whether the **levels are independent or dependent.** (A favourite interview question — be able to explain all three.)
+
+| Type | Factors | Levels | Example |
+|---|---|---|---|
+| **① One-way** | **one** | ≥ 2, **independent** | medication dosage (10/20/30 mg) |
+| **② Repeated measures** | **one** | ≥ 2, **dependent** | running distance over Day 1/2/3 |
+| **③ Factorial** | **two or more** | ≥ 2 each, can be independent **and** dependent | running × gender |
+
+The whole distinction between the first two is **independent vs dependent levels** — different subjects in each group, versus the *same* subjects measured repeatedly:
+
+<div style={{textAlign: 'center', margin: '1.5rem 0'}}>
+  <svg viewBox="0 0 640 250" width="640" style={{maxWidth: '100%'}} role="img" aria-label="Left: one-way ANOVA has different subjects (different colours) in each level. Right: repeated-measures ANOVA has the same subjects measured across every level.">
+    {/* One-way */}
+    <text x="160" y="18" textAnchor="middle" fontSize="12.5" fill="currentColor" fontWeight="700">One-way — independent levels</text>
+    <text x="160" y="34" textAnchor="middle" fontSize="10" fill="var(--ifm-color-emphasis-600, #888)">different subjects in each group</text>
+    {[['10mg', 60], ['20mg', 160], ['30mg', 260]].map(([lbl, x], gi) => (
+      <g key={lbl}>
+        <text x={x} y="58" textAnchor="middle" fontSize="11" fill="currentColor">{lbl}</text>
+        {[0, 1, 2].map((r) => {
+          const colors = ['#25c2a0', '#0e7490', '#f59e0b', '#e34948', '#8b5cf6', '#eab308', '#14b8a6', '#ef7a3d', '#3b82f6'];
+          return <circle key={r} cx={x} cy={78 + r * 26} r="8" fill={colors[gi * 3 + r]} opacity="0.9" />;
+        })}
+      </g>
+    ))}
+    <text x="160" y="176" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">9 different people</text>
+    {/* divider */}
+    <line x1="330" y1="20" x2="330" y2="200" stroke="var(--viz-grid)" strokeWidth="1.5" />
+    {/* Repeated measures */}
+    <text x="490" y="18" textAnchor="middle" fontSize="12.5" fill="currentColor" fontWeight="700">Repeated measures — dependent levels</text>
+    <text x="490" y="34" textAnchor="middle" fontSize="10" fill="var(--ifm-color-emphasis-600, #888)">same subjects across every level</text>
+    {[['Day 1', 400], ['Day 2', 490], ['Day 3', 580]].map(([lbl, x]) => (
+      <text key={lbl} x={x} y="58" textAnchor="middle" fontSize="11" fill="currentColor">{lbl}</text>
+    ))}
+    {[0, 1, 2].map((r) => {
+      const c = ['#25c2a0', '#0e7490', '#f59e0b'][r];
+      const y = 78 + r * 26;
+      return (
+        <g key={r}>
+          <line x1="400" y1={y} x2="580" y2={y} stroke={c} strokeWidth="1.2" strokeDasharray="3 3" opacity="0.6" />
+          {[400, 490, 580].map((x) => <circle key={x} cx={x} cy={y} r="8" fill={c} opacity="0.9" />)}
+        </g>
+      );
+    })}
+    <text x="490" y="176" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">3 people, each measured 3×</text>
+  </svg>
+</div>
+
+## ① One-way ANOVA
+
+**One factor, with at least two levels, and the levels are *independent*.**
+
+> A **doctor wants to test a new medication to decrease headache.** They split participants into **3 conditions — 10 mg, 20 mg, 30 mg** — and ask participants to **rate their headache from 1 to 10.**
+
+Here **medication is the factor** and the **dosages (10/20/30 mg) are the levels.** The levels are **independent**: the 10 mg group and the 30 mg group are *different people* — one dose has no relationship to another.
+
+| 10 mg | 20 mg | 30 mg |
+|---|---|---|
+| 5 | 7 | 2 |
+| 3 | 4 | 6 |
+| … | … | … |
+
+Different participants give different ratings depending on the dose's effect. One factor, independent groups ⇒ **one-way ANOVA.**
+
+## ② Repeated-measures ANOVA
+
+**One factor, with at least two levels, but the levels are *dependent*.**
+
+> Take **running** as the factor. Select a sample of people and have **each person run on Day 1, Day 2, and Day 3.**
+
+The **levels are Day 1 / Day 2 / Day 3**, and they're **dependent** because the **same person** is measured on every day — their Day 2 is linked to their Day 1. (Performance might not improve on Day 2 but jump on Day 3.)
+
+| Subject | Day 1 | Day 2 | Day 3 |
+|---|---|---|---|
+| Person 1 | 8 | 5 | 4 |
+| Person 2 | 7 | 4 | 9 |
+| … | … | … | … |
+
+Same subjects, repeated across the levels ⇒ **repeated-measures ANOVA.**
+
+## ③ Factorial ANOVA
+
+**Two or more factors** (each with at least two levels), and the levels **can be independent *and* dependent.**
+
+Reuse the running data, but add a **second factor: gender** (levels **Male / Female**). Now two factors cross each other:
+
+| Gender | Running: Day 1 | Day 2 | Day 3 |
+|---|---|---|---|
+| **Male** | 8 | 5 | 4 |
+| **Male** | 9 | 4 | 3 |
+| **Female** | 2 | 4 | 6 |
+| **Female** | 7 | 8 | 3 |
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 150" width="460" style={{maxWidth: '100%'}} role="img" aria-label="Factorial design: the Running factor (dependent, across days) crossed with the Gender factor (independent, male vs female)">
+    <rect x="150" y="14" width="280" height="30" rx="6" fill="#f59e0b" fillOpacity="0.12" stroke="#f59e0b" strokeWidth="1.4" />
+    <text x="290" y="33" textAnchor="middle" fontSize="11.5" fill="currentColor" fontWeight="700">Running — factor (dependent: Day 1/2/3)</text>
+    <rect x="14" y="60" width="110" height="76" rx="6" fill="#0e7490" fillOpacity="0.12" stroke="#0e7490" strokeWidth="1.4" />
+    <text x="69" y="94" textAnchor="middle" fontSize="11.5" fill="currentColor" fontWeight="700">Gender</text>
+    <text x="69" y="110" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.8">factor</text>
+    <text x="69" y="124" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.8">(indep: M / F)</text>
+    {['Day 1', 'Day 2', 'Day 3'].map((d, i) => (
+      <g key={d}>
+        <rect x={150 + i * 95} y="60" width="85" height="76" rx="6" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+        <text x={192 + i * 95} y="102" textAnchor="middle" fontSize="10.5" fill="currentColor">{d}</text>
+      </g>
+    ))}
+  </svg>
+</div>
+
+Male and female are completely separate entities (**independent**), while the day-to-day running for one person is **dependent** — so a factorial design mixes both. Two or more factors ⇒ **factorial ANOVA.**
+
+```python
+import pandas as pd
+
+# The three types differ mainly in DATA SHAPE:
+
+# ① One-way: one factor (dosage), independent groups
+one_way = pd.DataFrame({
+    "dosage":   ["10mg","10mg","20mg","20mg","30mg","30mg"],
+    "headache": [5, 3, 7, 4, 2, 6],
+})
+
+# ② Repeated measures: one factor (day), SAME subjects across levels
+repeated = pd.DataFrame({
+    "subject": ["P1","P1","P1","P2","P2","P2"],
+    "day":     ["D1","D2","D3","D1","D2","D3"],
+    "km":      [8, 5, 4, 7, 4, 9],
+})
+
+# ③ Factorial: two factors (gender × day)
+factorial = pd.DataFrame({
+    "gender": ["M","M","M","F","F","F"],
+    "day":    ["D1","D2","D3","D1","D2","D3"],
+    "km":     [8, 5, 4, 2, 4, 6],
+})
+
+print(one_way.groupby("dosage")["headache"].mean())
+# scipy.stats.f_oneway → one-way;  statsmodels AnovaRM → repeated measures;
+# statsmodels ols + anova_lm → factorial. The F-test mechanics come next lesson.
+```
+
+## Why a quant cares
+
+The three designs map cleanly onto three shapes of trading question:
+
+- **One-way** — compare a metric across *independent* buckets: mean returns of **three separate strategies**, or across **sectors**, where the groups share no members.
+- **Repeated measures** — the *same* assets or portfolio measured over **repeated periods or conditions** (pre/during/post a regime). Because the measurements are linked, treating them as independent overstates your evidence — repeated-measures handles the correlation.
+- **Factorial** — two drivers at once: does return depend on **strategy AND market regime**, and do they **interact**? Factorial ANOVA is the tool for interaction effects, the same idea as interaction terms in a [regression](/docs/Statistics/regression-analysis).
+
+Picking the right type is really about honoring the **dependence structure** of your data — the single thing financial time series violate most often.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'One factor (medication dosage: 10/20/30 mg) with different participants in each dose group is a…',
+    options: ['factorial ANOVA', 'one-way ANOVA (one factor, independent levels)', 'repeated-measures ANOVA', 'chi-square test'],
+    answer: 1,
+    explain: 'One factor with independent groups (different people per level) is a one-way ANOVA.',
+  },
+  {
+    q: 'The SAME people are measured running on Day 1, Day 2 and Day 3. This is…',
+    options: [
+      'one-way ANOVA',
+      'repeated-measures ANOVA — one factor whose levels are dependent (same subjects across levels)',
+      'factorial ANOVA',
+      'a z-test',
+    ],
+    answer: 1,
+    explain: 'Repeated measurements on the same subjects make the levels dependent — repeated-measures ANOVA.',
+  },
+  {
+    q: 'Studying running (Day 1/2/3) AND gender (male/female) together requires…',
+    options: [
+      'one-way ANOVA',
+      'factorial ANOVA — two or more factors, whose levels can be independent and dependent',
+      'repeated-measures ANOVA only',
+      'a single t-test',
+    ],
+    answer: 1,
+    explain: 'Two factors crossed (running × gender) is a factorial ANOVA; it can mix dependent (days) and independent (gender) levels and reveal interactions.',
+  },
+]} />
