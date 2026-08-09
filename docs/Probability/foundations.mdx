@@ -57,6 +57,22 @@ $$
 P(K \text{ or } \heartsuit) = \frac{4}{52} + \frac{13}{52} - \frac{1}{52} = \frac{16}{52} = \frac{4}{13}
 $$
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 360 210" width="360" style={{maxWidth: '100%'}} role="img" aria-label="Venn diagram: 4 Kings and 13 Hearts overlap on 1 card (the King of Hearts), giving 16 distinct cards">
+    <circle cx="140" cy="115" r="78" fill="#0e7490" fillOpacity="0.32" stroke="#0e7490" strokeWidth="1.5" />
+    <circle cx="235" cy="115" r="78" fill="#25c2a0" fillOpacity="0.28" stroke="#25c2a0" strokeWidth="1.5" />
+    <text x="95" y="26" textAnchor="middle" fill="currentColor" fontSize="14" fontWeight="700">Kings (4)</text>
+    <text x="280" y="26" textAnchor="middle" fill="currentColor" fontSize="14" fontWeight="700">Hearts (13)</text>
+    <text x="102" y="122" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="700">3</text>
+    <text x="187" y="118" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="700">1</text>
+    <text x="273" y="122" textAnchor="middle" fill="currentColor" fontSize="22" fontWeight="700">12</text>
+    <text x="187" y="138" textAnchor="middle" fill="currentColor" fontSize="11" opacity="0.75">K♥</text>
+  </svg>
+  <div style={{fontSize: '0.85rem', opacity: 0.75, marginTop: '0.25rem'}}>
+    3 + 1 + 12 = <b>16</b> distinct cards, so P(K or ♥) = 16/52. The <b>1</b> in the middle (the King of Hearts) is what you subtract to avoid double-counting.
+  </div>
+</div>
+
 Mutually exclusive events are just the special case where $P(A \text{ and } B) = 0$, and the overlap term vanishes — which is why the simpler rule above worked for coins and dice.
 
 ```python
