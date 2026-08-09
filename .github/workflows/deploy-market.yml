@@ -1,0 +1,42 @@
+# Deploys the market-data Cloudflare Worker (/_m/*) THROUGH GitHub Actions,
+# so worker code ships the same way the site does: push to main -> deploy.
+# No more local `wrangler deploy`.
+#
+# One-time setup — add these repo secrets (Settings -> Secrets and variables ->
+# Actions -> New repository secret):
+#   CLOUDFLARE_API_TOKEN   - a token with: Account > Workers Scripts: Edit,
+#                            Zone > Workers Routes: Edit
+#   CLOUDFLARE_ACCOUNT_ID  - your Cloudflare account id (dashboard right sidebar)
+#
+# Runtime secrets (ALPACA_KEY_ID, ALPACA_SECRET_KEY) live ON Cloudflare via
+# `wrangler secret put` and PERSIST across deploys — this workflow never touches
+# them (set them once locally per the README).
+
+name: Deploy market worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'market/src/**'
+      - 'market/wrangler.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-market
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy with Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: market

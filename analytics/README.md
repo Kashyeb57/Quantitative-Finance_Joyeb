@@ -52,6 +52,25 @@ That's it. The beacon is already in the site, so once the Worker is live it
 starts logging. (The site's next push to `main` will include the beacon; until
 then the Worker still logs any hit to `/_a/collect`.)
 
+## Automated deploys (GitHub Actions)
+
+After the one-time provisioning above you **never run `wrangler deploy` by hand
+again**. The workflow `.github/workflows/deploy-analytics.yml` redeploys this
+Worker automatically on every push to `main` that touches `analytics/**` — the
+same pipeline that ships the site, so all code goes through GitHub.
+
+It needs two repository secrets (**Settings → Secrets and variables → Actions**):
+
+| Secret | Value |
+|--------|-------|
+| `CLOUDFLARE_API_TOKEN` | token with **Workers Scripts: Edit**, **D1: Edit**, **Workers Routes: Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | your Cloudflare account id (dashboard right sidebar) |
+
+Your `VIEW_TOKEN` stays on Cloudflare and is untouched by deploys. The steps
+above (create D1, load schema, set `VIEW_TOKEN`) are one-time provisioning; after
+that, code changes ship through GitHub. You can also trigger a deploy manually
+from the **Actions** tab (“Deploy analytics worker” → *Run workflow*).
+
 ## View your traffic
 
 Open, replacing `YOUR_TOKEN` with what you set in step 4:

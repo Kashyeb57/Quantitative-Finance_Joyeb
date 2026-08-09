@@ -1,0 +1,42 @@
+# Deploys the site-analytics Cloudflare Worker (/_a/*) THROUGH GitHub Actions,
+# so worker code ships the same way the site does: push to main -> deploy.
+# No more local `wrangler deploy`.
+#
+# One-time setup — add these repo secrets (Settings -> Secrets and variables ->
+# Actions -> New repository secret):
+#   CLOUDFLARE_API_TOKEN   - a token with: Account > Workers Scripts: Edit,
+#                            Account > D1: Edit, Zone > Workers Routes: Edit
+#   CLOUDFLARE_ACCOUNT_ID  - your Cloudflare account id (dashboard right sidebar)
+#
+# Runtime secrets (VIEW_TOKEN) live ON Cloudflare via `wrangler secret put` and
+# PERSIST across deploys — this workflow never touches them. First-time D1
+# creation + schema still run once locally (see README).
+
+name: Deploy analytics worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'analytics/src/**'
+      - 'analytics/wrangler.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-analytics
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy with Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: analytics

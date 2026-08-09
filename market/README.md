@@ -49,6 +49,25 @@ browser  ──►  joyebkashyeb.com.np/_m/*  (this Worker, holds the keys)  ─
 5. **Check it** — open <https://joyebkashyeb.com.np/_m/health>.
    You should see `{"ok":true}`.
 
+## Automated deploys (GitHub Actions)
+
+After the one-time setup above you **never run `wrangler deploy` by hand again**.
+The workflow `.github/workflows/deploy-market.yml` redeploys this Worker on every
+push to `main` that touches `market/**` — the same pipeline that ships the site,
+so all code goes through GitHub.
+
+It needs two repository secrets (**Settings → Secrets and variables → Actions**):
+
+| Secret | Value |
+|--------|-------|
+| `CLOUDFLARE_API_TOKEN` | token with **Workers Scripts: Edit**, **Workers Routes: Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | your Cloudflare account id (dashboard right sidebar) |
+
+Your `ALPACA_KEY_ID` / `ALPACA_SECRET_KEY` stay on Cloudflare and are untouched by
+deploys. Setting them (step 3) is one-time provisioning; after that, code changes
+ship through GitHub. You can also trigger a deploy manually from the **Actions**
+tab (“Deploy market worker” → *Run workflow*).
+
 ## Notes
 
 - The free Alpaca tier serves the **IEX** feed. Prices are real trades in real
