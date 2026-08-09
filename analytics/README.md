@@ -54,10 +54,12 @@ then the Worker still logs any hit to `/_a/collect`.)
 
 ## Automated deploys (GitHub Actions)
 
-After the one-time provisioning above you **never run `wrangler deploy` by hand
-again**. The workflow `.github/workflows/deploy-analytics.yml` redeploys this
-Worker automatically on every push to `main` that touches `analytics/**` — the
-same pipeline that ships the site, so all code goes through GitHub.
+Deploys now happen **automatically through GitHub** — the default path, so your
+code ships the same way the site does. The workflow
+`.github/workflows/deploy-analytics.yml` redeploys this Worker on every push to
+`main` that touches `analytics/**`. You can **still run `wrangler deploy` locally**
+whenever you want (an emergency hotfix, a quick test) — CI is the default, not a
+lock. Just commit your change too, so GitHub stays the source of truth.
 
 It needs two repository secrets (**Settings → Secrets and variables → Actions**):
 
