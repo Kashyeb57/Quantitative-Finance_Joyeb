@@ -1,0 +1,175 @@
+---
+title: "Chi-Square Goodness of Fit — Worked"
+sidebar_position: 2
+description: The full χ² goodness-of-fit computation — a city-weights census example, worked end to end. Building the expected counts, the five steps, the right-skewed decision boundary and critical value 5.991 from the χ² table, and χ² = Σ(O−E)²/E = 26.66.
+---
+
+# Chi-Square for Goodness of Fit — a Worked Problem
+
+Now we actually *run* the [chi-square test](/docs/Statistics/inferential-statistics/categorical-tests/chi-square-test) from the last lesson — a full hypothesis test, step by step, using the **chi-square table**.
+
+## The problem
+
+> In the **2010 census** of a small city, the **weights** of individuals were distributed as:
+>
+> | Weight | &lt;50 kg | 50–75 | &gt;75 |
+> |---|---|---|---|
+> | **Proportion** | 20% | 30% | 50% |
+>
+> In **2020**, the weights of **n = 500** individuals were sampled, with these results:
+>
+> | Weight | &lt;50 | 50–75 | &gt;75 |
+> |---|---|---|---|
+> | **Count** | 140 | 160 | 200 |
+>
+> Using **α = 0.05**, would you conclude the population distribution of weights has **changed** in the last 10 years?
+
+There are **three categories**, so chi-square is the right tool. The 2010 percentages are the **theory** — the **expected** distribution; the 2020 sample is the **observed** distribution.
+
+## Build the expected counts
+
+The 2010 proportions still hold under the null, but we need them as **counts out of the 2020 sample of 500** — so multiply each proportion by 500:
+
+$$
+E_{<50} = 0.2\times 500 = 100, \qquad E_{50\text{–}75} = 0.3\times 500 = 150, \qquad E_{>75} = 0.5\times 500 = 250
+$$
+
+| Weight | Observed (O) | Expected (E) |
+|---|---|---|
+| &lt;50 | 140 | 100 |
+| 50–75 | 160 | 150 |
+| &gt;75 | 200 | 250 |
+| **Total** | **500** | **500** |
+
+## The five steps
+
+**① Hypotheses.**
+
+$$
+H_0:\ \text{the data meets the expectation} \qquad H_1:\ \text{the data does *not* meet the expectation}
+$$
+
+**② Significance level.** $\alpha = 0.05$, so $\text{C.I.} = 95\%$.
+
+**③ Degrees of freedom.** For goodness of fit, df is the number of categories minus one:
+
+$$
+\text{df} = k - 1 = 3 - 1 = 2
+$$
+
+**④ Decision boundary.** Here's what's different from the [z](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test)/[t](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test) tests: those used a **symmetric** bell, but the **chi-square distribution is not symmetric** — it's right-skewed and can't go negative. So the test is **one-tailed**: the entire rejection region (area $\alpha$) sits in the **right tail**. We find one **critical value** from the χ² table using df and $\alpha$, and reject $H_0$ if the statistic lands beyond it.
+
+<ChiSquareDistLab defaultDf={2} defaultAlpha={0.05} observed={26.66} />
+
+**Reading the chi-square table.** The table's top row is the area *to the right* of the critical value. At **df = 2** and $\alpha = 0.05$:
+
+| df | 0.10 | **0.05** | 0.025 | 0.01 |
+|---|---|---|---|---|
+| 1 | 2.706 | 3.841 | 5.024 | 6.635 |
+| **2** | 4.605 | **5.991** | 7.378 | 9.210 |
+| 3 | 6.251 | 7.815 | 9.348 | 11.345 |
+| 4 | 7.779 | 9.488 | 11.143 | 13.277 |
+| 5 | 9.236 | 11.070 | 12.833 | 15.086 |
+
+So the **critical value is 5.991**. The rule:
+
+$$
+\text{if } \chi^2 > 5.991 \Rightarrow \textbf{reject } H_0, \qquad \text{else} \Rightarrow \textbf{fail to reject } H_0.
+$$
+
+**⑤ Calculate the chi-square test statistic.**
+
+$$
+\chi^2 = \sum \frac{(O - E)^2}{E}
+$$
+
+$$
+\chi^2 = \frac{(140-100)^2}{100} + \frac{(160-150)^2}{150} + \frac{(200-250)^2}{250} = \frac{1600}{100} + \frac{100}{150} + \frac{2500}{250}
+$$
+
+$$
+\chi^2 = 16 + 0.66 + 10 = \boxed{26.66}
+$$
+
+The lab below reproduces this — each bar's $(O-E)^2/E$ contribution and the total. Notice one category (&lt;50, contributing 16) dominates the statistic:
+
+<ChiSquareGOFLab
+  showTest={true}
+  title="City weights — observed (2020) vs expected (2010 proportions × 500)"
+  categories={[
+    { label: '<50', observed: 140, expectedProp: 0.2, color: '#25c2a0' },
+    { label: '50-75', observed: 160, expectedProp: 0.3, color: '#0e7490' },
+    { label: '>75', observed: 200, expectedProp: 0.5, color: '#f59e0b' },
+  ]}
+/>
+
+## The verdict
+
+$$
+26.66 > 5.991 \ \Rightarrow\ \textbf{reject } H_0.
+$$
+
+**Conclusion:** the weights of the 2020 population are **different** from those expected under the 2010 distribution. Looking at *where* the counts diverge, the shift is toward the **lighter** end — the &lt;50 bin came in *above* expectation (140 vs 100) while the &gt;75 bin came in *below* (200 vs 250) — so the distribution genuinely changed shape over the decade.
+
+```python
+import numpy as np
+from scipy import stats
+
+observed = np.array([140, 160, 200])          # 2020 sample, n = 500
+props    = np.array([0.20, 0.30, 0.50])        # 2010 census proportions
+expected = props * observed.sum()              # -> [100, 150, 250]
+
+chi2, p = stats.chisquare(f_obs=observed, f_exp=expected)
+df = len(observed) - 1
+crit = stats.chi2.ppf(0.95, df)                # critical value at α = 0.05
+
+print(f"expected counts : {expected}")
+print(f"chi-square stat : {chi2:.2f}")         # 26.66
+print(f"df = {df},  critical (α=0.05) = {crit:.3f}")   # 2, 5.991
+print(f"p-value         : {p:.6f}")
+print("decision        :", "REJECT H0 — distribution changed" if chi2 > crit
+      else "fail to reject H0")
+```
+
+## Why a quant cares
+
+The goodness-of-fit test is the formal answer to *"has the distribution changed?"* — a question that runs through risk and trading:
+
+- **Regime / distribution drift.** Bucket returns (or volatility, or volume) into ranges and compare this year's observed counts against last year's — or against your model's assumed distribution. A big χ² is a statistical alarm that **the world your model was fit on no longer holds**.
+- **Backtest sanity checks.** If a strategy assumes signals fall into certain outcome categories at certain rates, goodness of fit tests whether the *realized* frequencies match — catching a broken assumption before it costs money.
+- **One category can dominate.** Here the &lt;50 bin alone contributed 16 of the 26.66. The per-category $(O-E)^2/E$ terms tell you *where* the misfit lives — which bucket drove the rejection — not just that a misfit exists.
+
+Where a z/t test asks "did the *average* move?", chi-square asks "did the *whole shape* move?" — often the more important question when tails are what hurt you.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The chi-square goodness-of-fit statistic is…',
+    options: [
+      'Σ(O − E)',
+      'Σ (O − E)² / E  — summed over categories',
+      '(O − E)² / n',
+      'the average of O and E',
+    ],
+    answer: 1,
+    explain: 'χ² = Σ(O−E)²/E. Each category contributes its squared gap divided by its expected count; the sum is the test statistic.',
+  },
+  {
+    q: 'With 3 categories at α = 0.05, df = 2 and the critical value from the χ² table is…',
+    options: ['3.841', '5.991', '7.815', '9.210'],
+    answer: 1,
+    explain: 'df = k − 1 = 2. Reading the χ² table at df = 2 and α = 0.05 (area 0.05 in the right tail) gives 5.991.',
+  },
+  {
+    q: 'The computed χ² was 26.66 against a critical 5.991. Because χ² is right-skewed and one-tailed, we…',
+    options: [
+      'fail to reject H₀',
+      'reject H₀ — 26.66 > 5.991, so the observed distribution differs from the expected',
+      'need a two-tailed test',
+      'accept H₀ because 26.66 is large',
+    ],
+    answer: 1,
+    explain: '26.66 falls far into the right-tail rejection region beyond 5.991, so we reject H₀: the 2020 weights differ from the 2010 expectation.',
+  },
+]} />

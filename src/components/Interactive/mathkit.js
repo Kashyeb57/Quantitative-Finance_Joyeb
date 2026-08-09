@@ -127,6 +127,12 @@ export function chiSquareCDF(x, k) {
   return lowerGammaP(k / 2, x / 2);
 }
 
+// Chi-square probability density with k degrees of freedom
+export function chiSquarePDF(x, k) {
+  if (x <= 0) return 0;
+  return Math.exp((k / 2 - 1) * Math.log(x) - x / 2 - (k / 2) * Math.log(2) - lgamma(k / 2));
+}
+
 // Inverse chi-square CDF via bisection (critical values)
 export function chiSquareInv(p, k) {
   if (p <= 0) return 0;
