@@ -52,6 +52,28 @@ $$
 
 Bigger $n$ ⇒ smaller standard error ⇒ **narrower** interval ⇒ a sharper estimate. The full mechanics — confidence levels, $t$ vs $z$, margins of error — live in [Inferential Statistics](/docs/Statistics/inferential-statistics).
 
+What does "95% confidence" actually mean? Draw many samples, build an interval from each, and about **19 of every 20 will contain the true μ** — one in twenty misses (the amber one below). The interval is random; μ is fixed:
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 208" width="460" style={{maxWidth: '100%'}} role="img" aria-label="Twelve 95-percent confidence intervals from twelve samples; eleven contain the true mean, one misses it">
+    <line x1="230" y1="16" x2="230" y2="188" stroke="#0e7490" strokeWidth="1.5" strokeDasharray="4 3" />
+    <text x="230" y="12" textAnchor="middle" fontSize="11" fill="#0e7490" fontWeight="700">true μ</text>
+    <g stroke="#25c2a0" strokeWidth="2.5">
+      <line x1="180" y1="26" x2="270" y2="26" /><line x1="198" y1="40" x2="278" y2="40" /><line x1="170" y1="54" x2="270" y2="54" />
+      <line x1="203" y1="82" x2="287" y2="82" /><line x1="192" y1="96" x2="268" y2="96" /><line x1="166" y1="110" x2="262" y2="110" />
+      <line x1="207" y1="124" x2="277" y2="124" /><line x1="184" y1="138" x2="272" y2="138" /><line x1="210" y1="152" x2="290" y2="152" />
+      <line x1="176" y1="166" x2="268" y2="166" /><line x1="197" y1="180" x2="275" y2="180" />
+    </g>
+    <line x1="140" y1="68" x2="204" y2="68" stroke="#f59e0b" strokeWidth="2.5" />
+    <circle cx="225" cy="26" r="2.6" fill="#25c2a0" /><circle cx="238" cy="40" r="2.6" fill="#25c2a0" /><circle cx="220" cy="54" r="2.6" fill="#25c2a0" />
+    <circle cx="172" cy="68" r="2.6" fill="#f59e0b" />
+    <circle cx="245" cy="82" r="2.6" fill="#25c2a0" /><circle cx="230" cy="96" r="2.6" fill="#25c2a0" /><circle cx="214" cy="110" r="2.6" fill="#25c2a0" />
+    <circle cx="242" cy="124" r="2.6" fill="#25c2a0" /><circle cx="228" cy="138" r="2.6" fill="#25c2a0" /><circle cx="250" cy="152" r="2.6" fill="#25c2a0" />
+    <circle cx="222" cy="166" r="2.6" fill="#25c2a0" /><circle cx="236" cy="180" r="2.6" fill="#25c2a0" />
+    <text x="230" y="203" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">each bar = a 95% CI from one sample · the amber one missed μ (~1 in 20)</text>
+  </svg>
+</div>
+
 ```python
 import numpy as np
 rng = np.random.default_rng(1)

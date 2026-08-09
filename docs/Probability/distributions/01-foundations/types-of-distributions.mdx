@@ -41,6 +41,29 @@ Each row is a lesson. The key split is the one from the last page: **discrete �
 - **Log-Normal** — a right-skewed hump for quantities that can't go negative. Continuous.
 - **Uniform** — a flat distribution where everything is equally likely; **discrete** (a die, a PMF) or **continuous** (a random point in an interval, a PDF).
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 200" width="460" style={{maxWidth: '100%'}} role="img" aria-label="Decision tree: a countable random variable uses a PMF (Bernoulli, Binomial, Poisson); a continuous one uses a PDF (Normal, Log-Normal, Uniform)">
+    <rect x="165" y="10" width="130" height="34" rx="6" fill="none" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+    <text x="230" y="31" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Random variable</text>
+    <line x1="200" y1="44" x2="110" y2="76" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
+    <line x1="260" y1="44" x2="350" y2="76" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
+    <text x="118" y="64" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">countable</text>
+    <text x="344" y="64" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.7">any value in a range</text>
+    <rect x="30" y="78" width="160" height="34" rx="6" fill="#0e7490" fillOpacity="0.12" stroke="#0e7490" strokeWidth="1.4" />
+    <text x="110" y="99" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Discrete → PMF</text>
+    <line x1="110" y1="112" x2="110" y2="128" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+    <rect x="30" y="128" width="160" height="54" rx="6" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+    <text x="110" y="150" textAnchor="middle" fontSize="11" fill="currentColor">Bernoulli · Binomial</text>
+    <text x="110" y="168" textAnchor="middle" fontSize="11" fill="currentColor">Poisson · (discrete Uniform)</text>
+    <rect x="270" y="78" width="160" height="34" rx="6" fill="#25c2a0" fillOpacity="0.12" stroke="#25c2a0" strokeWidth="1.4" />
+    <text x="350" y="99" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Continuous → PDF</text>
+    <line x1="350" y1="112" x2="350" y2="128" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+    <rect x="270" y="128" width="160" height="54" rx="6" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+    <text x="350" y="150" textAnchor="middle" fontSize="11" fill="currentColor">Normal · Log-Normal</text>
+    <text x="350" y="168" textAnchor="middle" fontSize="11" fill="currentColor">(continuous Uniform)</text>
+  </svg>
+</div>
+
 Two more, beyond the six, matter enormously in finance and get their own lessons in [module 4](/docs/Probability/distributions/heavy-tails/power-law): the **Power Law** and the **Pareto** distribution — the heavy-tailed shapes that the tidy list above quietly ignores.
 
 ## One dataset, many distributions

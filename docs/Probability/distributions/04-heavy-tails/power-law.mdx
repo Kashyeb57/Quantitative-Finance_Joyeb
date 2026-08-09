@@ -55,6 +55,20 @@ The lecture's examples span sports, economics, and engineering:
 
 A power law $y = c\,x^{-\alpha}$ becomes a **straight line** when you plot $\ln y$ against $\ln x$ (slope $-\alpha$). That's the practical test: histogram your data on log-log axes, and if it's a straight line, it's a power law — not a bell.
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 182" width="460" style={{maxWidth: '100%'}} role="img" aria-label="A power law is a curved decay on linear axes but a straight descending line on log-log axes">
+    <line x1="30" y1="150" x2="200" y2="150" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="30" y1="150" x2="30" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <path d="M34,28 C48,110 82,144 198,148" fill="none" stroke="#25c2a0" strokeWidth="2.5" />
+    <text x="115" y="172" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">linear axes → curved</text>
+    <line x1="270" y1="150" x2="440" y2="150" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="270" y1="150" x2="270" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="278" y1="30" x2="432" y2="146" stroke="#0e7490" strokeWidth="2.5" />
+    <text x="322" y="46" fontSize="10" fill="#0e7490" opacity="0.9">ln y vs ln x</text>
+    <text x="355" y="172" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">log–log axes → straight, slope −α</text>
+  </svg>
+</div>
+
 ```python
 import numpy as np
 rng = np.random.default_rng(0)

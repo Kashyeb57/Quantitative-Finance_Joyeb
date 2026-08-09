@@ -108,6 +108,22 @@ $$
 
 Variance is largest at $p = 0.5$ (a fair coin is *maximally* uncertain: $\sigma^2 = 0.25$) and shrinks to 0 as $p \to 0$ or $p \to 1$ (a near-certain outcome carries almost no uncertainty). Watch $\sigma^2$ peak as you slide the lab to $p=0.5$.
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 440 214" width="440" style={{maxWidth: '100%'}} role="img" aria-label="Variance sigma-squared = p(1-p), a parabola peaking at p = 0.5 with value 0.25 and falling to 0 at p = 0 and p = 1">
+    <line x1="44" y1="180" x2="410" y2="180" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="44" y1="180" x2="44" y2="24" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <path d="M44,180 L80,126 L116,84 L152,54 L188,36 L224,30 L260,36 L296,54 L332,84 L368,126 L404,180" fill="none" stroke="#25c2a0" strokeWidth="2.5" />
+    <line x1="224" y1="30" x2="224" y2="180" stroke="#f59e0b" strokeWidth="1.4" strokeDasharray="4 3" />
+    <circle cx="224" cy="30" r="4" fill="#f59e0b" />
+    <text x="224" y="20" textAnchor="middle" fontSize="11" fill="#f59e0b" fontWeight="700">max σ² = 0.25 at p = 0.5</text>
+    <text x="44" y="196" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">0</text>
+    <text x="224" y="196" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">0.5</text>
+    <text x="404" y="196" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">1</text>
+    <text x="228" y="210" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">success probability p</text>
+    <text x="16" y="30" fontSize="12" fill="currentColor" opacity="0.7">σ²</text>
+  </svg>
+</div>
+
 ```python
 def bernoulli(p):
     mean = p

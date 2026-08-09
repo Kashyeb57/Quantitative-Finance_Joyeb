@@ -38,6 +38,33 @@ The notes round $\sigma \approx 1.414$ to $1$ to keep the arithmetic clean, whic
 | 4 | $(4-3)/1 = 1$ |
 | 5 | $(5-3)/1 = 2$ |
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 440 200" width="440" style={{maxWidth: '100%'}} role="img" aria-label="Standardizing the values 1 to 5 (mean 3) into z-scores minus2 to plus2 (mean 0); each value maps straight down">
+    <line x1="80" y1="56" x2="80" y2="144" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+    <line x1="150" y1="56" x2="150" y2="144" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+    <line x1="220" y1="56" x2="220" y2="144" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+    <line x1="290" y1="56" x2="290" y2="144" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+    <line x1="360" y1="56" x2="360" y2="144" stroke="currentColor" strokeWidth="0.8" opacity="0.25" />
+    <line x1="50" y1="50" x2="390" y2="50" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <circle cx="80" cy="50" r="4" fill="#0e7490" /><circle cx="150" cy="50" r="4" fill="#0e7490" /><circle cx="220" cy="50" r="4.5" fill="#f59e0b" /><circle cx="290" cy="50" r="4" fill="#0e7490" /><circle cx="360" cy="50" r="4" fill="#0e7490" />
+    <text x="80" y="38" textAnchor="middle" fontSize="12" fill="currentColor">1</text>
+    <text x="150" y="38" textAnchor="middle" fontSize="12" fill="currentColor">2</text>
+    <text x="220" y="38" textAnchor="middle" fontSize="12" fill="#f59e0b" fontWeight="700">3</text>
+    <text x="290" y="38" textAnchor="middle" fontSize="12" fill="currentColor">4</text>
+    <text x="360" y="38" textAnchor="middle" fontSize="12" fill="currentColor">5</text>
+    <text x="410" y="54" fontSize="11" fill="#0e7490" fontWeight="700">X (μ=3, σ≈1)</text>
+    <text x="220" y="104" textAnchor="middle" fontSize="12" fill="#25c2a0" fontWeight="700">z = (x − μ) / σ   ↓</text>
+    <line x1="50" y1="150" x2="390" y2="150" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <circle cx="80" cy="150" r="4" fill="#0e7490" /><circle cx="150" cy="150" r="4" fill="#0e7490" /><circle cx="220" cy="150" r="4.5" fill="#f59e0b" /><circle cx="290" cy="150" r="4" fill="#0e7490" /><circle cx="360" cy="150" r="4" fill="#0e7490" />
+    <text x="80" y="170" textAnchor="middle" fontSize="12" fill="currentColor">−2</text>
+    <text x="150" y="170" textAnchor="middle" fontSize="12" fill="currentColor">−1</text>
+    <text x="220" y="170" textAnchor="middle" fontSize="12" fill="#f59e0b" fontWeight="700">0</text>
+    <text x="290" y="170" textAnchor="middle" fontSize="12" fill="currentColor">1</text>
+    <text x="360" y="170" textAnchor="middle" fontSize="12" fill="currentColor">2</text>
+    <text x="410" y="154" fontSize="11" fill="#25c2a0" fontWeight="700">Z (μ=0, σ=1)</text>
+  </svg>
+</div>
+
 The transform slides the center to 0 and rescales the spread to 1 — the whole distribution moves onto the axis running $-4 \dots +4$. The **shape doesn't change**; only the labels on the axis do. (With the exact $\sigma=\sqrt2$ the z-scores are $\{-1.41, -0.71, 0, 0.71, 1.41\}$ — same idea, less tidy numbers.)
 
 A z-score is unitless and universal: $z = 0$ is exactly average, $z = +2$ means "two standard deviations above the mean" whether the raw data was in dollars, kilograms, or basis points. Set $\mu=0,\ \sigma=1$ below and read the **z of a** / **z of b** fields as you move the bounds:

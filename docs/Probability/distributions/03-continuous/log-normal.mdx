@@ -54,6 +54,20 @@ Let $\sigma$ sweep and plot the density over $(\sigma, x)$. At small $\sigma$ it
 
 The defining relationship is also a *tool*: if data looks log-normal, **take logs and it becomes normal** — after which every normal-based method (z-scores, confidence intervals, the empirical rule) applies. A [QQ plot](/docs/Probability/distributions/continuous/normal) of $\ln(X)$ against a normal should fall on a straight line. (The more general version of this trick — a **Box–Cox transform** — appears in the [power-law lesson](/docs/Probability/distributions/heavy-tails/power-law).)
 
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 172" width="460" style={{maxWidth: '100%'}} role="img" aria-label="Taking the natural log of a right-skewed log-normal turns it into a symmetric normal bell">
+    <line x1="24" y1="140" x2="200" y2="140" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <path d="M28,140 C50,140 58,54 82,52 C112,50 150,120 198,134" fill="none" stroke="#25c2a0" strokeWidth="2.5" />
+    <text x="112" y="162" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">Log-normal (right-skewed)</text>
+    <line x1="212" y1="92" x2="260" y2="92" stroke="#f59e0b" strokeWidth="2" />
+    <path d="M262,92 l-9,-4 l0,8 z" fill="#f59e0b" />
+    <text x="236" y="82" textAnchor="middle" fontSize="12" fill="#f59e0b" fontWeight="700">ln(x)</text>
+    <line x1="272" y1="140" x2="448" y2="140" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <path d="M276,140 C318,140 334,46 360,46 C386,46 402,140 444,140" fill="none" stroke="#0e7490" strokeWidth="2.5" />
+    <text x="360" y="162" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">Normal (symmetric)</text>
+  </svg>
+</div>
+
 ```python
 import numpy as np
 rng = np.random.default_rng(0)
