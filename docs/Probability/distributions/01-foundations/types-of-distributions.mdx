@@ -1,0 +1,118 @@
+---
+title: "Types of Probability Distribution"
+sidebar_position: 2
+description: A map of the named distributions — which are discrete (PMF) and which are continuous (PDF), and how the columns of a real dataset each pick their own distribution.
+---
+
+# Types of Probability Distribution
+
+A **dataset becomes a distribution.** Collect enough ages, weights, or salaries and each column stops being a list of numbers and starts having a *shape* — some pile up in a symmetric hump, some lean right, some sit flat. Each recognizable shape has a name, a formula (a [PMF or PDF](/docs/Probability/distributions/foundations/pmf-pdf-cdf)), and a set of assumptions. This page is the map; the rest of the module is the territory.
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 480 130" width="480" style={{maxWidth: '100%'}} role="img" aria-label="Three dataset shapes: a symmetric bell, a right-skewed hump, and another bell">
+    <g stroke="#25c2a0" strokeWidth="2" fill="none">
+      <path d="M20,110 C60,110 65,40 90,40 C115,40 120,110 160,110" />
+      <path d="M185,110 C200,110 205,45 220,45 C245,45 300,105 325,108" />
+      <path d="M350,110 C390,110 400,35 420,35 C440,35 450,110 470,110" />
+    </g>
+    <text x="90" y="126" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">Ages</text>
+    <text x="255" y="126" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">Salary (skewed)</text>
+    <text x="410" y="126" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.75">Weight</text>
+  </svg>
+</div>
+
+## The six named distributions in this module
+
+Each row is a lesson. The key split is the one from the last page: **discrete → PMF, continuous → PDF.**
+
+| # | Distribution | Type | Discrete/Continuous | Models |
+|---|---|---|---|---|
+| 1 | [Bernoulli](/docs/Probability/distributions/discrete/bernoulli) | **PMF** | Discrete | one yes/no trial — a binary outcome |
+| 2 | [Binomial](/docs/Probability/distributions/discrete/binomial) | **PMF** | Discrete | number of successes in $n$ trials |
+| 3 | [Poisson](/docs/Probability/distributions/discrete/poisson) | **PMF** | Discrete | number of events in a fixed interval |
+| 4 | [Normal / Gaussian](/docs/Probability/distributions/continuous/normal) | **PDF** | Continuous | the symmetric bell — the default "assumption" |
+| 5 | [Log-Normal](/docs/Probability/distributions/continuous/log-normal) | **PDF** | Continuous | right-skewed, positive-only (prices, incomes) |
+| 6 | [Uniform](/docs/Probability/distributions/continuous/uniform) | **PMF or PDF** | Either | every outcome equally likely (flat) |
+
+- **Bernoulli** — outcomes are **binary** (success/failure). Discrete.
+- **Binomial** — repeat a Bernoulli trial $n$ times and count the successes. Discrete.
+- **Normal/Gaussian** — the symmetric bell curve; the distribution most models *assume*. Continuous.
+- **Poisson** — counts of events in a window (arrivals per hour). Discrete.
+- **Log-Normal** — a right-skewed hump for quantities that can't go negative. Continuous.
+- **Uniform** — a flat distribution where everything is equally likely; **discrete** (a die, a PMF) or **continuous** (a random point in an interval, a PDF).
+
+Two more, beyond the six, matter enormously in finance and get their own lessons in [module 4](/docs/Probability/distributions/heavy-tails/power-law): the **Power Law** and the **Pareto** distribution — the heavy-tailed shapes that the tidy list above quietly ignores.
+
+## One dataset, many distributions
+
+A real dataset almost never has *one* distribution — **each column picks its own.** The lecture's example is a **house-price prediction dataset**, the kind a data analyst or data scientist explores (EDA) and engineers features from (FE). Walk the columns:
+
+| Feature | Values | Random variable | Function |
+|---|---|---|---|
+| Size of the house | any positive number (sq ft) | **Continuous** | PDF |
+| Number of rooms | $1, 2, 3, \dots$ (counts) | **Discrete** | PMF |
+| Floor | $1, 2, 3, \dots$ (counts) | **Discrete** | PMF |
+| Sea-side view? | $\{0, 1\}$ (no / yes) | **Discrete (Bernoulli!)** | PMF |
+| Location | categories | Discrete (categorical) | PMF |
+| **Price** (the target) | any positive number (\$) | **Continuous** | PDF |
+
+The "sea-side view" column — a plain $\{0,1\}$ flag — *is* a Bernoulli variable, whether or not anyone labels it that way. Recognizing which distribution each feature follows is exactly what tells you how to scale it, which model can consume it, and what a "surprising" value would even mean.
+
+```python
+import pandas as pd
+
+house = pd.DataFrame({
+    "size_sqft":  [900, 1200, 1500, 2000, 850],   # continuous  -> PDF
+    "rooms":      [2, 3, 3, 4, 1],                 # discrete    -> PMF
+    "floor":      [1, 5, 2, 12, 1],                # discrete    -> PMF
+    "sea_view":   [0, 0, 1, 1, 0],                 # Bernoulli   -> PMF
+    "price_k":    [120, 180, 260, 540, 95],        # continuous  -> PDF (the target)
+})
+
+for col in house.columns:
+    kind = "discrete (PMF)" if house[col].nunique() <= 6 and (house[col] % 1 == 0).all() else "continuous (PDF)"
+    print(f"{col:10s} -> {kind}")
+```
+
+## Why a quant cares
+
+Choosing a distribution is a modeling *decision*, and every one carries assumptions that can quietly break:
+
+- Model a stock **price** as **Normal** and you allow negative prices — impossible. That's why prices are modeled **Log-Normal** (positive-only, right-skewed).
+- Model daily **returns** as **Normal** and you assume thin tails — but real returns have **fat tails** ([power law](/docs/Probability/distributions/heavy-tails/power-law) territory), so a "Normal" risk model badly understates crashes.
+- Model **defaults** or **trade arrivals** as independent counts and you're in **Binomial** / **Poisson** land — useful, until the independence assumption fails.
+
+The whole skill is matching the shape of the data to the distribution whose assumptions actually hold. Start with the simplest discrete one: [the Bernoulli trial](/docs/Probability/distributions/discrete/bernoulli).
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A dataset column "has a swimming pool?" holds only 0 or 1. Its distribution is…',
+    options: ['Normal', 'Bernoulli (a discrete PMF)', 'Poisson', 'Log-Normal'],
+    answer: 1,
+    explain: 'A single binary 0/1 outcome is a Bernoulli variable — a discrete distribution described by a PMF.',
+  },
+  {
+    q: 'Which pairing is correct?',
+    options: [
+      'Binomial → PDF (continuous)',
+      'Normal → PMF (discrete)',
+      'Poisson → PMF (discrete); Normal → PDF (continuous)',
+      'Bernoulli → PDF (continuous)',
+    ],
+    answer: 2,
+    explain: 'Poisson counts events (discrete → PMF); the Normal is a continuous bell (→ PDF). Bernoulli and Binomial are discrete PMFs; Log-Normal is a continuous PDF.',
+  },
+  {
+    q: 'Why model a stock PRICE as Log-Normal rather than Normal?',
+    options: [
+      'Log-Normal is easier to compute',
+      'a Normal allows negative values, but a price cannot go below zero; Log-Normal is positive-only and right-skewed',
+      'prices are discrete',
+      'they are identical',
+    ],
+    answer: 1,
+    explain: 'The Normal has support over all real numbers, including negatives. Prices are positive and right-skewed, which the Log-Normal captures.',
+  },
+]} />

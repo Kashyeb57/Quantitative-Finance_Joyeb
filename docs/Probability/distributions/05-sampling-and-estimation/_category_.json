@@ -1,0 +1,9 @@
+{
+  "label": "5. Sampling & Estimation",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "5. Sampling & Estimation",
+    "description": "How a sample connects back to the population it came from: the Central Limit Theorem, which makes the average of almost anything normal, and estimation — using an observed statistic (a point or an interval) to stand in for an unknown population parameter."
+  }
+}

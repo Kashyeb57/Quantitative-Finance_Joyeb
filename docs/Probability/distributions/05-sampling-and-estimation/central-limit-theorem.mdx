@@ -1,0 +1,132 @@
+---
+title: "Central Limit Theorem"
+sidebar_position: 1
+description: The theorem that makes statistics work — the sampling distribution of the mean is normal, N(μ, σ/√n), no matter what the population looks like, once n is large enough. An interactive demo, a 3D view of the standard error, and why quants can trust an average.
+---
+
+# Central Limit Theorem
+
+The **Central Limit Theorem (CLT)** is the reason statistics works at all. It rests on one concept — the **sampling distribution** — and delivers one astonishing result.
+
+## The idea: a sampling distribution
+
+**A sampling distribution is the probability distribution of a *statistic* computed over a large number of samples taken from a population.** Here the statistic is the **mean**. The procedure:
+
+1. Start with a population with mean $\mu$ and standard deviation $\sigma$.
+2. Draw a sample of size $n$ and compute its mean — call it $\bar{x}_1$.
+3. Draw another sample of size $n$, get $\bar{x}_2$. And another, $\bar{x}_3$… up to $\bar{x}_m$.
+
+$$
+S_1 = \{x_1, x_2, \dots, x_n\} \to \bar{x}_1, \quad S_2 = \{x_2, x_3, \dots, x_n\} \to \bar{x}_2, \quad \dots, \quad S_m \to \bar{x}_m
+$$
+
+Those sample means $\{\bar{x}_1, \bar{x}_2, \dots, \bar{x}_m\}$ form a distribution of their own — the **sampling distribution of the mean**, centered on $\mu_{\bar{x}}$.
+
+## The theorem
+
+> **The sampling distribution of the mean will always be normally distributed, as long as the sample size is large enough — regardless of whether the population is normal, Poisson, binomial, or any other distribution.**
+
+That's the magic. It doesn't matter what shape you start from:
+
+- **① If the population *is* normal**, $X \sim N(\mu, \sigma)$ — the sample means are normal too (no surprise).
+- **② If the population is *not* normal** — skewed, bimodal, exponential, anything — the sample means **still** pile up into a normal, provided the sample size is large enough. The rule of thumb is:
+
+$$
+\boxed{\,n \ge 30 \;\Rightarrow\; \text{sampling distribution of the mean is} \approx \text{Normal}\,}
+$$
+
+### See it happen
+
+Pick a deliberately un-normal population (the skewed exponential, or the two-humped bimodal), then push the sample size $n$ up from 1. The **top** chart is the population; the **bottom** chart is the distribution of the sample mean, with the theoretical normal dashed on top. By $n \ge 30$ the bottom chart locks onto the bell — whatever the top looks like:
+
+<CLTLab />
+
+## The result in a formula
+
+The sampling distribution of the mean isn't just *normal* — we know its exact parameters. Starting from a normal population $X \sim N(\mu, \sigma)$:
+
+$$
+\bar{X} \sim N\!\left(\mu,\; \frac{\sigma}{\sqrt{n}}\right)
+$$
+
+where $\sigma$ = population standard deviation, $\mu$ = population mean, $n$ = sample size. Two facts fall out:
+
+1. **The mean of the sample means is the population mean**, $\mu_{\bar{x}} = \mu$ — averaging is unbiased.
+2. **The spread shrinks as $\sqrt{n}$.** The standard deviation of the sample mean — called the **standard error** — is $\sigma/\sqrt{n}$. More data ⇒ a tighter estimate, but only at the rate $\sqrt{n}$: to halve your error you need **four times** the data.
+
+### The standard error in 3D
+
+Here is $\bar{X} \sim N(\mu, \sigma/\sqrt{n})$ drawn over both $n$ and $\bar{x}$. As $n$ grows the bell climbs and narrows into a sharp ridge over $\mu$ — the standard error $\sigma/\sqrt{n}$ collapsing. Drag to rotate:
+
+<Surface3D
+  title="Sampling distribution of the mean tightens as n grows"
+  xLabel="n"
+  yLabel="x̄"
+  zLabel="density"
+  xMin={1}
+  xMax={30}
+  yMin={-3}
+  yMax={3}
+  n={26}
+  yaw={44}
+  pitch={30}
+  f={(nn, x) => {
+    const N = Math.max(1, Math.round(nn));
+    const se = 1 / Math.sqrt(N); // σ = 1
+    return Math.exp(-(x * x) / (2 * se * se)) / (se * Math.sqrt(2 * Math.PI));
+  }}
+  caption="With σ = 1 and μ = 0: at n = 1 the curve is a wide standard normal; by n = 30 it is a tall narrow spike of width σ/√n ≈ 0.18. That narrowing is the √n law of precision."
+/>
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+# a strongly NON-normal population: exponential (right-skewed)
+mu, sigma = 1.0, 1.0                       # exponential(1): mean=1, std=1
+n, m = 30, 20_000
+means = rng.exponential(1.0, size=(m, n)).mean(axis=1)   # m sample means
+
+print(f"population: mean={mu}, std={sigma}  (very skewed)")
+print(f"sample means: mean={means.mean():.3f}  (≈ μ)")
+print(f"std of sample means = {means.std():.3f}")
+print(f"theory σ/√n         = {sigma/np.sqrt(n):.3f}")   # they match
+```
+
+## Why a quant cares
+
+The CLT is the licence to use the normal *even when the data isn't normal* — and it quietly underwrites most of finance:
+
+- **Averages are trustworthy; single observations aren't.** One day's return is drawn from a fat-tailed mess. The *average* of many is approximately normal, so its uncertainty is governed by $\sigma/\sqrt{n}$. This is why you estimate an expected return or a Sharpe ratio from a long track record, not one trade.
+- **The $\sqrt{n}$ law is everywhere.** The standard error of a mean, the precision of a **Monte Carlo** price (error shrinks like $1/\sqrt{n}$), the [√252 volatility annualization](/docs/Statistics/descriptive-statistics/summary-measures/standard-deviation) — all the same theorem. It's also why more data helps, but with diminishing returns.
+- **Diversification.** A portfolio of many roughly-independent bets has a P&L that's the *average* of the individual ones — pushed toward normal and with spread cut by $\sqrt{n}$. (The catch, as always: the CLT assumes independence. Correlated bets don't diversify, and their tails stay fat — the [power-law](/docs/Probability/distributions/heavy-tails/power-law) world.)
+
+The CLT is also the bridge to the next lesson: because $\bar{x}$ is normal with a known standard error, we can turn a sample mean into an **[estimate](/docs/Probability/distributions/sampling-and-estimation/estimates)** — a point, and an interval around it.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A population is heavily right-skewed. You take many samples of size n = 50 and record each sample MEAN. Those means are distributed…',
+    options: [
+      'right-skewed like the population',
+      'approximately normal (by the CLT)',
+      'uniform',
+      'impossible to say',
+    ],
+    answer: 1,
+    explain: 'The CLT says the sampling distribution of the mean is approximately normal for large enough n (≈30+), regardless of the population shape.',
+  },
+  {
+    q: 'The standard error of the sample mean is σ/√n. To HALVE it, you must…',
+    options: ['double n', 'quadruple n (4×)', 'halve n', 'nothing changes it'],
+    answer: 1,
+    explain: 'Error falls like 1/√n, so cutting it in half requires 4× the sample size. Precision is expensive.',
+  },
+  {
+    q: 'The sampling distribution of the mean is centered on…',
+    options: ['0', 'the population mean μ', 'σ/√n', 'the sample size n'],
+    answer: 1,
+    explain: 'The mean of the sample means equals the population mean μ (the estimator is unbiased); only the spread, σ/√n, depends on n.',
+  },
+]} />

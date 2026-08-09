@@ -1,0 +1,9 @@
+{
+  "label": "3. Continuous Distributions",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "3. Continuous Distributions",
+    "description": "Distributions for variables that take any value in a range, described by a probability density function: the Normal/Gaussian bell and its empirical rule, the standard normal and z-scores that let you compare anything, the flat Uniform, and the right-skewed Log-Normal that models prices and incomes."
+  }
+}

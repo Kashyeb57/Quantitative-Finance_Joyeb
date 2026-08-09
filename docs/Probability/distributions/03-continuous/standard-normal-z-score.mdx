@@ -1,0 +1,154 @@
+---
+title: "Standard Normal & Z-Score"
+sidebar_position: 2
+description: The standard normal N(0,1) and the z-score (x−μ)/σ that maps any normal onto it. Worked from the lecture's own examples, plus standardization — putting Age, Weight, Salary on one scale for ML models.
+---
+
+# Standard Normal Distribution & Z-Score
+
+The [normal distribution](/docs/Probability/distributions/continuous/normal) comes in infinitely many versions — every $(\mu, \sigma)$ gives a different bell. The **standard normal distribution** is the one special reference bell, with
+
+$$
+\mu = 0, \qquad \sigma = 1, \qquad X \sim \text{SND}(\mu=0,\ \sigma=1)
+$$
+
+and the **z-score** is the ruler that maps *any* normal onto it.
+
+## From a raw distribution to the standard normal
+
+Take a tiny dataset $X = \{1, 2, 3, 4, 5\}$. Its mean is $\mu = 3$, and its (population) standard deviation is
+
+$$
+\sigma = \sqrt{\tfrac{(1-3)^2+(2-3)^2+(3-3)^2+(4-3)^2+(5-3)^2}{5}} = \sqrt{\tfrac{10}{5}} = \sqrt{2} \approx 1.414
+$$
+
+**Standardizing** means re-expressing each value as *how many standard deviations it sits from the mean* — the **z-score**:
+
+$$
+\boxed{\;z = \frac{x_i - \mu}{\sigma}\;}
+$$
+
+The notes round $\sigma \approx 1.414$ to $1$ to keep the arithmetic clean, which turns $X=\{1,2,3,4,5\}$ into $Y = \{-2, -1, 0, 1, 2\}$:
+
+| $x_i$ | $z = (x_i - 3)/1$ |
+|---|---|
+| 1 | $(1-3)/1 = -2$ |
+| 2 | $(2-3)/1 = -1$ |
+| 3 | $(3-3)/1 = 0$ |
+| 4 | $(4-3)/1 = 1$ |
+| 5 | $(5-3)/1 = 2$ |
+
+The transform slides the center to 0 and rescales the spread to 1 — the whole distribution moves onto the axis running $-4 \dots +4$. The **shape doesn't change**; only the labels on the axis do. (With the exact $\sigma=\sqrt2$ the z-scores are $\{-1.41, -0.71, 0, 0.71, 1.41\}$ — same idea, less tidy numbers.)
+
+A z-score is unitless and universal: $z = 0$ is exactly average, $z = +2$ means "two standard deviations above the mean" whether the raw data was in dollars, kilograms, or basis points. Set $\mu=0,\ \sigma=1$ below and read the **z of a** / **z of b** fields as you move the bounds:
+
+<NormalExplorer />
+
+## How many σ away? — the lecture's questions
+
+With a distribution centered at $\mu = 4$ and $\sigma = 1$:
+
+**Q. How many standard deviations is 4.25 away from the mean?**
+
+$$
+z = \frac{4.25 - 4}{1} = 0.25
+$$
+
+→ a quarter of a σ **above** the mean.
+
+**And for $x_i = 2.5$:**
+
+$$
+z = \frac{2.5 - 4}{1} = -1.5
+$$
+
+→ one-and-a-half σ **below** the mean (the negative sign means below).
+
+The sign tells you the side; the magnitude tells you how extreme.
+
+## Standardization — putting different units on one scale
+
+The real payoff is **standardization for machine-learning models.** Consider a dataset whose columns live in wildly different units:
+
+| Age (yrs) | Weight (kg) | Height (cms) | Salary (INR) |
+|---|---|---|---|
+| 24 | 70 | 175 | 40K |
+| 25 | 60 | 160 | 50K |
+| 26 | 55 | 180 | 60K |
+| 22 | 40 | 130 | 30K |
+| 30 | 30 | 175 | 20K |
+| 31 | 25 | 180 | 70K |
+
+Salary (tens of thousands) would completely swamp Age (twenties) in any distance calculation. **Standardize each column with its own $\mu$ and $\sigma$** — $z = (x_i - \mu_{\text{age}})/\sigma$, $z = (x_i - \mu_{\text{weight}})/\sigma$, and so on — and every feature is recentered to mean 0, spread 1, directly comparable.
+
+This matters because a whole class of models is scale-sensitive:
+
+1. **Clustering algorithms** (k-means uses raw distances),
+2. **Linear regression** (coefficients and regularization depend on scale),
+3. **Logistic regression** (same),
+
+all behave badly if one feature dominates purely because of its units. Standardization levels the playing field.
+
+```python
+import numpy as np
+
+# the lecture's tiny set
+X = np.array([1, 2, 3, 4, 5])
+mu, sigma = X.mean(), X.std()           # population std -> sqrt(2)
+print("μ =", mu, " σ =", round(sigma, 3))
+print("z-scores:", np.round((X - mu) / sigma, 2))
+
+# standardize a multi-unit table, column by column
+data = np.array([
+    [24, 70, 175, 40_000],
+    [25, 60, 160, 50_000],
+    [26, 55, 180, 60_000],
+    [22, 40, 130, 30_000],
+    [30, 30, 175, 20_000],
+    [31, 25, 180, 70_000],
+], dtype=float)
+
+Z = (data - data.mean(axis=0)) / data.std(axis=0)   # per-column z-score
+print("\nstandardized (each column now mean≈0, std≈1):")
+print(np.round(Z, 2))
+print("means:", np.round(Z.mean(axis=0), 6), " stds:", np.round(Z.std(axis=0), 3))
+```
+
+## Why a quant cares
+
+- **Z-scores are the language of "how extreme."** A −4σ day, a factor exposure of +2.5σ, a signal 3σ rich — quants talk in standard deviations precisely because they're comparable across assets and units.
+- **Standardization is step zero of most ML pipelines** — PCA, k-means, ridge/lasso, neural nets — and of factor models, where raw exposures are z-scored cross-sectionally before they can be combined.
+- **The z-score is also the bridge to probability.** Once a value is a z-score, the standard normal CDF turns it straight into a tail probability ("a z of −1.65 sits at the 5th percentile") — the mechanics behind Value-at-Risk and hypothesis tests.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A value has z-score −2. This means it is…',
+    options: [
+      'twice the mean',
+      'two standard deviations BELOW the mean',
+      'two standard deviations above the mean',
+      'impossible',
+    ],
+    answer: 1,
+    explain: 'z = (x−μ)/σ = −2 means x is 2σ below the mean. The negative sign indicates below; the magnitude is the number of standard deviations.',
+  },
+  {
+    q: 'The standard normal distribution has…',
+    options: ['μ = 1, σ = 0', 'μ = 0, σ = 1', 'μ = 0, σ = 0', 'any μ and σ'],
+    answer: 1,
+    explain: 'The standard normal is N(0, 1): mean 0, standard deviation 1. The z-score maps any normal onto it.',
+  },
+  {
+    q: 'Why standardize features (z-score each column) before k-means or regression?',
+    options: [
+      'to make the data normal',
+      'so that a feature with large units (e.g. salary) does not dominate one with small units (e.g. age) purely because of scale',
+      'to remove outliers',
+      'it is never necessary',
+    ],
+    answer: 1,
+    explain: 'Scale-sensitive models weight features by their raw magnitude. Standardizing puts every feature on a common mean-0, std-1 scale so none dominates by units alone.',
+  },
+]} />

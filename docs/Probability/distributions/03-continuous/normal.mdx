@@ -1,0 +1,130 @@
+---
+title: "Normal / Gaussian Distribution"
+sidebar_position: 1
+description: The symmetric bell — the workhorse continuous distribution. Its PDF, the parameters μ and σ², mean = median = mode, the 68–95–99.7 empirical rule, an interactive explorer, a 3D joint bell, and why quants both rely on it and distrust its thin tails.
+---
+
+# Normal / Gaussian Distribution
+
+**The normal distribution (also called the Gaussian distribution) is a continuous probability distribution for a real-valued random variable.** It's the famous **bell curve** — the single most important distribution in statistics and the one most models quietly *assume*.
+
+Its defining features:
+
+1. It's a **continuous** random variable (a **PDF**), with $X \in \mathbb{R}$ — $X = \{\dots\}$ smeared across the whole number line.
+2. It's a **symmetric** distribution — a bell curve, the same on both sides of the center.
+3. Because it's symmetric and single-peaked, **mean = median = mode** all sit at the center.
+4. The spread is set by the variance: as $\sigma^2 \uparrow$, the **spread $\uparrow$** — the bell gets wider and flatter.
+
+**Examples:** the weights of students in a class; the heights of students in a class; the four measurements in the classic **IRIS dataset** (petal length, sepal length, petal width, sepal width) — the kind of naturally-occurring measurements researchers find are approximately normal.
+
+## Notation, parameters, PDF
+
+$$
+X \sim N(\mu, \sigma^2)
+$$
+
+- **Parameters:** $\mu \in \mathbb{R}$ = the **mean** (location); $\;\sigma^2 \in \mathbb{R}, > 0$ = the **variance** (spread); and $x \in \mathbb{R}$.
+
+The density itself:
+
+$$
+\text{PDF} = \frac{1}{\sigma\sqrt{2\pi}}\; e^{-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^{2}}
+$$
+
+The mean and variance are computed exactly as in [descriptive statistics](/docs/Statistics/descriptive-statistics/summary-measures/central-tendency):
+
+$$
+\mu = \sum_{i=1}^{n} \frac{x_i}{n}, \qquad \sigma^2 = \sum_{i=1}^{n} \frac{(x_i - \mu)^2}{n}, \qquad \sigma = \sqrt{\sigma^2}
+$$
+
+Formulas don't build intuition — sliders do. **Slide $\mu$** and the whole curve shifts without changing shape (pure location); **crank $\sigma$** and it flattens and spreads. The shaded area between $a$ and $b$ **is** the probability:
+
+<NormalExplorer />
+
+## The empirical rule: 68–95–99.7
+
+Because the shape is fixed, the probability within a given number of standard deviations of the mean is **always the same**, whatever $\mu$ and $\sigma$ are. This is the **empirical rule** (turn on the bands in the explorer to see it):
+
+$$
+P(\mu - \sigma \le X \le \mu + \sigma) \approx 68\% \quad(68.27\%)
+$$
+
+$$
+P(\mu - 2\sigma \le X \le \mu + 2\sigma) \approx 95\% \quad(95.45\%)
+$$
+
+$$
+P(\mu - 3\sigma \le X \le \mu + 3\sigma) \approx 99.7\% \quad(99.73\%)
+$$
+
+So ~68% of the mass is within one σ, ~95% within two, ~99.7% within three. A move beyond 3σ should happen only about 0.3% of the time — which is exactly why, when markets produce them monthly, you learn something is wrong with the normal assumption.
+
+A quick way to *check* whether data is actually normal is a **QQ plot** (quantile–quantile plot): plot the data's quantiles against a normal's. If the points fall on a straight line, the data is normal; systematic curls at the ends reveal skew or fat tails. We'll use QQ plots repeatedly in the [heavy-tails module](/docs/Probability/distributions/heavy-tails/power-law).
+
+## The bell in 3D
+
+The curve above is *one* variable. Put **two** independent normals together and their **joint density** becomes a 3D bell — a perfectly round hill whose height at each $(X, Y)$ is how likely that combination is. Drag to rotate:
+
+<Surface3D
+  title="Joint density of two independent standard normals"
+  xLabel="X"
+  yLabel="Y"
+  zLabel="density"
+  f={(x, y) => Math.exp(-(x * x + y * y) / 2)}
+  caption="Two independent normals give a round, symmetric hill. Introduce correlation and this hill stretches into a diagonal ridge — see the Correlation lesson to rotate that version."
+/>
+
+Correlation reshapes this hill: at $\rho = 0$ it's the round bell above; as $\rho \to \pm 1$ it collapses into a **ridge** along the diagonal — the geometry of two variables that move together. There's a rotatable $\rho = 0.8$ version on the [Correlation page](/docs/Statistics/descriptive-statistics/covariance-and-correlation/correlation).
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+x = rng.normal(0, 1, size=1_000_000)   # standard normal
+
+for k in (1, 2, 3):
+    inside = np.mean(np.abs(x) <= k)
+    print(f"within ±{k}σ: {inside*100:.2f}%")   # ≈ 68.27, 95.45, 99.73
+```
+
+## Why a quant cares
+
+The normal is the **default assumption** across finance — and both halves of that sentence matter:
+
+- **Where it's relied on:** returns models, the Black–Scholes option-pricing framework (log-returns normal), portfolio theory (mean–variance), confidence intervals, and Value-at-Risk all lean on normality because it's analytically clean — a whole model collapses to $\mu$ and $\sigma$.
+- **Where it fails:** real daily returns are **not** normal. They're more **peaked** in the middle (lots of tiny days) and have **fatter tails** (extreme days far more often than 68–95–99.7 allows). A "3-sigma" crash should be a once-a-century event under the normal; markets serve them up every few years. Assuming normality therefore **understates crash risk** — the motivation for the [log-normal](/docs/Probability/distributions/continuous/log-normal) and [power-law / Pareto](/docs/Probability/distributions/heavy-tails/pareto) models later in this module.
+
+The normal is the map; fat tails are the territory. Know the map cold, then never forget it's only a map.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'For a normal distribution, roughly what fraction of values lie within ±2σ of the mean?',
+    options: ['68%', '95%', '99.7%', '50%'],
+    answer: 1,
+    explain: 'The empirical rule: ±1σ ≈ 68%, ±2σ ≈ 95% (95.45%), ±3σ ≈ 99.7%.',
+  },
+  {
+    q: 'Increasing σ while holding μ fixed…',
+    options: [
+      'shifts the bell to the right',
+      'makes the bell flatter and wider (more spread), peak lower',
+      'makes it taller and narrower',
+      'does nothing to a continuous distribution',
+    ],
+    answer: 1,
+    explain: 'σ is the scale/spread. A larger σ spreads the same total area (=1) over a wider range, so the curve flattens.',
+  },
+  {
+    q: 'For a normal distribution, the mean, median, and mode are…',
+    options: ['all different', 'all equal, at the center', 'only equal if μ = 0', 'undefined'],
+    answer: 1,
+    explain: 'The normal is symmetric and unimodal, so its mean, median, and mode coincide at the peak.',
+  },
+  {
+    q: 'Real daily stock returns, compared to a fitted normal, typically show…',
+    options: ['thinner tails', 'fatter tails and a more peaked center (so normality understates crash risk)', 'a perfect match', 'negative variance'],
+    answer: 1,
+    explain: 'Returns are leptokurtic — heavier tails and a sharper peak than the normal. Extreme moves happen far more often than 68–95–99.7 predicts.',
+  },
+]} />

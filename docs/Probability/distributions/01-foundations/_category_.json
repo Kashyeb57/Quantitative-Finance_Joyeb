@@ -1,0 +1,9 @@
+{
+  "label": "1. Foundations: PMF, PDF, CDF",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "1. Foundations: PMF, PDF, CDF",
+    "description": "Before any named distribution: the three functions that describe how probability is distributed over a random variable — the mass function for discrete variables, the density function for continuous ones, and the cumulative function that ties them together — plus a map of which distribution you reach for when."
+  }
+}

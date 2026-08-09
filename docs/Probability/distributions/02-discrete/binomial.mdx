@@ -1,0 +1,159 @@
+---
+title: "Binomial Distribution"
+sidebar_position: 2
+description: Bernoulli, run n times — the number of successes in n independent yes/no trials. Its PMF nCk p^k q^(n-k), mean np, variance npq, with an interactive bar chart, a 3D view of the PMF growing with n, and the two lecture worked examples.
+---
+
+# Binomial Distribution
+
+Take a [Bernoulli trial](/docs/Probability/distributions/discrete/bernoulli) and **repeat it $n$ times**, counting how many successes you get. That count is the **Binomial distribution**.
+
+Formally: the binomial distribution with parameters $n$ and $p$ is the **discrete probability distribution of the number of successes in a sequence of $n$ independent experiments**, each asking a **yes–no question**, each with its own Boolean outcome — success (probability $p$) or failure (probability $q = 1-p$). A single success/failure experiment is a **Bernoulli trial**; a sequence of them is a **Bernoulli process**. For a single trial ($n = 1$) the binomial **is** the Bernoulli distribution. The binomial is also the basis for the **binomial test** of statistical significance.
+
+Its three assumptions:
+
+1. It's a **discrete** random variable (a **PMF**).
+2. **Every outcome of the experiment is binary** (success/failure).
+3. The experiment is **performed for $n$ trials**.
+
+**Example:** tossing a coin **10 times**, each toss $\{H, T\}$ — here $n = 10$ and "success" = heads.
+
+## Notation, parameters, support
+
+$$
+X \sim B(n, p)
+$$
+
+- **Parameters:** $n \in \{0, 1, 2, \dots\}$ = number of trials/experiments; $\;p \in [0, 1]$ = success probability for **each** trial; $\;q = 1 - p$.
+- **Support:** $K \in \{0, 1, 2, 3, \dots, n\}$ = the **number of successes** (you can get anywhere from 0 to all $n$).
+
+## The PMF
+
+$$
+P(K; n, p) = \binom{n}{K}\, p^{K} (1-p)^{\,n-K}, \qquad K = 0, 1, 2, \dots, n
+$$
+
+where the **binomial coefficient** counts how many different orderings give $K$ successes:
+
+$$
+\binom{n}{K} = {}^{n}C_{K} = \frac{n!}{K!\,(n-K)!}
+$$
+
+Read the PMF as three pieces: $p^{K}$ (the $K$ successes) $\times\ (1-p)^{n-K}$ (the $n-K$ failures) $\times\ \binom{n}{K}$ (the number of ways to arrange them). Drag $n$ and $p$, and **click any bar** to read $P(X=k)$:
+
+<PMFExplorer kind="binomial" title="Binomial PMF — click a bar for P(X = k)" />
+
+Set $n = 1$ and you get back the two-bar **Bernoulli**. Raise $p$ above $0.5$ and the hump slides right; raise $n$ and it drifts right and spreads — a shape we'll come back to.
+
+### Mean and variance
+
+Because it's $n$ independent Bernoullis stacked up, the mean and variance are just $n$ times the Bernoulli's:
+
+$$
+\text{Mean} = n p, \qquad \text{Variance} = n p q, \qquad \sigma = \sqrt{n p q}
+$$
+
+## Worked example 1 — exactly 3 heads in 5 flips
+
+Coin flip: $n = 5$ trials, $p = 0.5$, and $K$ (number of heads) varies from 0 to 5. **What is the probability of getting exactly 3 heads in 5 flips?** Here $n=5$, $K=3$:
+
+$$
+P(X = 3) = \binom{5}{3}(0.5)^{3}(1 - 0.5)^{5-3} = 10 \times 0.125 \times 0.25 = 0.3125
+$$
+
+(In the lab above, set $n=5,\ p=0.5$ and click the $k=3$ bar — it reads $31.25\%$.)
+
+## Worked example 2 — quality control
+
+**Scenario:** inspecting **10 items** in a factory where each item has a **10% chance of being defective**. So $n = 10$ trials, $p = 0.1$ (a defective item is a "success" for counting purposes), and $K$ varies from 0 to 10. **What is the probability of finding exactly 2 defective items in a sample of 10?**
+
+$$
+P(X = 2) = \binom{10}{2}(0.1)^{2}(1 - 0.1)^{10-2} = 45 \times 0.01 \times 0.9^{8} \approx 0.1937 = 19.37\%
+$$
+
+(Set $n=10,\ p=0.1$ in the lab and click $k=2$.)
+
+```python
+from math import comb
+
+def binom_pmf(k, n, p):
+    return comb(n, k) * p**k * (1 - p)**(n - k)
+
+# Example 1: exactly 3 heads in 5 fair flips
+print("P(3 heads in 5) =", round(binom_pmf(3, 5, 0.5), 4))      # 0.3125
+
+# Example 2: exactly 2 defectives in 10, each 10% defective
+print("P(2 defective in 10) =", round(binom_pmf(2, 10, 0.1), 4))  # 0.1937
+
+# mean and variance
+n, p = 10, 0.1
+print(f"mean = np = {n*p},  var = npq = {n*p*(1-p):.2f},  std = {(n*p*(1-p))**0.5:.3f}")
+```
+
+## Seeing the Binomial grow — in 3D
+
+Fix $p = 0.5$ and let the number of trials $n$ climb. The 3D surface below plots $P(X=k)$ over both $n$ (trials) and $k$ (successes). Watch the ridge **march outward** (its peak tracks $k = n/2$) and **spread and flatten** as $n$ grows — drag to rotate:
+
+<Surface3D
+  title="Binomial PMF as n grows (p = 0.5)"
+  xLabel="n (trials)"
+  yLabel="k (successes)"
+  zLabel="P"
+  xMin={1}
+  xMax={18}
+  yMin={0}
+  yMax={18}
+  n={19}
+  yaw={52}
+  pitch={30}
+  f={(nn, kk) => {
+    const N = Math.round(nn);
+    const K = Math.round(kk);
+    if (K < 0 || K > N) return 0;
+    let c = 1;
+    const m = Math.min(K, N - K);
+    for (let i = 0; i < m; i++) c = (c * (N - i)) / (i + 1);
+    return c * Math.pow(0.5, N);
+  }}
+  caption="Each slice at a fixed n is one Binomial PMF. As n increases the hump widens and smooths into a bell — a visual preview of the Central Limit Theorem, which says this shape becomes Normal."
+/>
+
+That smoothing-into-a-bell is not a coincidence — it's the [Central Limit Theorem](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem) arriving early. A binomial with large $n$ is well approximated by a [Normal](/docs/Probability/distributions/continuous/normal) with mean $np$ and variance $npq$.
+
+## Why a quant cares
+
+The binomial is the natural model whenever you **count successes over repeated independent bets**:
+
+- **Win rate over a trading month.** A strategy with edge $p$ over $n$ trades: the number of winners is $B(n, p)$, with expected $np$ winners and spread $\sqrt{npq}$. That spread is why a good strategy can still have a losing month — and why you need enough $n$ to tell skill from luck.
+- **Defaults in a small loan book** where each borrower independently defaults with probability $p$.
+- **The binomial options-pricing model** builds a price tree from exactly this: up/down moves as repeated Bernoulli steps.
+
+The critical caveat is the **independence** assumption. Real trades and real defaults are often *correlated* — and when they are, the true spread is far wider than $\sqrt{npq}$ suggests. (That failure of independence is the heart of the [conditional-probability](/docs/Probability/conditional-probability) lesson and the 2008 story.)
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'X ~ B(n=20, p=0.3). Its mean number of successes is…',
+    options: ['0.3', '6', '20', '14'],
+    answer: 1,
+    explain: 'Mean = np = 20 × 0.3 = 6.',
+  },
+  {
+    q: 'What does the binomial coefficient nCk count in the PMF?',
+    options: [
+      'the probability of one success',
+      'the number of distinct orderings that give exactly k successes in n trials',
+      'the variance',
+      'the number of trials',
+    ],
+    answer: 1,
+    explain: 'nCk = n!/(k!(n−k)!) counts how many arrangements of k successes among n trials there are; each such arrangement has probability p^k q^(n−k).',
+  },
+  {
+    q: 'A Binomial with n = 1 is the same as…',
+    options: ['a Poisson distribution', 'a Bernoulli distribution', 'a Normal distribution', 'a Uniform distribution'],
+    answer: 1,
+    explain: 'One trial (n=1) is a single success/failure experiment — exactly the Bernoulli distribution.',
+  },
+]} />

@@ -1,0 +1,136 @@
+---
+title: "Poisson Distribution"
+sidebar_position: 3
+description: The distribution of counts — how many events occur in a fixed interval at a constant average rate λ. PMF e^(−λ)λ^x/x!, the signature mean = variance = λ, an interactive PMF, a 3D view, and the quant reading (arrivals, jumps, rare events).
+---
+
+# Poisson Distribution
+
+**The Poisson distribution is a discrete probability distribution that expresses the probability of a given number of events occurring in a fixed interval of time** — provided those events occur with a **known constant mean rate** and **independently of the time since the last event**.
+
+Its two defining features:
+
+1. It's a **discrete** random variable (a **PMF**).
+2. It describes the **number of events occurring in a fixed time interval**.
+
+**Examples:** the number of people visiting a **hospital** every hour; the number of people visiting a **bank** every hour. The count is a whole number — 0, 1, 2, … — and it fluctuates around some average rate.
+
+## The rate parameter λ
+
+The single parameter is $\lambda$ (lambda), the **expected number of events per interval**. If a bank sees on average $\lambda = 3$ customers per hour, then across the afternoon — 12pm, 1pm, 2pm, 3pm, 4pm, 5pm — each hour brings a *random* count that averages 3 but might be 1, or 4, or 6:
+
+$$
+\lambda = 3 \;\Rightarrow\; \text{expected number of events occurring in each time interval}
+$$
+
+## The PMF
+
+$$
+P(X = x) = \frac{e^{-\lambda}\, \lambda^{x}}{x!}, \qquad x = 0, 1, 2, \dots
+$$
+
+It's defined **only at integer** $x$ (you can't have 2.5 arrivals). With $\lambda = 3$, the probability of exactly **5** customers in an hour is:
+
+$$
+P(X = 5) = \frac{e^{-3}\, 3^{5}}{5!} = \frac{0.0498 \times 243}{120} = 0.101 = 10.1\%
+$$
+
+And because it's a proper distribution you can accumulate it — e.g. $P(X \le 3) = P(0)+P(1)+P(2)+P(3)$, or combine pieces like $P(X=4) + P(X=5)$ for "4 or 5 arrivals." Drag $\lambda$ and **click a bar** (set $\lambda = 3$, click $k=5$ → $10.1\%$):
+
+<PMFExplorer kind="poisson" title="Poisson PMF — click a bar for P(X = k)" />
+
+## Mean and variance — the signature property
+
+$$
+\text{Mean} = E[X] = \mu = \lambda \times t, \qquad \text{Variance} = \lambda \times t
+$$
+
+where $\lambda$ is the expected number of events per unit time and $t$ is the length of the interval. For a single unit interval this is just $\mu = \lambda$. The striking part is that the **mean and the variance are the same number** — the arrow in the notes points from mean straight to variance because they're equal:
+
+$$
+\boxed{\;\text{mean} = \text{variance} = \lambda\;}
+$$
+
+This **equidispersion** is the Poisson's fingerprint. If you measure counts and find the variance roughly equals the mean, Poisson is a good model; if the variance is much *bigger* (overdispersion), the events are clustering and you need something else.
+
+## Poisson in 3D — how λ reshapes the counts
+
+Let the rate $\lambda$ climb and watch the PMF over $(\lambda, k)$. At small $\lambda$ the mass sits near 0 and is lopsided; as $\lambda$ grows the hump slides right (peak near $k = \lambda$), widens, and turns **symmetric and bell-like** — for large $\lambda$ the Poisson is well approximated by a [Normal](/docs/Probability/distributions/continuous/normal). Drag to rotate:
+
+<Surface3D
+  title="Poisson PMF as the rate λ grows"
+  xLabel="λ (rate)"
+  yLabel="k (events)"
+  zLabel="P"
+  xMin={0.5}
+  xMax={12}
+  yMin={0}
+  yMax={20}
+  n={24}
+  yaw={50}
+  pitch={30}
+  f={(lam, kk) => {
+    const K = Math.round(kk);
+    if (K < 0) return 0;
+    let logp = -lam + K * Math.log(lam);
+    for (let i = 2; i <= K; i++) logp -= Math.log(i);
+    return Math.exp(logp);
+  }}
+  caption="Each slice at a fixed λ is one Poisson PMF. Small λ → skewed, piled near zero; large λ → a symmetric bell centered on λ, with spread √λ."
+/>
+
+```python
+from math import exp, factorial
+
+def poisson_pmf(x, lam):
+    return exp(-lam) * lam**x / factorial(x)
+
+# λ = 3: probability of exactly 5 events
+print("P(X=5 | λ=3) =", round(poisson_pmf(5, 3), 4))          # 0.1008 ≈ 10.1%
+
+# P(X ≤ 3)
+print("P(X<=3 | λ=3) =", round(sum(poisson_pmf(k, 3) for k in range(4)), 4))
+
+# mean = variance = λ  — confirm by simulation
+import numpy as np
+sample = np.random.default_rng(0).poisson(lam=3, size=100_000)
+print(f"simulated mean = {sample.mean():.3f},  variance = {sample.var():.3f}  (both ≈ λ = 3)")
+```
+
+## Why a quant cares
+
+The Poisson is the model for **rare, countable events arriving over time** — which is most of market microstructure and risk:
+
+- **Order and trade arrivals.** The number of trades in a second, or market-orders hitting your quote, is classically Poisson — the backbone of queueing models in high-frequency trading.
+- **Jumps.** In a **jump-diffusion** model of prices, the *number* of sudden jumps in an interval is Poisson; it's how you bolt crash-risk onto an otherwise smooth model.
+- **Operational and credit events.** Rare losses, fraud events, or defaults in a large pool with small individual probability converge to Poisson (the "law of rare events": a Binomial with large $n$ and small $p$ becomes Poisson with $\lambda = np$).
+
+The equidispersion assumption is the thing to test: real trade counts often **cluster** (bursts of activity), giving variance well above the mean — a signal that arrivals aren't independent and a plain Poisson understates the busy-period risk.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A call center gets on average λ = 4 calls per minute. Which distribution models the number of calls in a given minute?',
+    options: ['Bernoulli', 'Binomial with n=4', 'Poisson with λ=4', 'Normal'],
+    answer: 2,
+    explain: 'Counts of events in a fixed interval at a constant average rate are Poisson, here with λ = 4. Mean and variance both equal 4.',
+  },
+  {
+    q: 'For a Poisson distribution, the variance is…',
+    options: ['λ² ', 'equal to the mean, λ', 'always 1', 'np(1−p)'],
+    answer: 1,
+    explain: 'The Poisson is equidispersed: mean = variance = λ. This equality is its signature.',
+  },
+  {
+    q: 'You measure daily trade counts and find the variance is FAR larger than the mean. This suggests…',
+    options: [
+      'a perfect Poisson fit',
+      'overdispersion — events are clustering, so a plain Poisson understates busy-period risk',
+      'the mean is zero',
+      'the data is continuous',
+    ],
+    answer: 1,
+    explain: 'Variance ≫ mean is overdispersion, a violation of the Poisson equidispersion assumption, typically caused by clustered (non-independent) arrivals.',
+  },
+]} />

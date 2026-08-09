@@ -1,0 +1,140 @@
+---
+title: "Pareto Distribution"
+sidebar_position: 2
+description: The named power-law distribution behind the 80–20 rule. Pareto Type I PDF, the tail index α, an interactive density and 3D tail view, the transforms back to normal, and why actuaries and risk managers model large losses with it.
+---
+
+# Pareto Distribution
+
+The **Pareto distribution** is the named, formal probability distribution behind the [power law](/docs/Probability/distributions/heavy-tails/power-law) and the 80–20 rule. It is a decidedly **non-Gaussian** distribution — the opposite of the tidy bell.
+
+**Named after Vilfredo Pareto — the Italian civil engineer, economist, and sociologist — it is a power-law probability distribution used to describe social, quality-control, scientific, geophysical, actuarial, and many other observable phenomena.** The principle was originally applied to the **distribution of wealth in a society**, fitting the trend that **a large portion of wealth is held by a small fraction of the population**.
+
+## The shape and the tail index α
+
+The Pareto (Type I) has a minimum value $x_m$ (the scale) and a shape parameter $\alpha$ (the **tail index**):
+
+$$
+f(x) = \frac{\alpha\, x_m^{\alpha}}{x^{\alpha+1}}, \quad x \ge x_m, \qquad F(x) = 1 - \left(\frac{x_m}{x}\right)^{\alpha}
+$$
+
+Everything hinges on $\alpha$. **As $\alpha$ increases the tail gets lighter** and the distribution crowds toward $x_m$; as $\alpha$ *decreases* the tail gets **heavier** and rare-but-huge values dominate. The lecture shows Pareto Type I for $\alpha = 1, 2, 3, \infty$ — and $\alpha = \infty$ is the limit where the whole distribution collapses onto a spike at $x_m$.
+
+Slide $\alpha$ and watch the tail — note the mean readout goes to $\infty$ once $\alpha \le 1$:
+
+<PDFExplorer kind="pareto" title="Pareto density — α is the tail index (lower α = heavier tail)" />
+
+The tail index has hard thresholds that matter enormously:
+
+$$
+\alpha \le 1 \Rightarrow \text{mean is infinite}, \qquad \alpha \le 2 \Rightarrow \text{variance is infinite}
+$$
+
+$$
+\text{Mean} = \frac{\alpha\, x_m}{\alpha - 1} \quad (\text{for } \alpha > 1)
+$$
+
+An infinite variance isn't a curiosity — it means the usual $\sigma$-based risk numbers **don't exist**, and any sample estimate of them is meaningless.
+
+### The tail in 3D
+
+Sweep $\alpha$ and plot the density over $(\alpha, x)$. Low $\alpha$ builds a long, thick ridge stretching out along $x$ (the heavy tail); high $\alpha$ pulls everything back toward the origin. Drag to rotate:
+
+<Surface3D
+  title="Pareto density as the tail index α varies (xₘ = 1)"
+  xLabel="α"
+  yLabel="x"
+  zLabel="density"
+  xMin={1}
+  xMax={4}
+  yMin={1}
+  yMax={6}
+  n={26}
+  yaw={46}
+  pitch={28}
+  f={(alpha, x) => (x < 1 ? 0 : alpha / Math.pow(x, alpha + 1))}
+  caption="Lower α → a heavier, longer tail (extreme values matter). Higher α → mass crowds near the minimum xₘ and the tail thins."
+/>
+
+## Transforming a Pareto
+
+Like any power law, a Pareto is hostile to normal-based methods — so you **transform it back toward normal** before modeling:
+
+$$
+\text{Pareto} \;\xrightarrow{\;\text{transformation}\;}\; \text{Log-Normal} \;\xrightarrow{\text{Box–Cox}}\; \text{Normal}
+$$
+
+Taking logs turns the multiplicative Pareto tail into something [log-normal](/docs/Probability/distributions/continuous/log-normal)-like, and a **Box–Cox transform** finishes the job so a [QQ plot](/docs/Probability/distributions/continuous/normal) straightens out.
+
+## The Pareto principle in practice
+
+The 80–20 principle applied to the **IT industry**:
+
+1. **80% of the entire project is done by 20% of the team.**
+2. **80% of the defects can be solved if we solve 20% of the defects** — fix the vital few and most of the problem disappears.
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+xm, alpha = 1.0, 1.16                       # α≈1.16 -> the classic 80-20
+x = (rng.pareto(alpha, size=200_000) + 1) * xm
+x.sort()
+
+top20 = x[int(0.8*len(x)):].sum() / x.sum()
+print(f"top 20% hold {top20*100:.0f}% of the total")     # ~80%
+
+for a in (0.9, 1.5, 3.0):
+    mean = a*xm/(a-1) if a > 1 else float('inf')
+    print(f"α={a}: mean = {mean}"
+          + ("  (infinite!)" if a <= 1 else "")
+          + ("  (infinite variance)" if a <= 2 else ""))
+```
+
+## Why a quant cares
+
+The Pareto is the working model wherever **a few observations carry most of the risk**:
+
+- **Insurance & actuarial science** model **large claims** with a Pareto — the handful of catastrophic payouts, not the many small ones, determine solvency. This is textbook **Extreme Value Theory (EVT)**, which fits a Pareto to the tail beyond a high threshold.
+- **Operational and credit risk** — rare, huge losses (rogue trades, fraud, systemic defaults) live in a Pareto tail; Value-at-Risk and Expected Shortfall in the tail are estimated with Pareto/EVT fits, not the normal.
+- **The tail index α *is* a risk number.** Estimating $\alpha$ for asset-return tails tells you whether variance even exists ($\alpha < 2$) — a sharper warning than any volatility figure. Empirically, many return tails sit near $\alpha \approx 3$, heavy enough to make "$\sigma$-based" risk dangerously optimistic.
+
+Where the normal says "this can't happen," the Pareto says "this is how you go bankrupt." Modeling the tail with the right distribution is the whole difference.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'In a Pareto distribution, decreasing the tail index α does what?',
+    options: [
+      'lightens the tail',
+      'makes the tail HEAVIER — extreme values become more probable',
+      'makes it symmetric',
+      'has no effect',
+    ],
+    answer: 1,
+    explain: 'Lower α = heavier tail. As α falls below 2 the variance becomes infinite; below 1 even the mean is infinite.',
+  },
+  {
+    q: 'The Pareto distribution was originally used to describe…',
+    options: [
+      'coin flips',
+      'the distribution of wealth — a large share held by a small fraction of people',
+      'heights of students',
+      'radioactive decay',
+    ],
+    answer: 1,
+    explain: 'Vilfredo Pareto introduced it for wealth distribution, capturing that a small fraction of the population holds most of the wealth — the 80–20 pattern.',
+  },
+  {
+    q: 'Why do insurers and risk managers fit a Pareto to the TAIL of losses?',
+    options: [
+      'the tail is normal',
+      'catastrophic large losses follow a power law, and the Pareto/EVT captures their probability far better than a thin-tailed normal',
+      'to make losses smaller',
+      'because losses are discrete',
+    ],
+    answer: 1,
+    explain: 'Rare, extreme losses drive solvency and are power-law distributed. A Pareto (Extreme Value Theory) models that heavy tail, whereas a normal severely underestimates it.',
+  },
+]} />

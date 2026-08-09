@@ -1,0 +1,171 @@
+---
+title: "PMF, PDF & CDF"
+sidebar_position: 1
+description: The three functions that describe any distribution — the probability mass function for discrete variables, the probability density function for continuous ones, and the cumulative distribution function that connects them. Density is the slope of the CDF.
+---
+
+# The Relationship Between PMF, PDF and CDF
+
+**A probability distribution function describes how probability is distributed over the values a random variable can take.** Before we meet any named distribution — Bernoulli, Normal, Poisson — we need the three functions that describe *every* distribution, and how they fit together.
+
+The split starts with the kind of random variable (an idea from the [random variables](/docs/Statistics/descriptive-statistics/variables/random-variables) lesson):
+
+- A **discrete** random variable takes separate, countable values — a die shows $\{1,2,3,4,5,6\}$, never $2.7$. Its probabilities live in a **probability mass function (PMF)**.
+- A **continuous** random variable takes any value in a range — an *age* is really $\{\dots\}$, a smear on the number line. Its probabilities live in a **probability density function (PDF)**.
+
+And both are summarized by a third function, the **cumulative distribution function (CDF)**, which answers "what's the probability of landing *at or below* $x$?"
+
+| Function | Used for | Answers |
+|---|---|---|
+| **PMF** — probability mass function | **discrete** random variables | $P(X = x)$: the probability of *exactly* $x$ |
+| **PDF** — probability density function | **continuous** random variables | density (height) at $x$; probability = area |
+| **CDF** — cumulative distribution function | both | $P(X \le x)$: the probability *up to* $x$ |
+
+## 1. The PMF — for discrete variables
+
+For a discrete variable the PMF gives the probability of **each individual value**. The cleanest example is a **fair die**, $X = \{1,2,3,4,5,6\}$, where every face is equally likely:
+
+$$
+P(1) = P(2) = P(3) = P(4) = P(5) = P(6) = \tfrac{1}{6}
+$$
+
+Those six equal bars *are* the PMF. Turning on the **cumulative** overlay draws the CDF: a staircase that adds one $\tfrac{1}{6}$ step at each value until it reaches $1$.
+
+<PMFExplorer kind="discrete-uniform" title="Fair die: PMF bars and the CDF staircase" showCDF={true} />
+
+The CDF is just a running total of the PMF:
+
+$$
+P(X \le 2) = P(X=1) + P(X=2) = \tfrac{1}{6} + \tfrac{1}{6} = \tfrac{2}{6} = \tfrac{1}{3}
+$$
+
+$$
+P(X \le 6) = P(X=1) + P(X=2) + \dots + P(X=6) = 1
+$$
+
+The CDF **must** end at $1$ — by the time you've included every outcome, the probability of "at or below the largest value" is certain.
+
+## 2. The PDF — for continuous variables
+
+Now take a continuous variable — say the **ages** of shoppers on a website. You can't ask "what's the probability someone is *exactly* 55.000… years old?" — for a continuous variable that's zero, because a single point has no width. Instead the PDF gives **probability density** (a height), and probability itself is the **area under the curve** between two values.
+
+Two facts define a PDF, and they're the only two properties you must remember:
+
+$$
+\textbf{1. Non-negativity: } f(x) \ge 0 \text{ for all } x
+$$
+
+$$
+\textbf{2. Total area} = 1: \quad \int_{-\infty}^{\infty} f(x)\,dx = 1
+$$
+
+Density can't be negative, and *all* the probability together is exactly $1$ — the continuous echo of "the PMF bars sum to 1." The **shape** of $f(x)$ changes from one distribution to another (a symmetric bell, a right-skewed hump, a flat rectangle), but those two properties always hold.
+
+Here the shaded area **is** the probability — drag the region bounds and watch it. Turn on **CDF** to see the cumulative curve climb from 0 to 1:
+
+<PDFExplorer kind="uniform" title="A continuous density: area = probability, total area = 1" showCDF={true} />
+
+## The link: density is the *slope* of the CDF
+
+The CDF of a continuous variable is a smooth **S-curve** rising from 0 to 1. Reading it is direct — for an age distribution you might find
+
+$$
+P(X \le 40) = 0.5 = 50\%, \qquad P(X \le 45) = 0.8 = 80\%
+$$
+
+Here's the punchline that ties the two functions together. **The height of the PDF at a point equals the *steepness* (gradient) of the CDF at that point.** Where the CDF rises fastest, probability is piling up fastest, so the density is tallest. Measure the slope of the CDF between two nearby points and you've measured the density:
+
+$$
+\text{slope} = \frac{0.65 - 0.45}{44 - 38} = \frac{\Delta(\text{cumulative prob})}{\Delta x} \;\Rightarrow\; \text{probability density}
+$$
+
+$$
+\boxed{\;\text{Probability density} \;=\; \text{gradient of the cumulative distribution function}\;}
+$$
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 420 220" width="420" style={{maxWidth: '100%'}} role="img" aria-label="A CDF S-curve; its slope at a point equals the PDF density there">
+    <line x1="40" y1="185" x2="400" y2="185" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="40" y1="185" x2="40" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <text x="16" y="30" fontSize="11" fill="currentColor" opacity="0.75">1.0</text>
+    <text x="16" y="188" fontSize="11" fill="currentColor" opacity="0.75">0</text>
+    <path d="M40,180 C150,175 175,120 210,100 C245,80 270,28 400,25" fill="none" stroke="#25c2a0" strokeWidth="2.5" />
+    <line x1="150" y1="150" x2="270" y2="55" stroke="#f59e0b" strokeWidth="1.6" strokeDasharray="5 3" />
+    <circle cx="180" cy="123" r="3.5" fill="#f59e0b" />
+    <text x="250" y="120" fontSize="11" fill="#f59e0b">slope = density here</text>
+    <text x="150" y="205" fontSize="11" fill="currentColor" opacity="0.75">CDF: P(X ≤ x) climbs 0 → 1; steepest where the density peaks</text>
+  </svg>
+</div>
+
+Run the two views side by side — a flat density gives a straight-line CDF; a peaked density gives an S-curve that's steepest under the peak:
+
+```python
+import numpy as np
+
+# a small continuous sample; estimate PDF (histogram) and CDF (cumulative)
+rng = np.random.default_rng(0)
+ages = rng.normal(40, 8, size=20_000)
+
+# CDF read-offs, exactly like the lecture
+for x in (40, 45):
+    print(f"P(X <= {x}) = {(ages <= x).mean():.2f}")
+
+# density ~ slope of the CDF between two nearby points
+x1, x2 = 38, 44
+c1, c2 = (ages <= x1).mean(), (ages <= x2).mean()
+print(f"slope of CDF over [{x1},{x2}] = {(c2 - c1)/(x2 - x1):.4f}  (this is the density)")
+```
+
+## Why a quant cares
+
+Everything downstream is one of these three functions:
+
+- **Discrete payoffs** — number of defaults in a bond portfolio, number of fills — are **PMFs** (Bernoulli, Binomial, Poisson, next module).
+- **Continuous quantities** — a return, a price, a P&L — are **PDFs** (Normal, Log-Normal, later).
+- **Risk questions are CDF questions.** "What's the probability of losing more than \$1m?" is $1 - \text{CDF}(-1\text{m})$. Value-at-Risk is literally an *inverse*-CDF read-off: the loss at the 5th percentile. Master the CDF and you've master most of risk reporting.
+
+Next: a [map of which distribution to reach for](/docs/Probability/distributions/foundations/types-of-distributions) when.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'You want the probability of EXACTLY 3 heads in 10 tosses. Which function do you use?',
+    options: [
+      'a PDF, because tosses are random',
+      'a PMF, because the count of heads is a discrete variable',
+      'a CDF, always',
+      'none — that probability is zero',
+    ],
+    answer: 1,
+    explain: 'The number of heads is discrete (0,1,2,…,10), so exact-value probabilities come from a probability mass function.',
+  },
+  {
+    q: 'For a continuous random variable X, what is P(X = 2.5)?',
+    options: ['f(2.5), the density there', 'exactly 0', '0.5', 'the slope of the CDF'],
+    answer: 1,
+    explain: 'A single point has zero width, so zero area, so zero probability. For continuous variables probability lives in areas (intervals), not points.',
+  },
+  {
+    q: 'The probability density at a point equals…',
+    options: [
+      'the area under the whole curve',
+      'the gradient (slope) of the CDF at that point',
+      'always 1',
+      'the cumulative probability up to that point',
+    ],
+    answer: 1,
+    explain: 'Density is the rate at which cumulative probability accumulates — the slope of the CDF. Where the CDF rises steeply, the density is high.',
+  },
+  {
+    q: 'Which is a required property of every PDF?',
+    options: [
+      'it is symmetric',
+      'f(x) ≥ 0 everywhere AND the total area under it is 1',
+      'its maximum value is 1',
+      'it is bell-shaped',
+    ],
+    answer: 1,
+    explain: 'Non-negativity and total area = 1 are the two defining properties. Shape (symmetric, skewed, flat) varies by distribution; the density height itself can exceed 1.',
+  },
+]} />

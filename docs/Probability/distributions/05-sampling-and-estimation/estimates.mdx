@@ -1,0 +1,108 @@
+---
+title: "Estimates"
+sidebar_position: 2
+description: Using an observed statistic to stand in for an unknown population parameter — point estimates (a single value) versus interval estimates (a range, the confidence interval). Built on the CLT's standard error, with the quant reading that every number is an estimate with error.
+---
+
+# Estimates
+
+We almost never know a population's true parameters — the real expected return, the real default rate, the real mean. We only have a **sample**. **An estimate is a specified, observed numerical value used to estimate an unknown population parameter.** This lesson names the two kinds.
+
+## 1. Point estimate
+
+**A point estimate is a single numerical value used to estimate an unknown population parameter.** The classic example: **the sample mean $\bar{x}$ is a point estimate of the population mean $\mu$.**
+
+Imagine the true population mean is $\mu = 65$ but hidden from you. You draw a sample and its mean comes out $\bar{x} = 60$. That one number, 60, is your point estimate — your single best guess for the unknown 65:
+
+$$
+\mu \;\longleftarrow\; \bar{x} \qquad (\text{the sample mean stands in for the population mean})
+$$
+
+Other point estimates follow the same pattern: the **sample proportion** estimates the true probability, the **sample variance** estimates $\sigma^2$ (this is exactly why it divides by [$n-1$](/docs/Statistics/descriptive-statistics/summary-measures/why-n-minus-1) — to be an unbiased estimator).
+
+The weakness of a point estimate is that it's **silent about its own uncertainty.** Reporting "60" hides the fact that another sample might have given 58, or 63. It looks more confident than it has any right to be.
+
+## 2. Interval estimate
+
+**An interval estimate is a *range* of values used to estimate the unknown population parameter.** Instead of a lone "60," you report a band — say **55 to 65** — that plausibly contains the true mean. That range is a **confidence interval**, and it's built by placing the point estimate in the middle and reaching out on either side:
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 130" width="460" style={{maxWidth: '100%'}} role="img" aria-label="A number line: point estimate at 60 in the middle of a confidence interval from 55 to 65">
+    <line x1="40" y1="70" x2="420" y2="70" stroke="currentColor" strokeWidth="1.5" opacity="0.6" />
+    <line x1="120" y1="58" x2="120" y2="82" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
+    <line x1="340" y1="58" x2="340" y2="82" stroke="currentColor" strokeWidth="1.5" opacity="0.7" />
+    <line x1="120" y1="70" x2="340" y2="70" stroke="#25c2a0" strokeWidth="4" opacity="0.5" />
+    <circle cx="230" cy="70" r="6" fill="#25c2a0" />
+    <text x="230" y="55" textAnchor="middle" fontSize="12" fill="#25c2a0" fontWeight="700">point estimate x̄ = 60</text>
+    <text x="120" y="100" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.8">55</text>
+    <text x="340" y="100" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.8">65</text>
+    <text x="230" y="120" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">confidence interval [55, 65]</text>
+  </svg>
+</div>
+
+An interval estimate is **honest**: its *width* communicates the uncertainty a point estimate hides. A narrow interval says "I'm fairly sure"; a wide one says "I really don't know."
+
+## Where the width comes from: the CLT
+
+This is where the previous lesson pays off. The [Central Limit Theorem](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem) tells us the sample mean is approximately $\bar{X} \sim N(\mu, \sigma/\sqrt{n})$ — so the **standard error $\sigma/\sqrt{n}$ sets the reach** of the interval. A common 95% confidence interval is
+
+$$
+\bar{x} \;\pm\; 1.96 \cdot \frac{\sigma}{\sqrt{n}}
+$$
+
+Bigger $n$ ⇒ smaller standard error ⇒ **narrower** interval ⇒ a sharper estimate. The full mechanics — confidence levels, $t$ vs $z$, margins of error — live in [Inferential Statistics](/docs/Statistics/inferential-statistics).
+
+```python
+import numpy as np
+rng = np.random.default_rng(1)
+
+# unknown population: mean 65. We only get a sample.
+population = rng.normal(65, 12, size=1_000_000)
+sample = rng.choice(population, size=40, replace=False)
+
+xbar = sample.mean()                       # point estimate
+se   = sample.std(ddof=1) / np.sqrt(len(sample))
+lo, hi = xbar - 1.96*se, xbar + 1.96*se    # 95% interval estimate
+
+print(f"point estimate  x̄ = {xbar:.1f}")
+print(f"interval estimate = [{lo:.1f}, {hi:.1f}]  (95% confidence)")
+print(f"(true μ = 65 — the interval is built to contain it ~95% of the time)")
+```
+
+## Why a quant cares
+
+**In markets, every number you report is an estimate — and pretending otherwise is how people blow up.**
+
+- **An expected return is a point estimate** with a huge standard error. Estimating a mean return to a useful precision takes *decades* of data (the $\sqrt{n}$ law again), which is why backtests over-promise: the point estimate looks great, the interval around it is enormous.
+- **A Sharpe ratio, a volatility, a correlation, a beta** — all point estimates from finite samples, all with confidence intervals that risk reports usually omit. Two strategies with the same estimated Sharpe can have wildly different *reliability*.
+- **Interval thinking is risk thinking.** "Expected P&L is \$2m" is a point estimate; "\$2m, 95% interval [−\$4m, +\$8m]" tells you whether you can survive the downside. The interval, not the point, is the decision-relevant object.
+
+Report the point, but *size your risk to the interval*. That single habit separates a robust process from a fragile one.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The sample mean x̄ used as a single best guess for the population mean μ is an example of…',
+    options: ['an interval estimate', 'a point estimate', 'a confidence level', 'a population parameter'],
+    answer: 1,
+    explain: 'A point estimate is a single number estimating an unknown parameter — the sample mean estimating the population mean is the classic case.',
+  },
+  {
+    q: 'What is the main advantage of an interval estimate over a point estimate?',
+    options: [
+      'it is always correct',
+      'its width communicates the uncertainty that a single number hides',
+      'it needs no data',
+      'it is narrower',
+    ],
+    answer: 1,
+    explain: 'A confidence interval reports a range whose width reflects the estimate’s uncertainty; a point estimate looks precise but says nothing about its own error.',
+  },
+  {
+    q: 'A 95% confidence interval for the mean is x̄ ± 1.96·σ/√n. Increasing the sample size n makes the interval…',
+    options: ['wider', 'narrower (smaller standard error)', 'unchanged', 'negative'],
+    answer: 1,
+    explain: 'The standard error σ/√n shrinks as n grows, so the interval narrows — more data gives a sharper estimate, at the √n rate.',
+  },
+]} />

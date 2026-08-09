@@ -1,0 +1,159 @@
+---
+title: "Bernoulli Distribution"
+sidebar_position: 1
+description: The simplest discrete distribution — one trial, two outcomes. Its PMF p^k(1-p)^(1-k), mean p, and variance pq, with an interactive bar chart and the quant reading of a single binary bet.
+---
+
+# Bernoulli Distribution
+
+**The Bernoulli distribution is the simplest discrete probability distribution.** It describes a random variable with **exactly two possible outcomes**: *success* (with probability $p$) and *failure* (with probability $1-p$). It's the model for any **binary** outcome — a coin flip, a yes/no question, up-day/down-day, default/no-default.
+
+Two facts define it:
+
+1. It's a **discrete** random variable (so it has a **PMF**).
+2. Its outcomes are **binary** — exactly two of them.
+
+## The outcomes, coded 0 and 1
+
+We label the two outcomes with $K \in \{0, 1\}$:
+
+- **Success** $\Rightarrow K = 1$, with probability $p$
+- **Failure** $\Rightarrow K = 0$, with probability $q = 1 - p$
+
+**Examples:**
+
+- **Tossing a coin**, $\{H, T\}$: $\;P(X=H) = 0.5 = p$, and $P(X=T) = 1 - 0.5 = 0.5 = q$.
+- **Will a person pass or fail?** $\;P(X=\text{Pass}) = 0.4$, so $P(X=\text{Fail}) = 1 - 0.4 = 0.6$.
+
+Notice $p$ need not be $\tfrac{1}{2}$ — a Bernoulli variable can be lopsided. Three different Bernoullis:
+
+| | $P(X=0)$ | $P(X=1)$ |
+|---|---|---|
+| lopsided to 1 | 0.2 | 0.8 |
+| lopsided to 0 | 0.8 | 0.2 |
+| fair | 0.5 | 0.5 |
+
+### Parameters
+
+$$
+0 \le p \le 1, \qquad q = 1 - p, \qquad K \in \{0, 1\} \;\;(\text{2 outcomes})
+$$
+
+## The PMF
+
+Take a concrete case: a company launches a **new smartphone "A"**. A person either **uses it** (probability $60\% = p$, coded $K=1$) or **doesn't** (probability $40\% = q$, coded $K=0$). That two-bar picture *is* the Bernoulli distribution. Slide $p$ and watch the bars — and the mean and variance — respond:
+
+<PMFExplorer kind="bernoulli" title="Bernoulli PMF — one binary trial (smartphone A: p = use)" />
+
+There's a single formula that produces both bars:
+
+$$
+\text{PMF} = p^{K} \,(1-p)^{\,1-K}
+$$
+
+It's a clever switch. Plug in each value of $K$ and one factor collapses to 1:
+
+$$
+P(K=1) = p^{1}(1-p)^{1-1} = p^{1}(1-p)^{0} = p
+$$
+
+$$
+P(K=0) = p^{0}(1-p)^{1-0} = 1 \cdot (1-p)^{1} = 1 - p = q
+$$
+
+So the compact formula is just shorthand for the two-line table:
+
+$$
+\text{PMF} =
+\begin{cases}
+q = 1 - p & \text{if } K = 0 \\
+p & \text{if } K = 1
+\end{cases}
+$$
+
+## Mean, median, mode, variance
+
+**Mean** — the expected value is the probability-weighted sum over $K \in \{0,1\}$:
+
+$$
+E[X] = \sum_{k=0}^{1} k \cdot P(k) = 0 \times 0.40 + 1 \times 0.60 = 0.60 = p
+$$
+
+The mean of a Bernoulli **is just $p$**. (With $p=0.6,\ q=0.4$: $P(1)=0.6$, $P(0)=0.4$.)
+
+**Median** — depends on which side $p$ falls:
+
+$$
+\text{Median} =
+\begin{cases}
+0 & \text{if } p < \tfrac{1}{2} \quad(\text{i.e. } q > p)\\
+[0, 1] & \text{if } p = \tfrac{1}{2} \quad(q = p,\ \text{any value in } [0,1])\\
+1 & \text{if } p > \tfrac{1}{2} \quad(q < p)
+\end{cases}
+$$
+
+**Mode** — the more likely outcome: if $p > q$ then **$p$ (the value 1) is the mode**; otherwise $q$ (the value 0) is the mode.
+
+**Variance** — with $P(K{=}0)=0.4=q$ and $P(K{=}1)=0.6=p$, and mean $0.6$:
+
+$$
+\sigma^2 = 0.40 \times (0 - 0.6)^2 + 0.6 \times (1 - 0.6)^2 = 0.40(0.36) + 0.6(0.16) = 0.24
+$$
+
+And $0.24 = 0.6 \times 0.4 = p \times q$. That's no coincidence — for **every** Bernoulli:
+
+$$
+\boxed{\;\sigma^2 = pq \qquad \sigma = \sqrt{pq}\;}
+$$
+
+Variance is largest at $p = 0.5$ (a fair coin is *maximally* uncertain: $\sigma^2 = 0.25$) and shrinks to 0 as $p \to 0$ or $p \to 1$ (a near-certain outcome carries almost no uncertainty). Watch $\sigma^2$ peak as you slide the lab to $p=0.5$.
+
+```python
+def bernoulli(p):
+    mean = p
+    var  = p * (1 - p)          # = p q
+    return mean, var
+
+for p in (0.5, 0.6, 0.9):
+    m, v = bernoulli(p)
+    print(f"p={p}:  mean={m:.2f}  variance=pq={v:.2f}  std={v**0.5:.3f}")
+
+# verify the mean formula from the definition, E[X] = 0*q + 1*p
+p = 0.6
+print("E[X] =", 0*(1-p) + 1*p)          # -> 0.6
+print("Var  =", (1-p)*(0-p)**2 + p*(1-p)**2)  # -> 0.24 = pq
+```
+
+## Why a quant cares
+
+**The Bernoulli is the atom of every binary bet.** Strip any single-shot market event down and it's a Bernoulli trial:
+
+- an **up day vs. down day** — $p$ is your directional edge; a no-edge coin-flip strategy is $p = 0.5$.
+- a bond that **defaults or doesn't** this year — $p$ is the default probability.
+- an option that expires **in- or out-of-the-money** — $p$ is $P(\text{ITM})$.
+- an order that **fills or doesn't** at your limit.
+
+The whole game is estimating $p$ and knowing your uncertainty $\sqrt{pq}$. And the moment you repeat the same trial $n$ times and count the successes, you've built the [Binomial distribution](/docs/Probability/distributions/discrete/binomial) — the next lesson, and literally "Bernoulli, $n$ times."
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A Bernoulli variable has p = 0.7. Its mean and variance are…',
+    options: ['mean 0.7, variance 0.21', 'mean 0.5, variance 0.25', 'mean 0.7, variance 0.7', 'mean 0.3, variance 0.7'],
+    answer: 0,
+    explain: 'Mean = p = 0.7. Variance = pq = 0.7 × 0.3 = 0.21.',
+  },
+  {
+    q: 'For which p is a Bernoulli variable MOST uncertain (largest variance)?',
+    options: ['p = 0.1', 'p = 0.5', 'p = 0.9', 'p = 1.0'],
+    answer: 1,
+    explain: 'σ² = pq is maximized at p = 0.5 (variance 0.25). A fair coin is maximally unpredictable; near-certain outcomes have tiny variance.',
+  },
+  {
+    q: 'The single-formula PMF p^K (1−p)^(1−K) gives P(K=0) = …',
+    options: ['p', '1 − p = q', '0', 'pq'],
+    answer: 1,
+    explain: 'p^0 (1−p)^1 = 1 × (1−p) = q. The exponents switch the formula between the two outcomes.',
+  },
+]} />

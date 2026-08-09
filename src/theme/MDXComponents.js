@@ -11,6 +11,9 @@ import ComingSoon from '@site/src/components/Interactive/ComingSoon';
 import PySandbox from '@site/src/components/Interactive/PySandbox';
 import Notebook from '@site/src/components/Interactive/Notebook';
 import Surface3D from '@site/src/components/Interactive/Surface3D';
+import PMFExplorer from '@site/src/components/Interactive/PMFExplorer';
+import PDFExplorer from '@site/src/components/Interactive/PDFExplorer';
+import CLTLab from '@site/src/components/Interactive/CLTLab';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 // Every component listed here can be used in any .mdx file without an import.
@@ -28,5 +31,8 @@ export default {
   PySandbox,
   Notebook,
   Surface3D,
+  PMFExplorer,
+  PDFExplorer,
+  CLTLab,
   CalcPlot,
 };

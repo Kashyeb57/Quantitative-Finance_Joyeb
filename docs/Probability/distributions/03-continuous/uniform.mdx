@@ -1,0 +1,136 @@
+---
+title: "Uniform Distribution"
+sidebar_position: 3
+description: The flat distribution where every outcome is equally likely — continuous (a PDF, 1/(b−a)) and discrete (a PMF, 1/n). Worked candy-sales and fair-die examples, an interactive area lab, mean/median/variance, and the quant reading (Monte Carlo, no-view priors).
+---
+
+# Uniform Distribution
+
+The uniform distribution is the picture of **"every outcome is equally likely"** — a **flat** shape with no favored region. It comes in two forms, matching the two kinds of random variable:
+
+1. **Continuous Uniform Distribution** — a **PDF** (continuous random variable).
+2. **Discrete Uniform Distribution** — a **PMF** (discrete random variable).
+
+## 1. Continuous Uniform Distribution
+
+**The continuous uniform distributions (or rectangular distributions) are a family of symmetric probability distributions.** Such a distribution describes an experiment where there is an arbitrary outcome that lies **between certain bounds**. The bounds are the parameters $a$ and $b$ — the **minimum** and **maximum** values.
+
+$$
+X \sim U(a, b), \qquad -\infty < a < b < \infty
+$$
+
+The density is constant on $[a,b]$ and zero elsewhere — a rectangle of height $1/(b-a)$ (chosen so the area is exactly 1):
+
+$$
+\text{PDF: } f(x) =
+\begin{cases}
+\dfrac{1}{b-a} & x \in [a, b] \\[4pt]
+0 & \text{otherwise}
+\end{cases}
+\qquad
+\text{CDF: } F(x) =
+\begin{cases}
+0 & x < a \\[2pt]
+\dfrac{x-a}{b-a} & x \in [a, b] \\[2pt]
+1 & x > b
+\end{cases}
+$$
+
+The CDF rises as a **straight line** from 0 to 1 across $[a,b]$ (using the maximum convention at the endpoints) — which is the [PMF/PDF/CDF](/docs/Probability/distributions/foundations/pmf-pdf-cdf) point made vivid: a *constant* density has a *straight-line* CDF, because the slope (the density) never changes.
+
+$$
+\text{Mean} = \tfrac{1}{2}(a+b), \qquad \text{Median} = \tfrac{1}{2}(a+b), \qquad \text{Variance} = \tfrac{1}{12}(b-a)^2
+$$
+
+### Worked example — candy sales
+
+**The number of candies sold daily at a shop is uniformly distributed, with a maximum of 40 and a minimum of 10.** So $a = 10$, $b = 40$, and the density height is $1/(b-a) = 1/30$.
+
+For a continuous uniform, a probability is just **width × height** — the area of a sub-rectangle:
+
+**i) Probability daily sales fall between 15 and 30?** With $x_1 = 15,\ x_2 = 30$:
+
+$$
+P(15 \le X \le 30) = (x_2 - x_1)\times\frac{1}{b-a} = (30 - 15)\times\frac{1}{30} = \frac{15}{30} = 0.5
+$$
+
+**And $P(X > 20)$?**
+
+$$
+P(X > 20) = (40 - 20)\times\frac{1}{30} = \frac{20}{30} = 0.66 = 66\%
+$$
+
+The lab starts on exactly this setup ($a=10,\ b=40$, region $15$–$30$ → $50\%$). Slide the region to $20$–$40$ to read the $66\%$:
+
+<PDFExplorer kind="uniform" title="Continuous uniform — probability is width × height" />
+
+## 2. Discrete Uniform Distribution
+
+**The discrete uniform distribution is a symmetric probability distribution wherein a finite number of values are equally likely to be observed** — every one of $n$ values has equal probability $1/n$. Put plainly: "a known, finite number of outcomes, all equally likely to happen."
+
+$$
+X \sim U(a, b), \quad b \ge a, \qquad \text{PMF} = \frac{1}{n}, \qquad \text{Mean} = \text{Median} = \frac{a+b}{2}
+$$
+
+The canonical example is **rolling a fair die**, $\{1,2,3,4,5,6\}$. The number of outcomes is
+
+$$
+n = b - a + 1 = 6 - 1 + 1 = 6, \qquad P(1) = P(2) = \dots = P(6) = \frac{1}{6}
+$$
+
+Six equal bars — the discrete cousin of the flat rectangle above:
+
+<PMFExplorer kind="discrete-uniform" title="Discrete uniform — a fair die, each face 1/n" showCDF={true} />
+
+```python
+# --- continuous uniform on [a, b] ---
+a, b = 10, 40
+height = 1 / (b - a)                       # 1/30
+p_15_30 = (30 - 15) * height               # width * height
+p_gt_20 = (40 - 20) * height
+print(f"P(15<=X<=30) = {p_15_30}")         # 0.5
+print(f"P(X>20)      = {round(p_gt_20,2)}")# 0.67 (0.66…)
+print(f"mean = {(a+b)/2},  variance = {(b-a)**2/12:.2f}")
+
+# --- discrete uniform: a fair die ---
+n = 6 - 1 + 1                              # b - a + 1
+print(f"\nfair die: n={n}, each P = 1/{n} = {1/n:.4f}")
+```
+
+## Why a quant cares
+
+The uniform is the distribution of **maximum ignorance** — no outcome preferred over another — and that makes it foundational in two ways:
+
+- **The raw fuel of Monte Carlo.** Every simulation starts with uniform random numbers on $[0,1]$. Feed them through an **inverse CDF** and you can generate a sample from *any* distribution (inverse-transform sampling) — so pricing an exotic option by simulation ultimately rests on uniforms.
+- **A "no-view" prior.** In Bayesian terms, a uniform prior says "before seeing data, I favor no value over another" — the flat starting belief that data then reshapes (see [Bayesian inference](/docs/Statistics/bayesian-inference)).
+- **Discrete uniform = fair mechanisms** — a die, a lottery draw, random tie-breaking, or picking a random row for a bootstrap sample.
+
+Its flatness is also a null hypothesis: if outcomes *should* be equally likely but aren't, the departure from uniform is the signal.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'X ~ U(0, 10) continuous. What is P(2 ≤ X ≤ 5)?',
+    options: ['0.5', '0.3', '0.7', '3'],
+    answer: 1,
+    explain: 'Height = 1/(10−0) = 0.1; width = 5−2 = 3; probability = 3 × 0.1 = 0.3.',
+  },
+  {
+    q: 'A fair die is a discrete uniform on {1,…,6}. Each outcome has probability…',
+    options: ['1/36', '1/6', '1/12', 'depends on the roll'],
+    answer: 1,
+    explain: 'n = b − a + 1 = 6, so each of the 6 equally-likely faces has probability 1/n = 1/6.',
+  },
+  {
+    q: 'Why is the uniform distribution central to Monte Carlo simulation?',
+    options: [
+      'it is the only continuous distribution',
+      'uniform [0,1] draws, passed through an inverse CDF, can generate samples from any distribution',
+      'it has the largest variance',
+      'it is always normal',
+    ],
+    answer: 1,
+    explain: 'Inverse-transform sampling turns uniform [0,1] numbers into draws from any target distribution, so uniforms are the raw randomness underneath simulations.',
+  },
+]} />

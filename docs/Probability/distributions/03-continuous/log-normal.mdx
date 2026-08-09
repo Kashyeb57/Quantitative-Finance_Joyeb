@@ -1,0 +1,124 @@
+---
+title: "Log-Normal Distribution"
+sidebar_position: 4
+description: The right-skewed, positive-only distribution whose logarithm is normal. If Y = ln(X) is normal then X is log-normal. Interactive density, a 3D view of skew growing with σ, the real-world examples (wealth, salaries), and why stock prices are modeled log-normal.
+---
+
+# Log-Normal Distribution
+
+**A log-normal (or lognormal) distribution is a continuous probability distribution of a random variable whose *logarithm* is normally distributed.** That one sentence is the whole idea:
+
+$$
+\text{If } X \sim \text{Log-Normal}(\mu, \sigma), \quad\text{then}\quad Y = \ln(X) \sim \text{Normal}
+$$
+
+and equivalently, going the other way,
+
+$$
+\text{If } Y \sim \text{Normal}, \quad\text{then}\quad X = e^{Y} \sim \text{Log-Normal}
+$$
+
+Take a normal variable and **exponentiate** it and you get a log-normal; take a log-normal and apply the **natural log** ($\log_e$) and you get back a normal. The two are the same information in two coordinate systems.
+
+## The shape: right-skewed and positive-only
+
+Because $X = e^{Y}$ and an exponential is always positive, a log-normal variable is **strictly positive** ($X > 0$) — it can never be negative. And it's **right-skewed**: a fat hump near the low end with a long tail stretching to the right. Increasing $\sigma$ (the spread of the *underlying* normal) makes the skew more extreme.
+
+Drag $\sigma$ up and watch the tail stretch (all curves here use $\mu = 0$, matching the lecture's $\sigma = 0.25, 0.5, 1$):
+
+<PDFExplorer kind="lognormal" title="Log-normal density — raise σ to grow the right skew" />
+
+Notice the readout: the **median $e^{\mu}$ sits to the *left* of the mean** $e^{\mu + \sigma^2/2}$. That gap between median and mean *is* right-skew — the long right tail drags the average above the typical value.
+
+### Skew in 3D
+
+Let $\sigma$ sweep and plot the density over $(\sigma, x)$. At small $\sigma$ it's almost a symmetric bell; as $\sigma$ grows the peak slides toward 0 and the right tail lengthens into a long ridge — the geometry of skew appearing. Drag to rotate:
+
+<Surface3D
+  title="Log-normal density as σ grows (μ = 0)"
+  xLabel="σ"
+  yLabel="x"
+  zLabel="density"
+  xMin={0.2}
+  xMax={1.1}
+  yMin={0.02}
+  yMax={4}
+  n={26}
+  yaw={48}
+  pitch={28}
+  f={(s, x) => (x <= 0 ? 0 : Math.exp(-((Math.log(x)) ** 2) / (2 * s * s)) / (x * s * Math.sqrt(2 * Math.PI)))}
+  caption="Small σ → nearly symmetric and bell-like. Large σ → the mass crowds toward zero and a long right tail forms. σ is the skew dial."
+/>
+
+## Turning it back into a normal
+
+The defining relationship is also a *tool*: if data looks log-normal, **take logs and it becomes normal** — after which every normal-based method (z-scores, confidence intervals, the empirical rule) applies. A [QQ plot](/docs/Probability/distributions/continuous/normal) of $\ln(X)$ against a normal should fall on a straight line. (The more general version of this trick — a **Box–Cox transform** — appears in the [power-law lesson](/docs/Probability/distributions/heavy-tails/power-law).)
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+Y = rng.normal(0, 0.5, size=200_000)   # underlying normal
+X = np.exp(Y)                          # -> log-normal
+
+def skew(v):                            # simple sample skewness
+    z = (v - v.mean()) / v.std()
+    return (z**3).mean()
+
+print(f"X (log-normal):  skew = {skew(X):+.2f}  (right-skewed, > 0)")
+print(f"ln(X) = Y:       skew = {skew(np.log(X)):+.2f}  (~0, back to normal)")
+print(f"median e^μ = {np.exp(0):.2f}   <   mean e^(μ+σ²/2) = {np.exp(0 + 0.5**2/2):.2f}")
+```
+
+## Where log-normals show up
+
+The lecture's examples are all quantities that are **positive and right-skewed** — a crowd near the low end and a few giants in the tail:
+
+1. **Wealth distribution of the world** — most people salaried near the peak, a long tail out to Bill Gates, Adani, Elon Musk.
+2. **Discussion forums** — the length of comments (many short, a few essays).
+3. **Length of chess games** (most games a typical length, some marathons).
+4. **Dwell time on online articles** (jokes, news) — most readers skim, a few linger.
+5. **Salaries of employees in a company.**
+
+The common thread: a hard floor at zero, a typical range, and a rare-but-huge upper tail.
+
+## Why a quant cares
+
+**The log-normal is the distribution of prices.** It's not a side-note — it's the backbone of continuous-time finance:
+
+- **Stock prices are modeled as log-normal.** The Black–Scholes model assumes *log-returns* are normal, which makes the *price* log-normal. This is exactly right for two reasons: prices can't go negative (log-normal is positive-only), and returns **compound multiplicatively** — a price is a product of many small growth factors, and the log of a product is a sum, which the [Central Limit Theorem](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem) pushes toward normal. So $\ln(\text{price})$ is normal ⇒ price is log-normal.
+- **Geometric Brownian Motion**, the standard price process, produces log-normally distributed prices at every horizon — see [stochastic processes](/docs/Probability/stochastic-processes).
+- **The median-vs-mean gap is a real trap.** Because expected wealth $e^{\mu+\sigma^2/2}$ exceeds the median $e^{\mu}$, the "average" outcome of a volatile compounding strategy is pulled up by rare huge paths that a *typical* investor never experiences — the mathematics behind "average returns" flattering long-run reality.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'X is log-normal. Which statement is true?',
+    options: [
+      'X can be negative',
+      'ln(X) is normally distributed, and X > 0 always',
+      'X is symmetric',
+      'X is discrete',
+    ],
+    answer: 1,
+    explain: 'By definition ln(X) is normal, and since X = e^Y > 0, a log-normal variable is strictly positive and right-skewed.',
+  },
+  {
+    q: 'Why are stock PRICES modeled as log-normal rather than normal?',
+    options: [
+      'prices are discrete',
+      'prices are positive-only and grow multiplicatively, so log-returns are ~normal and the price is log-normal',
+      'log-normal has thinner tails',
+      'it makes prices symmetric',
+    ],
+    answer: 1,
+    explain: 'A normal allows negative prices and additive changes. Prices are positive and compound multiplicatively; the log of a product of growth factors is a sum → normal, so the price itself is log-normal.',
+  },
+  {
+    q: 'For a right-skewed log-normal, the mean compared to the median is…',
+    options: ['smaller', 'larger (the long right tail pulls the mean up)', 'equal', 'undefined'],
+    answer: 1,
+    explain: 'Mean e^(μ+σ²/2) > median e^μ. The long right tail drags the mean above the typical (median) value.',
+  },
+]} />

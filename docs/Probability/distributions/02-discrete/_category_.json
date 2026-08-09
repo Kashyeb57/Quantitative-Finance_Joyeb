@@ -1,0 +1,9 @@
+{
+  "label": "2. Discrete Distributions",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "2. Discrete Distributions",
+    "description": "Distributions for variables that take countable values, described by a probability mass function: the single yes/no trial (Bernoulli), the count of successes over many trials (Binomial), and the count of events in a fixed window (Poisson)."
+  }
+}

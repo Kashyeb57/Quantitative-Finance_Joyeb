@@ -1,0 +1,10 @@
+{
+  "label": "Random Variables & Distributions",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "Probability Distributions",
+    "slug": "/Probability/distributions",
+    "description": "A distribution is how probability is spread over the values a random variable can take. This module works one lecture at a time from the ground up: the three functions that describe any distribution (PMF, PDF, CDF), the discrete family (Bernoulli, Binomial, Poisson), the continuous family (Normal, Standard Normal & z-scores, Uniform, Log-Normal), the heavy-tailed family (Power Law, Pareto) that finance actually lives in, and finally the two ideas that connect a sample back to reality — the Central Limit Theorem and estimation. Every page has an interactive lab or 3D visual and a runnable example. (Study reference: the 'Probability Distribution Functions' section of a Complete Data Science bootcamp — all notes, code, and visuals are my own.)"
+  }
+}
