@@ -22,10 +22,11 @@ Probability is the native language of quantitative finance. A price isn't a numb
 | [Conditional Probability & Bayes' Theorem](/docs/Probability/conditional-probability) | Updating probabilities given information — the engine of inference. |
 | [Stochastic Processes & Brownian Motion](/docs/Probability/stochastic-processes) | Random walks and the continuous-time models behind pricing. |
 
-The **Distributions** page is fully written with a live bell-curve explorer — start there.
+The **Foundations**, **Conditional Probability**, and **Distributions** pages are fully written — the Distributions page has a live bell-curve explorer.
 
 ## Where to start
 
+- New to probability? Begin with [Probability Foundations](/docs/Probability/foundations) (the addition rule for "or") and [Conditional Probability](/docs/Probability/conditional-probability) (the multiplication rule for "and") — both fully written with runnable examples.
 - [Random Variables & Distributions](/docs/Probability/distributions) has an interactive normal-distribution lab: verify the 68–95–99.7 rule and see tail risk yourself.
 - From there, [Stochastic Processes](/docs/Probability/stochastic-processes) leads into the [Stochastic Calculus](/docs/Mathematics/stochastic-calculus) notes, which have a live GBM simulator.
 - The [Probability Cheatsheet](/books) (Blitzstein & Chen) in the library is a great one-page reference.

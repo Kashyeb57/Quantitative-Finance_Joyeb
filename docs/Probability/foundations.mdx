@@ -1,24 +1,115 @@
 ---
+sidebar_position: 2
 title: Probability Foundations
-description: Sample spaces, events, axioms, and the laws of probability. Notes in progress.
-sidebar_class_name: soon
+description: What probability is, sample spaces and events, the axioms, mutually exclusive events, and the addition rule — including the general inclusion–exclusion form — with runnable examples and a quant framing.
 ---
 
 # Probability Foundations
 
-Sample spaces, events, axioms, and the laws of probability.
+**Probability is about determining the likelihood of an event.** It's the native language of quantitative finance: a price isn't a number you predict, it's a random outcome you assign probabilities to. This page builds the ground floor — what a probability *is*, and the first rule for combining events: the **addition rule** for "or."
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Sample spaces and events',
-    'The axioms of probability',
-    'Unions, intersections, and complements',
-    'Equally-likely outcomes and counting',
-    'The inclusion–exclusion principle',
-  ]}
-  meanwhile={[
-    { label: 'Combinatorics', to: '/docs/Probability/combinatorics' },
-    { label: 'Distributions (live lab)', to: '/docs/Probability/distributions' },
-  ]}
-/>
+## What is a probability?
+
+A probability is a number between **0 (impossible)** and **1 (certain)** measuring how likely an event is. When every outcome is **equally likely**, it's just a ratio:
+
+$$
+P(\text{event}) = \frac{\text{number of favorable outcomes}}{\text{total number of outcomes}}
+$$
+
+The set of all possible outcomes is the **sample space**; an **event** is any subset of it.
+
+- **Toss a coin** — sample space $\{H, T\}$. $\;P(H) = \tfrac{1}{2} = 50\%$, $\;P(T) = \tfrac{1}{2} = 50\%$.
+- **Roll a die** — sample space $\{1,2,3,4,5,6\}$. $\;P(X=1) = \tfrac{1}{6}$.
+
+A few rules follow immediately and are worth stating:
+
+- $0 \le P(A) \le 1$ for any event $A$.
+- The probabilities of the whole sample space sum to $1$.
+- **Complement:** $P(\text{not } A) = 1 - P(A)$ — the chance something *doesn't* happen.
+
+## Mutually exclusive events
+
+**Two events are mutually exclusive if they cannot occur at the same time.** On a single coin toss you get heads *or* tails, never both — $H$ and $T$ are mutually exclusive.
+
+For mutually exclusive events, the **addition rule** is as simple as it looks: the chance of one *or* the other is the sum.
+
+$$
+P(A \text{ or } B) = P(A) + P(B)
+$$
+
+- **Coin:** $P(H \text{ or } T) = \tfrac{1}{2} + \tfrac{1}{2} = 1$ — one of them is certain to happen.
+- **Die:** $P(1 \text{ or } 5) = \tfrac{1}{6} + \tfrac{1}{6} = \tfrac{2}{6} = \tfrac{1}{3}$.
+
+## Non-mutually-exclusive events: the general addition rule
+
+Most interesting events *can* happen together, and then simple addition **double-counts** the overlap. The classic example: draw one card from a 52-card deck.
+
+- Event $K$ = "it's a King" — 4 cards, $P(K) = \tfrac{4}{52}$.
+- Event $\heartsuit$ = "it's a Heart" — 13 cards, $P(\heartsuit) = \tfrac{13}{52}$.
+
+These overlap: the **King of Hearts** is both. If you just add $\tfrac{4}{52} + \tfrac{13}{52}$ you count that one card *twice*. The fix is to subtract the overlap once — the **general addition rule** (also called **inclusion–exclusion**):
+
+$$
+P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B)
+$$
+
+$$
+P(K \text{ or } \heartsuit) = \frac{4}{52} + \frac{13}{52} - \frac{1}{52} = \frac{16}{52} = \frac{4}{13}
+$$
+
+Mutually exclusive events are just the special case where $P(A \text{ and } B) = 0$, and the overlap term vanishes — which is why the simpler rule above worked for coins and dice.
+
+```python
+# P(King OR Heart) from a 52-card deck, via the addition rule
+kings          = 4/52
+hearts         = 13/52
+king_of_hearts = 1/52          # the overlap: King AND Heart
+
+naive   = kings + hearts                     # WRONG: double-counts the King of Hearts
+correct = kings + hearts - king_of_hearts    # inclusion-exclusion
+
+print(f"just adding:        {naive:.4f}  = {round(naive*52)}/52")
+print(f"subtract overlap:   {correct:.4f}  = {round(correct*52)}/52  (correct)")
+```
+
+## Why a quant cares
+
+Every question in markets is really about the probability of an event — $P(\text{up day})$, $P(\text{price breaches a barrier})$, $P(\text{default this year})$. Two of these foundations matter more than they first appear:
+
+- **The overlap term is where risk hides.** You *cannot* get $P(\text{stock A falls OR stock B falls})$ by adding the two probabilities — they overlap (both can fall together), and ignoring $P(\text{A and B})$ **overstates** the chance of "at least one." How big that overlap is comes straight from how the two are related — the [covariance and correlation](/docs/Statistics/descriptive-statistics/covariance-and-correlation/covariance) from the Statistics section.
+- **The complement rule is a constant shortcut.** $P(\text{at least one loss}) = 1 - P(\text{no losses})$ is almost always easier to compute than the "at least one" side directly.
+
+Next, the [addition rule's partner](/docs/Probability/conditional-probability) — the **multiplication rule** for "and," and the all-important question of whether two events are *independent*.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Two events are mutually exclusive. The probability that one OR the other occurs is…',
+    options: [
+      'P(A) × P(B)',
+      'P(A) + P(B)',
+      'P(A) + P(B) − P(A and B)',
+      'always 1',
+    ],
+    answer: 1,
+    explain: 'Mutually exclusive events cannot overlap, so P(A and B) = 0 and the addition rule reduces to a plain sum, P(A) + P(B).',
+  },
+  {
+    q: 'For a single card from a 52-card deck, why is P(King or Heart) = 4/52 + 13/52 − 1/52 rather than 4/52 + 13/52?',
+    options: [
+      'the deck has fewer than 52 cards',
+      'the King of Hearts is both a King and a Heart, so adding double-counts it; you subtract the overlap once',
+      'Kings are worth more than Hearts',
+      'the events are independent',
+    ],
+    answer: 1,
+    explain: 'King and Heart overlap on one card (the King of Hearts). The general addition rule subtracts P(A and B) so the shared outcome is not counted twice.',
+  },
+  {
+    q: 'If P(a strategy loses money on a given day) = 0.45, then P(it does NOT lose) is…',
+    options: ['0.45', '0.55', '0.90', 'cannot be determined'],
+    answer: 1,
+    explain: 'The complement rule: P(not A) = 1 − P(A) = 1 − 0.45 = 0.55.',
+  },
+]} />

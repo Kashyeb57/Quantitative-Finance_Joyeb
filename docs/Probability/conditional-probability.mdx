@@ -1,24 +1,134 @@
 ---
+sidebar_position: 5
 title: Conditional Probability & Bayes' Theorem
-description: Dependence, independence, and Bayesian updating. Notes in progress.
-sidebar_class_name: soon
+description: Independent vs dependent events, conditional probability, and the multiplication rule for 'and' — plus the one-line step to Bayes' theorem — with runnable examples and why dependence is the heart of risk.
 ---
 
 # Conditional Probability & Bayes' Theorem
 
-Dependence, independence, and Bayesian updating.
+Where the [addition rule](/docs/Probability/foundations) handles **"or,"** the **multiplication rule** handles **"and"** — the probability that two events *both* happen. And it forces the single most important question in all of probability: does one event **affect** the other?
 
-<ComingSoon
-  eta="On the roadmap"
-  covers={[
-    'Conditional probability and independence',
-    'The multiplication rule and law of total probability',
-    'Bayes’ theorem',
-    'Common paradoxes (Monty Hall, base rates)',
-    'Bayesian updating in practice',
-  ]}
-  meanwhile={[
-    { label: 'Bayesian Inference (live prior→posterior lab)', to: '/docs/Statistics/bayesian-inference' },
-    { label: 'Distributions', to: '/docs/Probability/distributions' },
-  ]}
-/>
+## Independent vs. dependent events
+
+- **Independent** — two events are independent if they **do not affect one another**. Tossing a coin, then tossing it again: the first result tells you nothing about the second. $P(H)=\tfrac{1}{2}$ on every toss, no matter what came before. Rolling a die twice is the same.
+- **Dependent** — two events are dependent if one **changes the probability** of the other. Draw a card and *keep it*, then draw again: the deck has changed, so the second probability depends on the first.
+
+The card case makes dependence concrete. Take a King from a full deck, then a Queen from what remains:
+
+$$
+P(K) = \frac{4}{52}, \qquad P(Q \text{ after a King is removed}) = \frac{4}{51}
+$$
+
+The denominator dropped from 52 to 51 — the first draw altered the second. That's dependence.
+
+## Conditional probability
+
+The tool for dependence is **conditional probability** — the probability of $B$ **given that** $A$ has already happened, written $P(B \mid A)$:
+
+$$
+P(B \mid A) = \frac{P(A \text{ and } B)}{P(A)}
+$$
+
+In the card example, $P(Q \mid K) = \tfrac{4}{51}$: *given* a King was drawn and set aside, all four Queens still sit in the remaining 51 cards.
+
+## The multiplication rule
+
+To get the probability that **both** events happen, multiply — with a twist depending on independence.
+
+**Independent events** — just multiply the two probabilities:
+
+$$
+P(A \text{ and } B) = P(A) \times P(B)
+$$
+
+$$
+P(H \text{ and then } T) = \tfrac{1}{2} \times \tfrac{1}{2} = \tfrac{1}{4}
+$$
+
+**Dependent events** — multiply by the *conditional* probability:
+
+$$
+P(A \text{ and } B) = P(A) \times P(B \mid A)
+$$
+
+$$
+P(K \text{ and then } Q) = \frac{4}{52} \times \frac{4}{51} = \frac{16}{2652} = \frac{4}{663} \approx 0.006
+$$
+
+Independence is simply the special case where $P(B \mid A) = P(B)$ — knowing $A$ tells you nothing, so the conditional collapses back to the plain multiplication.
+
+```python
+from fractions import Fraction
+
+# Independent: two separate coin tosses
+p_h_and_t = Fraction(1,2) * Fraction(1,2)
+print(f"P(H and T), independent:  {p_h_and_t}  = {float(p_h_and_t):.3f}")
+
+# Dependent: King then Queen from a 52-card deck, no replacement
+p_king              = Fraction(4,52)
+p_queen_given_king  = Fraction(4,51)          # deck now has 51 cards; all 4 queens remain
+p_k_then_q          = p_king * p_queen_given_king
+print(f"P(K then Q), dependent:   {p_k_then_q}  = {float(p_k_then_q):.5f}")
+```
+
+## Where this leads: Bayes' theorem
+
+The multiplication rule can be written from either event's point of view — $P(A \text{ and } B)$ is the same thing whether you condition on $A$ or on $B$:
+
+$$
+P(A)\,P(B \mid A) = P(A \text{ and } B) = P(B)\,P(A \mid B)
+$$
+
+Rearrange, and out falls **Bayes' theorem** — the rule for flipping a conditional and *updating* a belief when new evidence arrives:
+
+$$
+P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)}
+$$
+
+That one step is the engine of statistical inference. Its full, hands-on treatment — priors, posteriors, and a live prior→posterior lab — lives in [Bayesian Inference](/docs/Statistics/bayesian-inference).
+
+## Why a quant cares
+
+Independence versus dependence isn't academic — it's the difference between a survivable portfolio and a blown-up one:
+
+- **The 2008 lesson.** If mortgage defaults were **independent**, the multiplication rule makes many defaulting *at once* astronomically unlikely (multiply many small numbers → near zero). They weren't independent — they were highly **dependent**, driven by a common housing market. Models that assumed independence priced the joint risk near zero and were catastrophically wrong. Getting $P(B \mid A)$ right *is* the risk model.
+- **Conditional probability is how markets actually behave.** $P(\text{big move tomorrow} \mid \text{big move today})$ is well above the unconditional $P(\text{big move})$ — that's **volatility clustering**, and it's why calm and turbulent periods come in runs.
+- **Sampling without replacement** — sequential draws, position sizing from a finite pool — is the dependent-events multiplication rule in disguise.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'You draw two cards from a 52-card deck WITHOUT replacement. The two draws are…',
+    options: [
+      'independent — the multiplication rule uses P(A) × P(B)',
+      'dependent — the first draw changes the deck, so you use P(A) × P(B | A)',
+      'mutually exclusive',
+      'impossible to combine',
+    ],
+    answer: 1,
+    explain: 'Removing the first card changes what remains, so the second probability is conditional. Use P(A and B) = P(A) × P(B | A).',
+  },
+  {
+    q: 'P(H and then T) on two fair coin tosses equals 1/4 because…',
+    options: [
+      'the tosses are dependent',
+      'the tosses are independent, so P(A and B) = P(A) × P(B) = 1/2 × 1/2',
+      'you add the probabilities',
+      'of the complement rule',
+    ],
+    answer: 1,
+    explain: 'Separate coin tosses are independent — one result does not affect the other — so their joint probability is the product, 1/2 × 1/2 = 1/4.',
+  },
+  {
+    q: 'Why were pre-2008 models that assumed mortgage defaults were independent so dangerous?',
+    options: [
+      'independence makes joint defaults look astronomically unlikely (a product of small numbers), but real defaults were dependent on a common factor, so the true joint risk was far higher',
+      'independence overstates risk',
+      'the multiplication rule does not apply to defaults',
+      'they used the addition rule instead',
+    ],
+    answer: 0,
+    explain: 'Multiplying many small independent probabilities drives the joint probability toward zero. Because defaults were actually dependent (a shared housing downturn), that assumption hid enormous joint risk.',
+  },
+]} />
