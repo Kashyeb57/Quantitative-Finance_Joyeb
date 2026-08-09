@@ -1,0 +1,9 @@
+{
+  "label": "4. ANOVA (Analysis of Variance)",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "4. ANOVA (Analysis of Variance)",
+    "description": "The test for comparing the means of three or more groups at once, without inflating the error rate of many pairwise t-tests. This sub-module works up from the definition and vocabulary (factors and levels) through the assumptions, the types of ANOVA, and how the total variance is partitioned into between-group and within-group pieces to form the F-statistic."
+  }
+}

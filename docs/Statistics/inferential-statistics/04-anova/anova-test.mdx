@@ -1,0 +1,142 @@
+---
+title: "What Is ANOVA?"
+sidebar_position: 1
+description: Analysis of Variance — the definition (comparing the means of two or more groups) and its two core components, factors and levels, with the medicine/dosage and mode-of-payment examples.
+---
+
+# Analysis of Variance (ANOVA)
+
+The [z](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test)- and [t](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test)-tests compare **one** mean, or at most **two** groups. But what if you have **three or four** groups and want to know whether *any* of them differ? That's the job of **ANOVA.**
+
+## Definition
+
+> **ANOVA is a statistical method used to compare the means of two or more groups.**
+
+That's the one line to remember. With two group means you'd reach for a z- or t-test; the moment you have **three groups, four groups** — several groups you want to analyze and compare at once — you use **ANOVA** instead.
+
+:::note Why not just run many t-tests?
+Comparing every pair with separate t-tests inflates the chance of a false positive (each test spends its own $\alpha$). ANOVA tests them **all together** with a single test — the reason it exists is spelled out on the [Big Picture page](/docs/Statistics/inferential-statistics/foundations/big-picture). The *how* — an F-statistic from partitioned variance — comes later in this module.
+:::
+
+## The two components: factors and levels
+
+Every ANOVA problem is organized around **two** pieces of vocabulary. Get these and the data layout falls into place.
+
+**① Factor (the variable).** The categorical variable whose effect you're studying. (A factor can be *independent* or *dependent* — that distinction comes in the next lesson, on assumptions and types.)
+
+**② Levels.** The specific groups or settings *within* a factor.
+
+An example makes it concrete. Take **medicine** as the **factor** — and suppose it's given at different **dosages: 5 mg, 10 mg, 15 mg.** Those dosages are the **levels.**
+
+<div style={{textAlign: 'center', margin: '1.5rem 0'}}>
+  <svg viewBox="0 0 480 360" width="480" style={{maxWidth: '100%'}} role="img" aria-label="Two factor-and-level trees: Medicine (factor) splits into dosage levels 5mg, 10mg, 15mg; Mode of payment (factor) splits into levels GPay, PhonePe, IMPS, NEFT">
+    {/* Tree 1: Medicine */}
+    <rect x="175" y="8" width="130" height="34" rx="7" fill="#25c2a0" fillOpacity="0.14" stroke="#25c2a0" strokeWidth="1.5" />
+    <text x="240" y="29" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Medicine — factor</text>
+    <line x1="240" y1="42" x2="110" y2="76" stroke="#f59e0b" strokeWidth="1.4" />
+    <line x1="240" y1="42" x2="240" y2="76" stroke="#f59e0b" strokeWidth="1.4" />
+    <line x1="240" y1="42" x2="370" y2="76" stroke="#f59e0b" strokeWidth="1.4" />
+    {[['5 mg', 110], ['10 mg', 240], ['15 mg', 370]].map(([t, x]) => (
+      <g key={t}>
+        <rect x={x - 42} y="78" width="84" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.7" />
+        <text x={x} y="97" textAnchor="middle" fontSize="11.5" fill="currentColor">{t}</text>
+      </g>
+    ))}
+    <text x="60" y="97" textAnchor="middle" fontSize="11" fill="#f59e0b" fontWeight="700">Dosage</text>
+    <text x="418" y="70" textAnchor="middle" fontSize="10" fill="#f59e0b">levels</text>
+
+    {/* Tree 2: Mode of payment */}
+    <rect x="150" y="200" width="180" height="34" rx="7" fill="#0e7490" fillOpacity="0.14" stroke="#0e7490" strokeWidth="1.5" />
+    <text x="240" y="221" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Mode of payment — factor</text>
+    {[80, 187, 293, 400].map((x) => (
+      <line key={x} x1="240" y1="234" x2={x} y2="286" stroke="#f59e0b" strokeWidth="1.4" />
+    ))}
+    {[['GPay', 80], ['PhonePe', 187], ['IMPS', 293], ['NEFT', 400]].map(([t, x]) => (
+      <g key={t}>
+        <rect x={x - 40} y="288" width="80" height="30" rx="6" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.7" />
+        <text x={x} y="307" textAnchor="middle" fontSize="11" fill="currentColor">{t}</text>
+      </g>
+    ))}
+    <text x="40" y="307" textAnchor="middle" fontSize="11" fill="#f59e0b" fontWeight="700">levels</text>
+  </svg>
+</div>
+
+A second, everyday example: **mode of payment** is the **factor**, and the ways people pay — **GPay, PhonePe, IMPS, NEFT** (and demand draft, and so on) — are its **levels.** Whatever the domain, the pattern is the same: **a factor holds several levels, and ANOVA asks whether the response mean differs across those levels.**
+
+## What ANOVA is really asking
+
+Picture the response for three groups (three levels of a factor). ANOVA's question is whether the **group means** are far enough apart to be real, or whether the groups are just noisy samples of the same underlying mean:
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 480 180" width="480" style={{maxWidth: '100%'}} role="img" aria-label="Three group distributions with different means along one axis, illustrating the question ANOVA asks">
+    <line x1="30" y1="140" x2="450" y2="140" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    {[['#25c2a0', 130, 'Level A'], ['#0e7490', 240, 'Level B'], ['#f59e0b', 350, 'Level C']].map(([c, cx, lbl]) => (
+      <g key={lbl}>
+        <path d={`M${cx-55},140 C${cx-30},140 ${cx-24},50 ${cx},50 C${cx+24},50 ${cx+30},140 ${cx+55},140`} fill={c} fillOpacity="0.12" stroke={c} strokeWidth="2" />
+        <line x1={cx} y1="140" x2={cx} y2="52" stroke={c} strokeWidth="1.3" strokeDasharray="3 3" />
+        <text x={cx} y="156" textAnchor="middle" fontSize="11" fill="currentColor">{lbl}</text>
+        <text x={cx} y="45" textAnchor="middle" fontSize="10" fill={c} fontWeight="700">mean</text>
+      </g>
+    ))}
+    <text x="240" y="172" textAnchor="middle" fontSize="10.5" fill="currentColor" opacity="0.7">Are these group means different, or is the gap just sampling noise? — that's the ANOVA question</text>
+  </svg>
+</div>
+
+```python
+import pandas as pd
+
+# ANOVA data lives in "tidy" form: one factor column (the levels)
+# and one response column. Here: medicine dosage (factor) vs outcome.
+df = pd.DataFrame({
+    "dosage": ["5mg", "5mg", "10mg", "10mg", "15mg", "15mg"],   # factor -> its levels
+    "response": [12, 14, 18, 17, 23, 25],                        # what we measure
+})
+
+# ANOVA asks: does mean(response) differ ACROSS the dosage levels?
+print(df.groupby("dosage")["response"].mean())
+# The F-test that answers it (stats.f_oneway / statsmodels) comes once we've
+# covered the assumptions, types, and how the variance is partitioned.
+```
+
+## Why a quant cares
+
+"Compare the means of several groups" is a question that shows up constantly once you stop thinking in pairs:
+
+- **Strategy across regimes.** Is a strategy's mean return the same in low-, medium-, and high-volatility regimes (three levels of a "regime" factor), or does at least one differ? That's a one-factor ANOVA, not three separate t-tests.
+- **A/B/C/… testing.** Comparing more than two execution algos, venues, or signal variants at once is exactly ANOVA's turf — and doing it as one test controls the false-positive rate that many pairwise comparisons would blow up.
+- **The factor/level frame organizes the data.** Recognizing "this column is a factor, these are its levels, that column is the response" is the tidy-data layout every group-comparison model (ANOVA, and the [regression / GLM](/docs/Statistics/regression-analysis) it's equivalent to) consumes.
+
+We'll build the machinery — assumptions, types, and the variance partition that yields the F-statistic — over the next lessons.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'ANOVA is used to…',
+    options: [
+      'compare the means of exactly two groups',
+      'compare the means of two or more groups',
+      'test a single proportion',
+      'estimate one population variance',
+    ],
+    answer: 1,
+    explain: 'ANOVA compares the means of two or more groups. With three or more groups it replaces running many pairwise t-tests.',
+  },
+  {
+    q: 'If “medicine” is the factor and it is given at 5 mg, 10 mg and 15 mg, those three dosages are the…',
+    options: ['factors', 'levels', 'responses', 'p-values'],
+    answer: 1,
+    explain: 'A factor is the variable (medicine); the specific settings within it (5/10/15 mg) are its levels.',
+  },
+  {
+    q: 'Why prefer one ANOVA over many pairwise t-tests for several groups?',
+    options: [
+      'ANOVA needs less data',
+      'running many t-tests inflates the false-positive rate; ANOVA tests all groups in a single test',
+      'ANOVA is Bayesian',
+      't-tests cannot compare means',
+    ],
+    answer: 1,
+    explain: 'Each pairwise test spends its own α, so many of them pile up false positives. ANOVA controls this with one omnibus test.',
+  },
+]} />
