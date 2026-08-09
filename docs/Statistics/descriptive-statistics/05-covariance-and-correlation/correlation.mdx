@@ -24,6 +24,22 @@ Now the number is directly interpretable:
 
 The crucial qualifier is **linear**. Pearson measures *straight-line* association specifically. A relationship can be perfectly predictable yet curved, and Pearson will report less than 1 — it only sees the straight-line part.
 
+### Seeing correlation in 3D
+
+Correlation has a shape. If you plot the **joint density** of two variables — how likely each combination of $(X, Y)$ is — a positive correlation stops being an abstract number and becomes something you can see: the round bell of two *independent* variables gets stretched into a **ridge along the diagonal**. Drag the surface below to rotate it.
+
+<Surface3D
+  title="Joint density of two variables with ρ = 0.8"
+  xLabel="X"
+  yLabel="Y"
+  zLabel="density"
+  f={(x, y) => {
+    const r = 0.8;
+    return Math.exp(-(x * x - 2 * r * x * y + y * y) / (2 * (1 - r * r)));
+  }}
+  caption="With ρ = 0.8 the bell is pulled into a ridge along the line Y = X: when X is high, Y tends to be high too. At ρ = 0 it would be a symmetric round hill; a negative ρ tilts the ridge the other way. That tilt IS the correlation."
+/>
+
 ## Spearman rank correlation
 
 **Spearman correlation is Pearson computed on the *ranks* of the data** instead of the raw values. Replace each value by its position in sorted order, then correlate those ranks:

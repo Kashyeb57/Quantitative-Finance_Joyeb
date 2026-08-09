@@ -10,6 +10,7 @@ import BayesianUpdaterLab from '@site/src/components/Interactive/BayesianUpdater
 import ComingSoon from '@site/src/components/Interactive/ComingSoon';
 import PySandbox from '@site/src/components/Interactive/PySandbox';
 import Notebook from '@site/src/components/Interactive/Notebook';
+import Surface3D from '@site/src/components/Interactive/Surface3D';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 // Every component listed here can be used in any .mdx file without an import.
@@ -26,5 +27,6 @@ export default {
   ComingSoon,
   PySandbox,
   Notebook,
+  Surface3D,
   CalcPlot,
 };
