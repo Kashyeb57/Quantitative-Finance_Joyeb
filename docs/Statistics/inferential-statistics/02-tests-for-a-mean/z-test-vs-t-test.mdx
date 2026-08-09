@@ -1,0 +1,114 @@
+---
+title: "Z-test vs t-test: Which to Use"
+sidebar_position: 4
+description: A single decision tree for choosing between the z-test and the t-test — driven by whether you know the population σ and whether the sample exceeds 30 — plus a side-by-side comparison.
+---
+
+# When to Use a t-test vs a z-test
+
+Both tests answer the same question — *is this mean different?* — so the only thing left to decide is **which one**. Two yes/no questions settle it.
+
+## The decision tree
+
+<div style={{textAlign: 'center', margin: '1.5rem 0'}}>
+  <svg viewBox="0 0 480 300" width="480" style={{maxWidth: '100%'}} role="img" aria-label="Decision tree: do you know the population standard deviation? If no, use the t-test. If yes, is the sample above 30? If yes use the z-test, if no use the t-test.">
+    {/* root */}
+    <rect x="150" y="12" width="180" height="46" rx="8" fill="#0e7490" fillOpacity="0.12" stroke="#0e7490" strokeWidth="1.5" />
+    <text x="240" y="32" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Do you know the</text>
+    <text x="240" y="48" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">population std σ?</text>
+    {/* branches from root */}
+    <line x1="200" y1="58" x2="120" y2="96" stroke="currentColor" strokeWidth="1.3" opacity="0.6" />
+    <line x1="290" y1="58" x2="380" y2="96" stroke="currentColor" strokeWidth="1.3" opacity="0.6" />
+    <text x="150" y="82" textAnchor="middle" fontSize="11" fill="#25c2a0" fontWeight="700">YES</text>
+    <text x="350" y="82" textAnchor="middle" fontSize="11" fill="#f59e0b" fontWeight="700">NO</text>
+    {/* left child: sample size question */}
+    <rect x="30" y="98" width="180" height="46" rx="8" fill="#0e7490" fillOpacity="0.12" stroke="#0e7490" strokeWidth="1.5" />
+    <text x="120" y="118" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Is the sample</text>
+    <text x="120" y="134" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">size above 30?</text>
+    {/* right child: use t-test */}
+    <rect x="300" y="98" width="160" height="46" rx="8" fill="#f59e0b" fillOpacity="0.16" stroke="#f59e0b" strokeWidth="1.5" />
+    <text x="380" y="126" textAnchor="middle" fontSize="13" fill="currentColor" fontWeight="700">Use the t-test</text>
+    {/* branches from sample-size */}
+    <line x1="85" y1="144" x2="70" y2="196" stroke="currentColor" strokeWidth="1.3" opacity="0.6" />
+    <line x1="160" y1="144" x2="230" y2="196" stroke="currentColor" strokeWidth="1.3" opacity="0.6" />
+    <text x="60" y="176" textAnchor="middle" fontSize="11" fill="#25c2a0" fontWeight="700">YES</text>
+    <text x="215" y="176" textAnchor="middle" fontSize="11" fill="#f59e0b" fontWeight="700">NO</text>
+    {/* leaves */}
+    <rect x="10" y="198" width="150" height="46" rx="8" fill="#25c2a0" fillOpacity="0.16" stroke="#25c2a0" strokeWidth="1.5" />
+    <text x="85" y="226" textAnchor="middle" fontSize="13" fill="currentColor" fontWeight="700">Use the z-test</text>
+    <rect x="175" y="198" width="150" height="46" rx="8" fill="#f59e0b" fillOpacity="0.16" stroke="#f59e0b" strokeWidth="1.5" />
+    <text x="250" y="226" textAnchor="middle" fontSize="13" fill="currentColor" fontWeight="700">Use the t-test</text>
+    <text x="240" y="278" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">Only one path leads to the z-test — σ known AND n &gt; 30. Everything else is a t-test.</text>
+  </svg>
+</div>
+
+Read it top-down:
+
+1. **Do you know the population standard deviation $\sigma$?**
+   - **No** → use the **t-test.** (You'll estimate the spread with the sample $s$.)
+   - **Yes** → ask the second question.
+2. **Is the sample size above 30?**
+   - **Yes** → use the **z-test.**
+   - **No** → use the **t-test.**
+
+The z-test wins on **exactly one path** — you know $\sigma$ *and* $n > 30$. In every other case, the [t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test) is the honest choice.
+
+## Side by side
+
+| | **z-test** | **t-test** |
+|---|---|---|
+| Population σ | **known** | **unknown** (estimated by sample $s$) |
+| Sample size | large, $n \ge 30$ | any, especially small $n < 30$ |
+| Reference curve | standard normal | Student-t with $\text{dof} = n-1$ |
+| Two-tailed 95% critical value | fixed $\pm 1.96$ | $\pm t_{\text{dof}}$ (wider; e.g. $\pm 2.045$ at dof 29) |
+| Tails | thinner | fatter (more room for extremes) |
+
+The two converge: as $n$ grows, the sample $s$ nails down $\sigma$, the t-tails thin, and the t-critical value slides toward $1.96$. That's why "$n \ge 30$" is the rough line where the distinction stops mattering — drag the **df** slider on the [t-distribution lab](/docs/Statistics/inferential-statistics/tests-for-a-mean/student-t-distribution) to watch it happen.
+
+```python
+import numpy as np
+
+def choose_test(sigma_known: bool, n: int) -> str:
+    if not sigma_known:
+        return "t-test  (σ unknown → estimate with sample s)"
+    return "z-test" if n > 30 else "t-test  (σ known but small sample)"
+
+for sigma_known, n in [(True, 50), (True, 12), (False, 200), (False, 8)]:
+    print(f"σ known={sigma_known!s:5}  n={n:>3}  ->  {choose_test(sigma_known, n)}")
+```
+
+## Why a quant cares
+
+In practice the tree almost always dead-ends at the t-test, and knowing *why* keeps you from overstating confidence:
+
+- **You essentially never know σ in markets.** True volatility is unobservable and time-varying; you estimate it from returns. So the correct default for testing a mean return or a Sharpe ratio is the **t-test**, full stop.
+- **The z-test is the large-sample convenience limit.** With thousands of daily observations the two agree, so people report "z-stats" — fine when $n$ is huge, misleading on a short or regime-limited history.
+- **Small samples are where the choice bites.** Judging a strategy on a year of data ($n \approx 252$ days, but far fewer *independent* observations after autocorrelation) is exactly when the fatter t-tails save you from calling noise an edge.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'You know the population σ and have n = 100. Which test?',
+    options: ['t-test', 'z-test — σ is known and n > 30', 'chi-square', 'ANOVA'],
+    answer: 1,
+    explain: 'Known σ AND a large sample is the one path that leads to the z-test.',
+  },
+  {
+    q: 'You do NOT know σ (you estimate it from the sample). Which test, regardless of sample size?',
+    options: ['always the z-test', 'the t-test — an unknown σ sends you to the t-test on either branch', 'chi-square', 'it depends only on n'],
+    answer: 1,
+    explain: 'If σ is unknown you use the t-test whether the sample is large or small — the sample s replaces σ and the t-distribution accounts for that extra uncertainty.',
+  },
+  {
+    q: 'Why do the z-test and t-test give nearly identical answers when n is large?',
+    options: [
+      'they use the same table',
+      'as n grows, s estimates σ well and the t-distribution converges to the normal (critical value → 1.96)',
+      'large samples are always significant',
+      'they never agree',
+    ],
+    answer: 1,
+    explain: 'More data pins down σ, thinning the t-tails until the t-distribution is essentially the standard normal — so the tests coincide for large n.',
+  },
+]} />

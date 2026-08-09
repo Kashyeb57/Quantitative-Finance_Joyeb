@@ -1,0 +1,129 @@
+---
+title: "The One-Sample t-Test"
+sidebar_position: 3
+description: Putting the t-distribution to work — a fully worked one-sample t-test. Does a medication change IQ? From hypotheses and degrees of freedom to the critical value ±2.045 and a t-statistic of 10.96.
+---
+
+# T-Stats with the t-Test
+
+The **t-statistic** feeds the **t-test.** When we compare a single sample's mean against a known population value, it's called a **one-sample t-test** — the [t-distribution's](/docs/Statistics/inferential-statistics/tests-for-a-mean/student-t-distribution) answer to the [z-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test) when $\sigma$ is unknown.
+
+## A worked example
+
+> In the population, the average **IQ is 100**. A team of researchers wants to test a new medication to see if it has a **positive, negative, or no effect** on intelligence. A sample of **30 participants** who took the medication has a **mean of 140** with a **standard deviation of 20**. Did the medication affect intelligence? (C.I. = 95%, $\alpha = 0.05$.)
+
+**Given:** $\mu = 100,\ n = 30,\ \bar x = 140,\ s = 20,\ \text{C.I.} = 95\%,\ \alpha = 0.05$.
+
+### ① Hypotheses
+
+$$
+H_0:\ \mu = 100 \qquad\qquad H_1:\ \mu \neq 100 \quad \{\text{2-tail test}\}
+$$
+
+"Positive **or** negative effect" points both ways, so it's **two-tailed.**
+
+### ② Significance level
+
+$$
+\alpha = 0.05
+$$
+
+### ③ Degrees of freedom
+
+$$
+\text{dof} = n - 1 = 30 - 1 = 29
+$$
+
+This is the crucial difference from the z-test: the critical value comes from the **t-table at 29 degrees of freedom**, not the fixed normal.
+
+### ④ Decision rule
+
+A two-tailed test at 95% puts **2.5% in each tail.** From the t-table at dof $= 29$, the critical value is $\pm 2.045$ (a touch wider than the normal's $\pm 1.96$, because the t has fatter tails):
+
+$$
+\text{if } t < -2.045 \ \text{ or } \ t > +2.045, \ \textbf{reject } H_0.
+$$
+
+<HypothesisTestLab
+  title="One-sample t-test — dof = 29, two-tailed, critical ±2.045"
+  dist="t"
+  defaultDf={29}
+  overlayNormal={true}
+  defaultTails="two"
+  defaultStat={2.2}
+  defaultAlpha={0.05}
+/>
+
+### ⑤ Calculate the test statistic
+
+$$
+t = \frac{\bar x - \mu}{s/\sqrt n} = \frac{140 - 100}{20/\sqrt{30}} = \frac{40}{3.65} = \boxed{10.96}
+$$
+
+Since $t = 10.96 > 2.045$, we **reject the null hypothesis.** In fact $10.96$ is so far into the tail it's *off the right edge* of the chart above — the p-value is minuscule.
+
+**Conclusion:** the medication **affected** intelligence — specifically, it **increased** it (the sample mean of 140 sits far *above* the population's 100).
+
+```python
+import numpy as np
+from scipy import stats
+
+# One-sample t-test from summary stats (we only have mean, s, n).
+mu0, xbar, s, n, alpha = 100, 140, 20, 30, 0.05
+dof = n - 1
+
+t = (xbar - mu0) / (s / np.sqrt(n))
+t_crit = stats.t.ppf(1 - alpha/2, dof)          # two-tailed critical value
+p = 2 * (1 - stats.t.cdf(abs(t), dof))          # two-tailed p-value
+
+print(f"dof            = {dof}")
+print(f"t-statistic    = {t:.2f}")
+print(f"critical value = ±{t_crit:.3f}")
+print(f"p-value        = {p:.2e}")
+print("decision       :", "REJECT H0 — medication changed IQ" if abs(t) > t_crit
+      else "fail to reject H0")
+
+# If you had the raw 30 data points instead, one call does it all:
+# t, p = stats.ttest_1samp(sample, popmean=100)
+```
+
+## Why a quant cares
+
+The one-sample t-test is the exact tool for the most basic quant question — *is this average different from a benchmark?*
+
+- **"Does my strategy beat zero?"** or **"does it beat the risk-free rate?"** is a one-sample t-test on the return series, with $\mu_0 = 0$ (or the benchmark). The resulting $t$ is, up to scaling, the **t-stat on the mean return** — the number every performance report is quietly leaning on.
+- **The IQ example's shape is every "too good to be true" backtest.** A huge $\bar x$ far above $\mu_0$ produces an enormous $t$ — which is a reason to check for look-ahead bias and overfitting, *not* to celebrate. A t-stat of 10 on a strategy usually means a bug, not an edge.
+- **Degrees of freedom keep you honest on short histories.** With few data points the critical value balloons (dof small ⇒ wider), so a two-year track record has to clear a higher bar than a twenty-year one — exactly as it should.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A one-sample t-test compares…',
+    options: [
+      'the variances of three groups',
+      'a single sample mean against a known/hypothesized population value, using the sample standard deviation',
+      'two categorical variables',
+      'the medians of two samples',
+    ],
+    answer: 1,
+    explain: 'It tests whether one sample mean differs from a claimed μ, estimating the spread from the sample s — the t-distribution version of the z-test.',
+  },
+  {
+    q: 'With n = 30, the degrees of freedom for the t-test are…',
+    options: ['30', '29 (n − 1)', '28', '31'],
+    answer: 1,
+    explain: 'dof = n − 1 = 29. The critical two-tailed value at 95% for 29 dof is ±2.045, slightly wider than the normal’s ±1.96.',
+  },
+  {
+    q: 'The test statistic came to t = 10.96 against a critical ±2.045. The conclusion is…',
+    options: [
+      'fail to reject H₀',
+      'reject H₀ — 10.96 far exceeds 2.045, so the medication changed (raised) IQ',
+      'the sample is too small to decide',
+      'accept both hypotheses',
+    ],
+    answer: 1,
+    explain: '10.96 is far beyond 2.045, so H₀ is rejected with a tiny p-value; since x̄ = 140 > 100, the effect is an increase.',
+  },
+]} />

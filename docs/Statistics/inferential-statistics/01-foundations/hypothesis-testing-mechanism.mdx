@@ -1,0 +1,161 @@
+---
+title: "Hypothesis Testing & Its Mechanism"
+sidebar_position: 2
+description: What inferential statistics is, the courtroom logic of the null and alternative hypotheses, the five-step mechanism every test follows, and a worked setup — does a new college's pass rate differ from the district's 85%?
+---
+
+# A Hypothesis and the Hypothesis-Testing Mechanism
+
+**Inferential statistics is about reaching a conclusion or an inference.** [Descriptive statistics](/docs/Statistics/descriptive-statistics) *summarized* a sample; inference takes the next, harder step — it uses that small sample to make a defensible claim about the whole **population** you cannot see.
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 460 150" width="460" style={{maxWidth: '100%'}} role="img" aria-label="A small sample circle points via an arrow to a large population circle; below, conclusions lead down to hypothesis testing">
+    <circle cx="90" cy="55" r="26" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    <text x="90" y="59" textAnchor="middle" fontSize="12" fill="currentColor">Sample</text>
+    <line x1="122" y1="55" x2="300" y2="55" stroke="currentColor" strokeWidth="1.4" markerEnd="url(#ah)" />
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="currentColor" /></marker>
+    </defs>
+    <circle cx="360" cy="55" r="48" fill="#25c2a0" fillOpacity="0.1" stroke="#25c2a0" strokeWidth="1.8" />
+    <text x="360" y="59" textAnchor="middle" fontSize="12" fill="currentColor" fontWeight="700">Population</text>
+    <line x1="90" y1="83" x2="90" y2="112" stroke="#0e7490" strokeWidth="1.3" markerEnd="url(#ah2)" />
+    <defs>
+      <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0e7490" /></marker>
+    </defs>
+    <text x="150" y="103" textAnchor="middle" fontSize="11" fill="#0e7490">Conclusions</text>
+    <text x="150" y="128" textAnchor="middle" fontSize="12" fill="#f59e0b" fontWeight="700">↓ Hypothesis Testing</text>
+  </svg>
+</div>
+
+A **hypothesis** is just a *claim* about the population — "the average pass rate is 85%," "this coin is fair," "the medication has no effect." **Hypothesis testing** is the formal procedure that weighs a sample against that claim and decides whether the evidence is strong enough to overturn it.
+
+## The courtroom analogy
+
+The cleanest way to feel the mechanism is a criminal trial:
+
+$$
+\text{Person} \;\longrightarrow\; \text{Crime} \;\longrightarrow\; \text{Court}
+$$
+
+A court doesn't start by assuming the defendant is guilty. It **begins by assuming innocence** and only convicts if the evidence is overwhelming. Hypothesis testing works exactly the same way — and every piece of the trial has a statistical name.
+
+## The mechanism, step by step
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 470 250" width="470" style={{maxWidth: '100%'}} role="img" aria-label="Five stacked steps: null hypothesis, alternate hypothesis, experiment and statistical analysis, and accept or reject the null">
+    <g fontSize="12" fill="currentColor">
+      <rect x="20" y="12" width="430" height="40" rx="7" fill="#0e7490" fillOpacity="0.12" stroke="#0e7490" strokeWidth="1.3" />
+      <text x="34" y="30" fontWeight="700">① Null hypothesis (H₀)</text>
+      <text x="34" y="46" fontSize="11" opacity="0.85">the person is NOT guilty — the assumption you begin with</text>
+      <rect x="20" y="60" width="430" height="40" rx="7" fill="#f59e0b" fillOpacity="0.12" stroke="#f59e0b" strokeWidth="1.3" />
+      <text x="34" y="78" fontWeight="700">② Alternate hypothesis (H₁)</text>
+      <text x="34" y="94" fontSize="11" opacity="0.85">the person IS guilty — the exact opposite of H₀</text>
+      <rect x="20" y="108" width="430" height="52" rx="7" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.7" />
+      <text x="34" y="128" fontWeight="700">③ Experiment → statistical analysis</text>
+      <text x="34" y="144" fontSize="11" opacity="0.85">gather evidence (DNA, fingerprints) → a p-value &amp; significance level</text>
+      <rect x="20" y="168" width="430" height="40" rx="7" fill="#25c2a0" fillOpacity="0.12" stroke="#25c2a0" strokeWidth="1.3" />
+      <text x="34" y="186" fontWeight="700">④ Accept or reject the null hypothesis</text>
+      <text x="34" y="202" fontSize="11" opacity="0.85">convict (reject H₀) only if the evidence is strong enough</text>
+    </g>
+  </svg>
+</div>
+
+**① Null hypothesis $H_0$ — "the person is not guilty."** This is **the assumption you are beginning with** — the default, the status quo, "nothing unusual is going on." In statistics it's almost always the *no-effect / no-difference* statement.
+
+**② Alternate hypothesis $H_1$ — "the person is guilty."** It is simply the **opposite of the null** — the claim that there *is* an effect or a difference, the thing you'd need evidence to establish.
+
+**③ Experiment → statistical analysis.** You run the experiment and gather evidence — the courtroom's **direct proof (DNA test, fingerprint test)**. In statistics this evidence is boiled down to two numbers: the **[p-value](/docs/Statistics/inferential-statistics/foundations/p-value)** and the **significance value** $\alpha$.
+
+**④ Accept the null hypothesis, or reject the null hypothesis.** The verdict. If the evidence isn't strong enough, you *fail to reject* $H_0$ (acquit); if it is, you *reject* $H_0$ in favor of $H_1$ (convict).
+
+:::note The asymmetry that matters
+You never "prove the null true" — a court doesn't declare the defendant *innocent*, only *not guilty*. Failing to reject $H_0$ means the evidence wasn't strong enough, **not** that $H_0$ is confirmed. This one-sided burden of proof is the heart of the whole method.
+:::
+
+## A worked setup
+
+> **Colleges in District A state that their average pass percentage of students is 85%. A new college opened in the district, and a sample of 100 of its students had a pass percentage of 90%, with a standard deviation of 4%. Does this college have a *different* pass percentage?**
+
+Setting up the hypotheses is the entire skill at this stage. The district's long-run claim is the status quo, so it becomes the null; "different" (in *either* direction) is the alternative:
+
+$$
+H_0:\; \mu = 85\% \qquad\qquad H_1:\; \mu \neq 85\%
+$$
+
+Note the $\neq$ — the question asks whether the rate is *different*, not specifically *higher*. That "different in either direction" phrasing makes this a **two-tailed** test, a distinction the [z-test lesson](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test) turns into an actual number. Everything we've set up — $\mu$, the sample mean $\bar x = 90\%$, $n = 100$, the standard deviation — is exactly what the test statistic will consume.
+
+## See the mechanism
+
+The whole procedure lives on one picture: a distribution of what the test statistic would look like **if $H_0$ were true**, with **rejection regions** carved out in the tails. Land in a tail and you reject the null. Drag the observed statistic and the significance level and watch the verdict flip:
+
+<HypothesisTestLab
+  title="The verdict: does the statistic fall in a rejection region?"
+  defaultTails="two"
+  defaultStat={2.1}
+  defaultAlpha={0.05}
+/>
+
+```python
+# Step 1-2: state the hypotheses for the college example.
+# H0: mu == 85   (the district's status quo)
+# H1: mu != 85   (this college is different — two-tailed)
+
+mu0   = 85.0     # claimed population mean under H0
+xbar  = 90.0     # sample mean (100 students)
+n     = 100
+alpha = 0.05     # significance level chosen up front
+
+print("H0: population pass rate = 85%")
+print("H1: population pass rate != 85%   (two-tailed)")
+print(f"evidence so far: xbar={xbar}%, n={n}, alpha={alpha}")
+# The next lessons turn this evidence into a test statistic, a p-value,
+# and finally an 'accept / reject H0' decision.
+```
+
+## Why a quant cares
+
+Every claim a quant makes is a hypothesis test in disguise, and the null is almost always the deflating one:
+
+- **"This strategy has positive expected return."** $H_0$: the true edge is zero; your backtest is noise. You have to *reject* that null before risking capital — and markets are a hostile courtroom where flukes are common.
+- **"This model's alpha survived out of sample."** $H_0$: the out-of-sample mean is zero. Failing to reject isn't proof the model works; it's an acquittal for lack of evidence.
+- **The burden of proof protects your capital.** Assuming "no edge" until the data forces you to conclude otherwise is precisely the discipline that stops you from trading on randomness.
+
+Set the null to the boring, skeptical claim, and make the data work to overturn it. That habit — not any single formula — is what inference buys you.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The null hypothesis H₀ is best described as…',
+    options: [
+      'the claim you are trying to prove',
+      'the default, no-effect assumption you begin with (like "not guilty")',
+      'always false',
+      'the same as the alternative',
+    ],
+    answer: 1,
+    explain: 'H₀ is the status-quo / no-effect assumption — the presumption of innocence. You reject it only if the evidence is strong enough.',
+  },
+  {
+    q: 'For "does this college have a DIFFERENT pass rate than 85%?", the hypotheses are…',
+    options: [
+      'H₀: μ ≠ 85%,  H₁: μ = 85%',
+      'H₀: μ = 85%,  H₁: μ ≠ 85%',
+      'H₀: μ > 85%,  H₁: μ < 85%',
+      'H₀: x̄ = 90%,  H₁: x̄ ≠ 90%',
+    ],
+    answer: 1,
+    explain: 'The status quo (85%) is the null; "different in either direction" is the alternative, μ ≠ 85% — a two-tailed test. Hypotheses are about the population μ, not the sample mean.',
+  },
+  {
+    q: '"Failing to reject the null hypothesis" means…',
+    options: [
+      'we have proven the null is true',
+      'the evidence was not strong enough to overturn the null — like an acquittal, not a declaration of innocence',
+      'we reject the alternative for certain',
+      'the experiment failed',
+    ],
+    answer: 1,
+    explain: 'Like a court that acquits for lack of proof, we never confirm H₀ — we only decide the evidence was insufficient to reject it.',
+  },
+]} />

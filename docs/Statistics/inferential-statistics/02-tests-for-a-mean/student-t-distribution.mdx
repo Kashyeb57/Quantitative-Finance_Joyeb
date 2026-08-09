@@ -1,0 +1,131 @@
+---
+title: "The Student-t Distribution"
+sidebar_position: 2
+description: What to do when the population σ is unknown — estimate it with the sample s and switch from the z to the t-statistic. Degrees of freedom (n − 1) explained, the fatter tails of the t, and why it converges to the normal as the sample grows.
+---
+
+# The Student-t Distribution
+
+The [z-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test) has a hidden requirement. When we perform any analysis using a **z-score**, we require $\sigma$ — the **population** standard deviation — to be **already known**:
+
+$$
+z = \frac{\bar x - \mu}{\sigma/\sqrt n}
+$$
+
+But in almost every real problem, **we don't know $\sigma$.** We only have a sample. So:
+
+> **How do we perform an analysis when we don't know the population standard deviation?**
+
+The answer is **Student's t-distribution.**
+
+## Estimate σ with the sample, and the z becomes a t
+
+The fix is natural: replace the unknown population $\sigma$ with the **sample standard deviation $s$** computed from your data. That single swap changes the statistic — and the distribution it follows:
+
+$$
+\underbrace{z = \frac{\bar x - \mu}{\sigma/\sqrt n}}_{\text{z-table, } \sigma \text{ known}} \qquad\longrightarrow\qquad \underbrace{t = \frac{\bar x - \mu}{s/\sqrt n}}_{\text{t-table, } \sigma \text{ unknown}}
+$$
+
+where **$s$ = sample standard deviation.** You now look the value up in the **t-table** instead of the z-table — that lookup *is* the **[t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test).**
+
+Why isn't it still a normal? Because $s$ is itself an *estimate*, wobbling from sample to sample. That extra uncertainty has to go somewhere, and it shows up as **fatter tails**: the t-distribution admits more extreme values than the normal, so its critical values sit farther out. The smaller the sample, the fatter the tails.
+
+## Degrees of freedom
+
+The t-distribution isn't one curve — it's a family indexed by **degrees of freedom (dof)**:
+
+$$
+\text{dof} = n - 1
+$$
+
+For a sample of 3 people, $\text{dof} = 3 - 1 = 2$. Where does the "$-1$" come from? Once you fix the sample mean, the values are no longer all free to vary. Picture **3 people** whose average is pinned: you can choose the first two freely, but the **third is then forced** to whatever value makes the mean come out right.
+
+<div style={{textAlign: 'center', margin: '1.25rem 0'}}>
+  <svg viewBox="0 0 320 110" width="320" style={{maxWidth: '100%'}} role="img" aria-label="Three boxes: the first two are free choices marked with an X, the third is determined once the mean is fixed">
+    <g>
+      <rect x="20" y="30" width="60" height="60" rx="6" fill="#25c2a0" fillOpacity="0.14" stroke="#25c2a0" strokeWidth="1.5" />
+      <line x1="30" y1="40" x2="70" y2="80" stroke="#25c2a0" strokeWidth="2" /><line x1="70" y1="40" x2="30" y2="80" stroke="#25c2a0" strokeWidth="2" />
+      <rect x="110" y="30" width="60" height="60" rx="6" fill="#25c2a0" fillOpacity="0.14" stroke="#25c2a0" strokeWidth="1.5" />
+      <line x1="120" y1="40" x2="160" y2="80" stroke="#25c2a0" strokeWidth="2" /><line x1="160" y1="40" x2="120" y2="80" stroke="#25c2a0" strokeWidth="2" />
+      <rect x="200" y="30" width="60" height="60" rx="6" fill="none" stroke="var(--ifm-color-emphasis-500, #888)" strokeWidth="1.5" strokeDasharray="5 3" />
+    </g>
+    <text x="50" y="20" textAnchor="middle" fontSize="11" fill="currentColor">free</text>
+    <text x="140" y="20" textAnchor="middle" fontSize="11" fill="currentColor">free</text>
+    <text x="230" y="20" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.7">forced</text>
+    <text x="160" y="105" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.8">n = 3  →  dof = n − 1 = 2 free values</text>
+  </svg>
+</div>
+
+So $n-1$ counts the values that were genuinely free to vary after the mean ate up one degree of freedom. It's the same reason [sample variance divides by $n-1$](/docs/Statistics/descriptive-statistics/summary-measures/why-n-minus-1), not $n$.
+
+## t versus normal — watch the tails converge
+
+Below, switch the distribution to **t** and drag the **degrees of freedom**. At low dof the t (solid) is visibly shorter and fatter-tailed than the normal (dashed), and its critical value sits farther out. Push dof toward 30–40 and the two curves become nearly indistinguishable — **the t-distribution converges to the normal as the sample grows**, which is exactly why the z-test is fine once $n \ge 30$.
+
+<HypothesisTestLab
+  title="Student-t vs normal — fatter tails at low degrees of freedom"
+  dist="t"
+  defaultDf={4}
+  overlayNormal={true}
+  defaultTails="two"
+  defaultStat={2.2}
+  defaultAlpha={0.05}
+/>
+
+```python
+import numpy as np
+from scipy import stats
+
+# Two-tailed 95% critical value: t (df = n−1) vs the normal's 1.96.
+print(f"{'n':>4} {'dof':>4} {'t crit':>8} {'z crit':>8}")
+for n in (2, 3, 5, 10, 30, 100):
+    dof = n - 1
+    t_crit = stats.t.ppf(0.975, dof)
+    print(f"{n:>4} {dof:>4} {t_crit:>8.3f} {1.96:>8.2f}")
+
+# Small samples demand a MORE extreme statistic to reach significance:
+# t crit shrinks from ~12.7 (n=2) toward 1.96 as n grows.
+```
+
+## Why a quant cares
+
+Finance lives in the small-sample, unknown-σ world the t-distribution was built for:
+
+- **You never know a strategy's true volatility** — you estimate it from returns as $s$. So a Sharpe-ratio significance test is a **t-test**, not a z-test, and with only a year or two of data the fatter t-tails mean you need a *bigger* observed Sharpe to call it real.
+- **The t's fat tails are a feature, not a nuisance.** Underestimating how often extreme values occur is precisely the error that blows up risk models; the t builds that humility into the critical value.
+- **"$n \ge 30$" is a rule of thumb, not a law.** With genuinely fat-tailed returns even 30 points can be too few, and the gap between t and z matters most exactly when data is scarce and stakes are high.
+
+The t-distribution is the honest default: use it whenever you had to *estimate* the spread — which is almost always.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'You switch from a z-test to a t-test when…',
+    options: [
+      'the sample is very large',
+      'the population standard deviation σ is unknown and must be estimated by the sample s',
+      'the data are categorical',
+      'you never switch',
+    ],
+    answer: 1,
+    explain: 'The t-test replaces the unknown population σ with the sample standard deviation s. That extra estimation is what fattens the tails.',
+  },
+  {
+    q: 'For a sample of n = 3, the degrees of freedom are…',
+    options: ['3', '2 (n − 1)', '1', '4'],
+    answer: 1,
+    explain: 'dof = n − 1 = 2. Once the mean is fixed, only 2 of the 3 values are free to vary; the third is determined.',
+  },
+  {
+    q: 'As the degrees of freedom increase, the t-distribution…',
+    options: [
+      'gets fatter tails',
+      'converges to the standard normal distribution',
+      'becomes uniform',
+      'stops existing',
+    ],
+    answer: 1,
+    explain: 'With more data the sample s pins down σ better, the tails thin, and the t approaches the normal — which is why the z-test is fine for large n.',
+  },
+]} />

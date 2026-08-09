@@ -1,0 +1,10 @@
+{
+  "label": "Inferential Statistics & Hypothesis Testing",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "Inferential Statistics & Hypothesis Testing",
+    "slug": "/Statistics/inferential-statistics",
+    "description": "Inference is reasoning from a limited sample back to the population that generated it — and honestly quantifying how sure you're allowed to be. This module works one lecture at a time: the mindset (the null/alternative framing, the p-value, the two ways to be wrong), the tests for a mean (the z-test when σ is known, the Student-t distribution and t-test when it isn't, and how to choose between them), and Bayesian reasoning (Bayes' theorem and the base-rate trap). Every page has an interactive lab or a visual and a runnable example. (Study reference: the 'Inferential Statistics' section of a Complete Data Science bootcamp — all notes, code, and visuals are my own.)"
+  }
+}

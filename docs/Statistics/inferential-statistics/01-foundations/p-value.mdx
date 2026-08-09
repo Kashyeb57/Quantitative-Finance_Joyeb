@@ -1,0 +1,134 @@
+---
+title: "What Is a P-value?"
+sidebar_position: 3
+description: The p-value defined precisely — how likely your observations are if the null were true — the significance level α, the 95% confidence region with its 0.025 tails, the coin-fairness example, and the decision rule p < α ⇒ reject.
+---
+
+# What Is a P-value?
+
+**The p-value is a number, calculated from a statistical test, that describes how likely you are to have found a particular set of observations *if the null hypothesis were true*. P-values are used in hypothesis testing to help decide whether to reject the null hypothesis.**
+
+Read that definition twice, because almost everyone misreads it. The p-value is **not** the probability the null is true. It is the probability of seeing data *at least this extreme* **in a world where $H_0$ holds**. Small p-value ⇒ "what I observed would be a weird fluke if the null were true" ⇒ evidence against the null.
+
+## The intuition: how often do you land here?
+
+Picture pressing a space bar 100 times and marking where your finger lands. Most presses cluster in a likely region; a few stray to an unlikely one. If a spot is one where you'd land **around 20 times out of 100**, its "p-value" is about $0.2$ — perfectly ordinary. A spot you'd hit only rarely carries a *tiny* p-value — landing there is surprising, and surprise is exactly what makes you doubt the default assumption.
+
+$$
+p = P(\text{data this extreme, or more} \mid H_0 \text{ true})
+$$
+
+## The coin example
+
+> **Is a coin fair or not?** Flip it **100 times.**
+
+Under a fair coin we'd expect the probabilities to be balanced; an unfair coin tilts them:
+
+$$
+\begin{aligned}
+P(H) &= 0.5, & P(T) &= 0.5 \quad(\text{fair})\\
+P(H) &= 0.6, & P(T) &= 0.4\\
+P(H) &= 0.7, & P(T) &= 0.3
+\end{aligned}
+$$
+
+Run the mechanism from the [previous lesson](/docs/Statistics/inferential-statistics/foundations/hypothesis-testing-mechanism):
+
+1. **Null hypothesis $H_0$:** the coin **is fair**.
+2. **Alternate hypothesis $H_1$:** the coin **is not fair**.
+3. **Experiment:** flip it **100 times** and count heads.
+4. **Significance value:** choose $\alpha = 0.05$, so the **confidence interval** is $\text{C.I.} = 1 - 0.05 = 0.95$.
+5. **Conclusion:** compare $p$ against $\alpha$.
+
+## Where α lives: the 0.025 tails
+
+With $\alpha = 0.05$ split across a **two-tailed** test, the middle **95%** is the region where "the coin is fair" is believable, and **0.025 in each tail** is the **rejection region** where we'd conclude "the coin is not fair." A result of ~50 heads sits comfortably in the middle; a result far out in a tail — say 70 heads — is where the null dies.
+
+<HypothesisTestLab
+  title="p-value vs α — the fair-coin test"
+  defaultTails="two"
+  defaultStat={2.4}
+  defaultAlpha={0.05}
+/>
+
+The **yellow area is the p-value** (how extreme your result is); the **red area is α** (the bar you set in advance). The whole test collapses to comparing those two areas.
+
+## The decision rule
+
+$$
+\boxed{\;p < \alpha \;\Rightarrow\; \textbf{Reject the null hypothesis}\;}
+$$
+
+$$
+\text{else} \;\Rightarrow\; \textbf{Fail to reject the null hypothesis}
+$$
+
+That's the entire payoff. If your observations would be too improbable under $H_0$ (p below your threshold), you reject $H_0$. Otherwise the evidence isn't strong enough and you retain it.
+
+```python
+import numpy as np
+from scipy import stats
+
+# Observed: 70 heads in 100 flips. Is the coin fair?
+# H0: p = 0.5 (fair)   H1: p != 0.5 (two-tailed)
+heads, n, alpha = 70, 100, 0.05
+
+# exact two-sided p-value under H0 (binomial test)
+p_value = stats.binomtest(heads, n, 0.5, alternative='two-sided').pvalue
+print(f"observed heads : {heads}/{n}")
+print(f"p-value        : {p_value:.6f}")
+print("decision       :",
+      "REJECT H0 — coin is not fair" if p_value < alpha
+      else "fail to reject H0 — no evidence it's unfair")
+
+# 50 heads, by contrast, is the least surprising result possible:
+print("\n50/100 p-value:", stats.binomtest(50, n, 0.5).pvalue)  # = 1.0
+```
+
+## Why a quant cares
+
+The p-value is where good intentions go to die, so a quant has to hold two ideas at once:
+
+- **It answers the right conditional the wrong way round.** $p$ is $P(\text{data}\mid H_0)$, never $P(H_0\mid \text{data})$. Confusing them — the "prosecutor's fallacy" — is how a 1-in-20 fluke gets sold as a 95%-sure edge.
+- **A small p is necessary, not sufficient.** With enough data an economically meaningless effect clears $p<0.05$; a real edge still has to beat costs and slippage. **Statistical significance ≠ tradable significance.**
+- **Every extra test spends your α.** Try 20 strategies at $\alpha=0.05$ and you *expect* one "winner" from noise alone. That's the [multiple-testing](/docs/Statistics/inferential-statistics) trap that makes backtests so treacherous — the topic the [big-picture page](/docs/Statistics/inferential-statistics/foundations/big-picture) opens with.
+
+Use the p-value as a *speed bump* — "could this plausibly be luck?" — not as a probability that you're right.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A p-value is…',
+    options: [
+      'the probability that the null hypothesis is true',
+      'the probability of observing data at least this extreme, assuming the null hypothesis is true',
+      'the probability the effect is large',
+      'always equal to 0.05',
+    ],
+    answer: 1,
+    explain: 'By definition it is computed ASSUMING H₀ is true — the chance of data this extreme under the null. It is not P(H₀ is true).',
+  },
+  {
+    q: 'With α = 0.05 in a two-tailed test, the rejection region is…',
+    options: [
+      '0.05 in one tail',
+      '0.025 in each tail (0.05 total), with the middle 95% as the "fail to reject" region',
+      'the middle 5%',
+      '0.95 in each tail',
+    ],
+    answer: 1,
+    explain: 'A two-tailed α = 0.05 splits into 0.025 per tail; the central 95% is the confidence region, C.I. = 1 − α = 0.95.',
+  },
+  {
+    q: 'The decision rule of a hypothesis test is:',
+    options: [
+      'if p > α, reject H₀',
+      'if p < α, reject H₀; otherwise fail to reject H₀',
+      'always reject H₀',
+      'reject H₀ only if p = 1',
+    ],
+    answer: 1,
+    explain: 'A p-value smaller than the significance level means the data are too extreme to be luck under H₀, so we reject it. Otherwise we fail to reject.',
+  },
+]} />

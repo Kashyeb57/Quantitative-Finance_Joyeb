@@ -1,0 +1,174 @@
+---
+title: "The Z-Test"
+sidebar_position: 1
+description: The test for a mean when the population σ is known and n ≥ 30. The family of tests (z, t, chi-square, ANOVA), the z-statistic, and two fully worked examples — a two-tailed height test and a one-tailed bulb-warranty test — from hypotheses to p-value to verdict.
+---
+
+# Hypothesis Testing and Statistical Analysis: The Z-Test
+
+Once the hypotheses are set, you need an actual **statistical test** to turn data into a p-value. Which test you reach for depends on what you're comparing.
+
+## The family of tests
+
+| Test | Used for | Leads to |
+|---|---|---|
+| **① Z-test** | an **average** (σ known, large sample) | a **z-score** and p-value via the **z-table** |
+| **② t-test** | an **average** (σ unknown) | a **t-score** and p-value via the **t-table** |
+| **③ Chi-square** | **categorical** data | a χ² statistic |
+| **④ ANOVA** | **variance** across 3+ groups | an F-statistic |
+
+The first two both test an **average** — the difference is only whether you know the population's standard deviation. The z- and t-tests are the workhorses of this module; chi-square (categorical) and ANOVA (variance) come later.
+
+## When you may use a Z-test
+
+A z-test is valid only when **both** conditions hold:
+
+$$
+\textbf{(i)}\;\; \text{the population standard deviation } \sigma \text{ is known} \qquad \textbf{(ii)}\;\; n \ge 30
+$$
+
+If $\sigma$ is unknown, you estimate it from the sample and switch to the [t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test). The formula is the standardization you already met with [z-scores](/docs/Probability/distributions/continuous/standard-normal-z-score) — but applied to the **sample mean**, whose spread is the [standard error](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem) $\sigma/\sqrt{n}$:
+
+$$
+z_{\text{score}} = \frac{X - \mu}{\sigma}, \qquad\qquad z_{d} = \frac{\bar{x} - \mu}{\sigma/\sqrt{n}}
+$$
+
+The right-hand formula — the **test statistic** — measures how many standard errors the sample mean $\bar x$ sits from the claimed mean $\mu$.
+
+## Example 1 — a two-tailed height test
+
+> The average height of all residents in a city is **168 cm**, with **σ = 3.9**. A doctor believes the mean to be *different*. He measures the height of **36** individuals and finds the average height to be **169.5 cm**.
+> **(a)** State the null and alternate hypotheses. **(b)** At a **95% confidence level**, is there enough evidence to reject the null?
+
+**Given:**
+
+$$
+\mu = 168, \quad \sigma = 3.9, \quad n = 36, \quad \bar x = 169.5, \quad \text{C.I.} = 0.95, \quad \alpha = 1 - \text{C.I.} = 0.05
+$$
+
+**① Null hypothesis** $H_0:\ \mu = 168$ cm.  **② Alternate hypothesis** $H_1:\ \mu \neq 168$ cm — "different" in either direction, so this is a **two-tailed test**.
+
+**③ Decision boundary from the C.I.** A two-tailed 95% leaves **2.5% in each tail.** The critical z comes from the z-table: the area to the left of the upper cutoff is $1 - 0.025 = 0.9750$, which maps to a **z-score of +1.96**. So the rule is:
+
+$$
+\text{if } z < -1.96 \ \text{ or } \ z > +1.96, \ \textbf{reject } H_0.
+$$
+
+**Compute the test statistic:**
+
+$$
+z_d = \frac{\bar x - \mu}{\sigma/\sqrt n} = \frac{169.5 - 168}{3.9/\sqrt{36}} = \frac{1.5}{0.65} = \boxed{2.31}
+$$
+
+Since $2.31 > 1.96$, the statistic lands in the right rejection region. Equivalently, the two-tailed **p-value** is the area in both tails beyond $\pm 2.31$:
+
+$$
+p = 0.01044 + 0.01044 = 0.02088, \qquad 0.02088 < 0.05 \ \Rightarrow\ \textbf{reject } H_0.
+$$
+
+<HypothesisTestLab
+  title="Example 1 — two-tailed, z = 2.31 vs critical ±1.96"
+  defaultTails="two"
+  defaultStat={2.31}
+  defaultAlpha={0.05}
+/>
+
+**Final conclusion:** the average height $\neq 168$ cm. Based on this sample, **the average height seems to be increasing.**
+
+## Example 2 — a one-tailed warranty test
+
+> A factory manufactures bulbs with an average warranty of **5 years**, standard deviation **0.50**. A worker believes the bulbs malfunction in **less than 5 years**. He tests **40** bulbs and finds the average life to be **4.8 years**.
+> **(a)** State the hypotheses. **(b)** At a **2% significance level**, is there enough evidence that the warranty should be revised?
+
+**Given:** $\mu = 5,\ \sigma = 0.50,\ n = 40,\ \bar x = 4.8,\ \alpha = 0.02$.
+
+**① Null** $H_0:\ \mu = 5$.  **② Alternate** $H_1:\ \mu < 5$ — "less than" points one way, so this is a **one-tailed (left) test.** All 2% of the rejection area sits in the **left** tail; the other 98% is the acceptance region.
+
+**Test statistic:**
+
+$$
+z_d = \frac{\bar x - \mu}{\sigma/\sqrt n} = \frac{4.8 - 5}{0.50/\sqrt{40}} = -2.53
+$$
+
+The area under the curve beyond $z = -2.53$ is the **p-value $= 0.0570$.** Now compare it with $\alpha$:
+
+$$
+p < \alpha \ ? \quad 0.0570 < 0.02 \ \Rightarrow\ \textbf{False}
+$$
+
+<HypothesisTestLab
+  title="Example 2 — one-tailed (left), z = −2.53 vs α = 0.02"
+  dist="z"
+  defaultTails="left"
+  defaultStat={-2.53}
+  defaultAlpha={0.02}
+/>
+
+Because the p-value is **not** below $\alpha$, **we accept (fail to reject) the null hypothesis** — there isn't enough evidence at the 2% level to say the true warranty is under 5 years. Notice the same $z=-2.53$ *would* have been significant at $\alpha=0.05$; the stricter 2% bar changed the verdict. **The threshold is part of the result.**
+
+```python
+import numpy as np
+from scipy import stats
+
+def z_test(xbar, mu0, sigma, n, alpha, tail):
+    z = (xbar - mu0) / (sigma / np.sqrt(n))
+    if tail == 'two':
+        p = 2 * (1 - stats.norm.cdf(abs(z)))
+    elif tail == 'left':
+        p = stats.norm.cdf(z)
+    else:  # right
+        p = 1 - stats.norm.cdf(z)
+    verdict = "REJECT H0" if p < alpha else "fail to reject H0"
+    print(f"z = {z:.2f},  p = {p:.4f},  α = {alpha}  ->  {verdict}")
+
+# Example 1: two-tailed height test
+z_test(xbar=169.5, mu0=168, sigma=3.9, n=36, alpha=0.05, tail='two')
+# Example 2: one-tailed (left) bulb-warranty test
+z_test(xbar=4.8,   mu0=5,   sigma=0.50, n=40, alpha=0.02, tail='left')
+```
+
+## Why a quant cares
+
+The z-test is the skeleton under a lot of trading statistics, and its conditions are exactly where people cheat:
+
+- **"Is this month's average return different from zero?"** is a z-test on $\bar x$ with test statistic $\bar x/(\sigma/\sqrt n)$ — which, annualized, is essentially the **Sharpe ratio times $\sqrt{n}$.** Testing an edge and computing a Sharpe are the same calculation.
+- **The one-vs-two-tail choice is a modeling decision with teeth.** "Is there *any* edge?" is two-tailed; "is the edge *positive*?" is one-tailed and easier to clear — which is why a one-tailed test on a strategy you already believe in quietly doubles your false-positive rate.
+- **σ is almost never actually known** in markets, and volatility isn't even constant — so the honest tool is usually the [t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test), with the z-test as the large-sample limit.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A Z-test for a mean is appropriate when…',
+    options: [
+      'the sample is tiny and σ is unknown',
+      'the population standard deviation σ is known and the sample is large (n ≥ 30)',
+      'the data are categorical',
+      'you are comparing five group variances',
+    ],
+    answer: 1,
+    explain: 'The z-test needs a known population σ and a large sample. When σ must be estimated from the sample, use the t-test instead.',
+  },
+  {
+    q: 'In Example 1, z_d = (169.5 − 168)/(3.9/√36) = 2.31 against a two-tailed critical value of ±1.96. The conclusion is…',
+    options: [
+      'fail to reject H₀',
+      'reject H₀ — 2.31 > 1.96, so the mean differs from 168 (p ≈ 0.021 < 0.05)',
+      'the test is invalid',
+      'accept H₁ only if n > 100',
+    ],
+    answer: 1,
+    explain: '2.31 exceeds 1.96 and the two-tailed p-value ≈ 0.0209 < 0.05, so we reject H₀: the average height is different from 168 cm.',
+  },
+  {
+    q: 'In Example 2, the p-value was 0.0570 and α = 0.02. Since 0.0570 is NOT less than 0.02, we…',
+    options: [
+      'reject H₀',
+      'fail to reject H₀ — there is not enough evidence at the 2% level',
+      'change α to make it significant',
+      'conclude the warranty is definitely under 5 years',
+    ],
+    answer: 1,
+    explain: 'p = 0.0570 > α = 0.02, so we fail to reject H₀. (The very same result would have been significant at α = 0.05 — the threshold is part of the verdict.)',
+  },
+]} />

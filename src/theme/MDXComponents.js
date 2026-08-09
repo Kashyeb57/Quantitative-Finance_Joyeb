@@ -14,6 +14,8 @@ import Surface3D from '@site/src/components/Interactive/Surface3D';
 import PMFExplorer from '@site/src/components/Interactive/PMFExplorer';
 import PDFExplorer from '@site/src/components/Interactive/PDFExplorer';
 import CLTLab from '@site/src/components/Interactive/CLTLab';
+import HypothesisTestLab from '@site/src/components/Interactive/HypothesisTestLab';
+import BayesTheoremLab from '@site/src/components/Interactive/BayesTheoremLab';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 // Every component listed here can be used in any .mdx file without an import.
@@ -34,5 +36,7 @@ export default {
   PMFExplorer,
   PDFExplorer,
   CLTLab,
+  HypothesisTestLab,
+  BayesTheoremLab,
   CalcPlot,
 };

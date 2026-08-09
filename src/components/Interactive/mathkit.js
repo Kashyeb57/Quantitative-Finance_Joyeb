@@ -20,6 +20,70 @@ export function normCDF(x) {
   return x > 0 ? 1 - p : p;
 }
 
+// Inverse standard-normal CDF via bisection on normCDF (good to ~1e-5)
+export function normInv(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  let lo = -8;
+  let hi = 8;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (normCDF(mid) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// Log-gamma (Lanczos approximation) — for the Student-t density
+export function lgamma(x) {
+  const g = 7;
+  const c = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+    771.32342877765313, -176.61502916214059, 12.507343278686905,
+    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+  ];
+  if (x < 0.5) {
+    return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+  }
+  x -= 1;
+  let a = c[0];
+  const t = x + g + 0.5;
+  for (let i = 1; i < g + 2; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+
+// Student-t probability density with df degrees of freedom
+export function tPDF(x, df) {
+  const lead = lgamma((df + 1) / 2) - lgamma(df / 2) - 0.5 * Math.log(df * Math.PI);
+  return Math.exp(lead) * Math.pow(1 + (x * x) / df, -(df + 1) / 2);
+}
+
+// Student-t CDF via Simpson integration of the (symmetric) density
+export function tCDF(x, df) {
+  if (!isFinite(x)) return x > 0 ? 1 : 0;
+  const a = Math.abs(x);
+  const n = 800; // even
+  const h = a / n;
+  let s = tPDF(0, df) + tPDF(a, df);
+  for (let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * tPDF(i * h, df);
+  const half = (s * h) / 3; // area from 0 to |x|
+  return x >= 0 ? 0.5 + half : 0.5 - half;
+}
+
+// Inverse Student-t CDF via bisection (critical values)
+export function tInv(p, df) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  let lo = -60;
+  let hi = 60;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (tCDF(mid, df) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 // Box–Muller standard normal sample
 export function randn() {
   let u = 0;

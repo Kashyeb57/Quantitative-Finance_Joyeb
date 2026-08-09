@@ -1,12 +1,14 @@
 ---
-sidebar_position: 3
-title: Inferential Statistics & Hypothesis Testing
-description: Sampling, confidence intervals, t-tests and ANOVA, the pitfalls of p-values, and the ROPE — a decision rule that asks whether an effect is big enough to actually matter.
+title: "The Big Picture"
+sidebar_position: 1
+description: An orientation to inference — sampling and the standard error, confidence intervals, the classic hypothesis-testing recipe, ANOVA, the two ways to be wrong, the pitfalls of p-values, and the ROPE. The map before the module walks the territory.
 ---
 
-# Inferential Statistics & Hypothesis Testing
+# Inferential Statistics: The Big Picture
 
 Inference is the art of saying something about a whole **population** from a limited **sample**. You never get to see all future returns, every customer, or the "true" mean — you get a handful of noisy observations and have to reason back to the thing that generated them, honestly quantifying how sure you're allowed to be.
+
+This page is the **map**; the rest of the module walks the territory one lecture at a time — the [testing mechanism](/docs/Statistics/inferential-statistics/foundations/hypothesis-testing-mechanism), the [p-value](/docs/Statistics/inferential-statistics/foundations/p-value), the [z-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test) and [t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test), and [Bayes' theorem](/docs/Statistics/inferential-statistics/bayesian-reasoning/bayes-theorem).
 
 ## From sample to population
 
@@ -29,6 +31,8 @@ A 95% **confidence interval** is $\bar x \pm 1.96\,\operatorname{SE}$ (using the
 3. Get a **p-value**: the probability of a result at least this extreme *if $H_0$ were true*.
 4. If $p$ is below a threshold $\alpha$ (often 0.05), reject $H_0$.
 
+The next lessons make each step concrete — the [mechanism and courtroom logic](/docs/Statistics/inferential-statistics/foundations/hypothesis-testing-mechanism) first, then the [p-value](/docs/Statistics/inferential-statistics/foundations/p-value).
+
 ### Two groups: the t-test
 
 Does using your phone slow your reaction time? Two samples, one test:
@@ -46,7 +50,7 @@ print(f"mean difference = {phone.mean() - no_phone.mean():.1f} ms")
 print(f"t = {t:.2f},  p = {p:.4f}")
 ```
 
-The $t$-statistic is (difference in means) ÷ (standard error of that difference). A big $|t|$ and a small $p$ say the gap is hard to explain as luck.
+The $t$-statistic is (difference in means) ÷ (standard error of that difference). A big $|t|$ and a small $p$ say the gap is hard to explain as luck. The [t-test lesson](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test) builds it up from one sample.
 
 ## Comparing many groups: ANOVA
 
@@ -74,7 +78,7 @@ An ANOVA with a group predictor is, once again, just a [linear model / GLM](/doc
 | **Reject $H_0$** | Type I error (false positive), rate $\alpha$ | ✅ correct |
 | **Fail to reject** | ✅ correct | Type II error (false negative), rate $\beta$ |
 
-**Power** is $1-\beta$: the chance of detecting a real effect. It rises with sample size and effect size. Underpowered studies both miss real effects *and* — because only large flukes clear the bar — exaggerate the ones they do report.
+**Power** is $1-\beta$: the chance of detecting a real effect. It rises with sample size and effect size. Underpowered studies both miss real effects *and* — because only large flukes clear the bar — exaggerate the ones they do report. The [Type I & Type II errors lesson](/docs/Statistics/inferential-statistics/foundations/type-1-and-type-2-errors) works through all four outcomes.
 
 ## The trouble with p-values
 

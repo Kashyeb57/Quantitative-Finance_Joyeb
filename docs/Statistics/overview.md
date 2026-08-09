@@ -17,14 +17,14 @@ Statistics is how a quant turns noisy data into decisions you can defend. Every 
 | Topic | What it covers |
 |---|---|
 | [Descriptive Statistics](/docs/Statistics/descriptive-statistics) | Summarizing data — center, dispersion, percentiles, and covariance vs. correlation, each with a runnable example. |
-| [Inferential Statistics & Hypothesis Testing](/docs/Statistics/inferential-statistics) | Confidence intervals, p-values, and testing whether an edge is real. |
+| [Inferential Statistics & Hypothesis Testing](/docs/Statistics/inferential-statistics) | A full module: the testing mechanism, p-values, Type I/II errors, the z- and t-tests, and Bayes' theorem — each with an interactive lab. |
 | [Regression Analysis](/docs/Statistics/regression-analysis) | OLS, factor models, and the assumptions that make a fit trustworthy. |
 | [Time Series (AR, MA, ARIMA, GARCH)](/docs/Statistics/time-series) | Modeling and forecasting serially-dependent financial data. |
 | [Bayesian Inference](/docs/Statistics/bayesian-inference) | Priors, posteriors, and MCMC — updating beliefs as data arrives. |
 | [Robust & Nonparametric Statistics](/docs/Statistics/robust-statistics) | Methods that survive outliers and fat tails. |
 | [Causal Inference & DAGs](/docs/Statistics/causal-inference) | Why correlation isn't causation, and which variables to control for. |
 
-The **Descriptive Statistics** and **Bayesian Inference** pages are fully written and hands-on — the Bayesian page has a live interactive lab.
+The **Descriptive Statistics**, **Inferential Statistics & Hypothesis Testing**, and **Bayesian Inference** pages are fully written and hands-on — the inferential module has a rejection-region/p-value lab and a Bayes base-rate lab, and the Bayesian page has a live prior→posterior updater.
 
 ## Where to start
 

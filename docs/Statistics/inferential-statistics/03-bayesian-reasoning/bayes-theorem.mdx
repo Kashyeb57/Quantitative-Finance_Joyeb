@@ -1,0 +1,133 @@
+---
+title: "Bayes' Theorem"
+sidebar_position: 1
+description: From independent vs dependent events and conditional probability to the derivation of Bayes' theorem, the base-rate trap made visual, and the link to the Naive Bayes classifier.
+---
+
+# Bayes' Statistics (Bayes' Theorem)
+
+**Bayesian statistics is an approach to data analysis and parameter estimation based on Bayes' theorem.** Where the [hypothesis tests](/docs/Statistics/inferential-statistics/foundations/hypothesis-testing-mechanism) so far ask *"how surprising is this data if the null is true?"*, Bayes flips the question to the one you actually care about: **"given the data, how probable is my hypothesis?"** To get there we start from the two flavours of probability.
+
+## Independent vs dependent events
+
+**① Independent events** — one outcome tells you nothing about the next.
+
+- **Rolling a die** over $\{1, 2, 3, 4, 5, 6\}$: each face has $P(1) = P(2) = \dots = \tfrac{1}{6}$, and the previous roll doesn't change the next.
+- **Tossing a coin**: $P(H) = 0.5,\ P(T) = 0.5$, every toss fresh.
+
+**② Dependent events** — one outcome *changes* the probability of the next. Draw balls from a box **without replacing them** and the mix shifts as you go. Say the chance of drawing **red** is $P(R) = \tfrac{2}{5}$, and then — with one ball already gone — the chance of **yellow** becomes $P(Y \mid R) = \tfrac{3}{4}$. That second term is a **conditional probability**: the probability of $Y$ *given that* $R$ already happened.
+
+## Conditional probability and the multiplication rule
+
+The probability of **both** dependent events is the first times the second-given-the-first:
+
+$$
+P(R \text{ and } Y) = P(R)\cdot \underbrace{P(Y \mid R)}_{\text{conditional}} = \frac{2}{5}\cdot\frac{3}{4} = \frac{6}{20}
+$$
+
+## Deriving Bayes' theorem
+
+Here's the one clever step. The probability of "$A$ and $B$" can't depend on the order you name them:
+
+$$
+P(A \text{ and } B) = P(B \text{ and } A)
+$$
+
+Write each side with the multiplication rule:
+
+$$
+P(A)\cdot P(B \mid A) = P(B)\cdot P(A \mid B)
+$$
+
+Now just divide to isolate the conditional you want. Solving for $P(B \mid A)$:
+
+$$
+P(B \mid A) = \frac{P(B)\cdot P(A \mid B)}{P(A)}
+$$
+
+or, the form we'll use most, solving for $P(A \mid B)$:
+
+$$
+\boxed{\,P(A \mid B) = \frac{P(A)\cdot P(B \mid A)}{P(B)}\,} \qquad\Leftarrow\ \textbf{Bayes' theorem}
+$$
+
+Reading each term, where $A, B$ are events:
+
+- $P(A \mid B)$ — probability of **$A$ given $B$ is true** (the **posterior** — what we want).
+- $P(B \mid A)$ — probability of **$B$ given $A$ is true** (the **likelihood**).
+- $P(A)$ — the standalone probability of $A$ (the **prior**).
+- $P(B)$ — the standalone probability of $B$ (the **evidence**, a normalizer).
+
+## The base-rate trap — see it
+
+Bayes matters most when your intuition fails, and it fails hardest on **rare events.** A test can be "90% accurate" and yet a positive result still mean you're *probably fine* — because a small **prior** $P(A)$ drags the **posterior** $P(A\mid B)$ far below the test's accuracy. Play with the base rate and watch the red (truly affected) dots get swamped by amber false alarms:
+
+<BayesTheoremLab />
+
+The gap between "the test is 90% accurate" and "I'm 90% likely to have it" **is** Bayes' theorem in one picture — and the reason the prior can never be ignored.
+
+## From theorem to classifier: Naive Bayes
+
+Bayes' theorem is also the engine of a real machine-learning model. Take a **house-price dataset** with **independent** features — size of house $x_1$, number of rooms $x_2$, location $x_3$ — predicting a **dependent output** $y$ (the price). Bayes gives the probability of an output given the features:
+
+$$
+P(y \mid x_1, x_2, x_3) = \frac{P(y)\cdot P(x_1, x_2, x_3 \mid y)}{P(x_1, x_2, x_3)}
+$$
+
+Assume the features are (naively) independent given $y$ and this becomes the **Naive Bayes classifier** — cheap, surprisingly strong, and the classic baseline for spam filtering and text classification.
+
+```python
+# Bayes' theorem: the base-rate trap in numbers.
+# A disease affects 1% of people. A test is 90% sensitive with a 9% false-positive rate.
+# You test positive — what's the chance you actually have it?
+prior = 0.01          # P(A): base rate
+sens  = 0.90          # P(B|A): true-positive rate
+fpr   = 0.09          # P(B|¬A): false-positive rate
+
+p_B = prior*sens + (1 - prior)*fpr          # P(B): total prob. of a positive test
+posterior = prior*sens / p_B                 # P(A|B): Bayes' theorem
+
+print(f"P(positive test)          = {p_B:.3f}")
+print(f"P(disease | positive) = {posterior:.3f}")   # ≈ 0.092 — only ~9%, not 90%!
+```
+
+## Why a quant cares
+
+Bayes is the native language of decision-making under uncertainty, which is the whole job:
+
+- **Updating beliefs with evidence.** Start with a **prior** on a parameter (a stock's true drift, a regime probability), see data, and compute a **posterior**. That's Bayesian estimation — and the [Bayesian Inference](/docs/Statistics/bayesian-inference) page has a prior→posterior updater you can drag.
+- **The base-rate trap is a risk trap.** "This alert is 95% accurate" is meaningless without the base rate of the thing it detects. Rare-event detectors — fraud, default, blow-up — are swamped by false positives exactly as the disease test is; ignoring the prior is how teams drown in false alarms or trust a bad signal.
+- **A credible interval says what people *think* a confidence interval says.** The Bayesian posterior supports the direct statement "95% probability the parameter is in this range" — the honest version of the frequentist [confidence interval](/docs/Statistics/inferential-statistics/foundations/big-picture), and the basis of the ROPE decision rule.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'Bayes’ theorem is P(A|B) = P(A)·P(B|A) / P(B). The term P(A) is the…',
+    options: ['posterior', 'prior — the standalone probability of A before seeing B', 'likelihood', 'evidence'],
+    answer: 1,
+    explain: 'P(A) is the prior. P(A|B) is the posterior, P(B|A) the likelihood, and P(B) the evidence (normalizer).',
+  },
+  {
+    q: 'For dependent events, P(R and Y) equals…',
+    options: [
+      'P(R) + P(Y)',
+      'P(R)·P(Y | R) — the first event times the conditional probability of the second given the first',
+      'P(R)·P(Y), always',
+      'P(Y | R) alone',
+    ],
+    answer: 1,
+    explain: 'The multiplication rule for dependent events uses the conditional: P(R and Y) = P(R)·P(Y|R). Here 2/5 · 3/4 = 6/20.',
+  },
+  {
+    q: 'A disease affects 1% of people; a test is 90% accurate. Why can a positive result still mean only a ~9% chance of disease?',
+    options: [
+      'the test is broken',
+      'the low base rate (prior) means false positives from the healthy 99% outnumber true positives — Bayes weights by the prior',
+      'probabilities cannot exceed 10%',
+      'because 90% is actually low',
+    ],
+    answer: 1,
+    explain: 'With a rare condition, the many healthy people generate more false positives than the few sick people generate true positives, so the posterior stays low. That is the base-rate trap.',
+  },
+]} />
