@@ -4,6 +4,6 @@
   "link": {
     "type": "generated-index",
     "title": "2. Tests for a Mean — z and t",
-    "description": "The workhorse tests for a single average. The z-test when the population standard deviation is known and the sample is large; the Student-t distribution and the t-test for the far more common case where σ is unknown and estimated from the sample; and a decision rule for choosing between them."
+    "description": "The workhorse tools for a single average. The z-test when the population standard deviation is known and the sample is large; the Student-t distribution and the t-test for the far more common case where σ is unknown and estimated from the sample; a decision rule for choosing between them; and the estimation face of the same machinery — the confidence interval and its margin of error."
   }
 }

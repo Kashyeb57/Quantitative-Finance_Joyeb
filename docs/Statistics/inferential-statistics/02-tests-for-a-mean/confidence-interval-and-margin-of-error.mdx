@@ -1,0 +1,141 @@
+---
+title: "Confidence Interval & Margin of Error"
+sidebar_position: 5
+description: The estimation face of the same z/t machinery — a point estimate reached out by a margin of error to give a range for the unknown population mean. The formula point estimate ± z(α/2)·σ/√n, worked on the CAT-exam example to the 95% interval [480.8, 559.2].
+---
+
+# Confidence Interval & Margin of Error
+
+So far every test in this module — [z-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/z-test), [t-test](/docs/Statistics/inferential-statistics/tests-for-a-mean/t-test) — took a **sample mean** and asked whether it was too far from a *claimed* population mean to be luck. For a 95% two-tailed test we drew the familiar picture: the middle **95%** is where we **accept the null**, and the two extreme ends — **2.5%** each — are where we **reject** it.
+
+But there's a question we never actually answered: **what values could lie *within* that confidence interval?** That flips the whole exercise from *testing* a claim to *estimating* the unknown mean — and it's where the confidence interval earns its name.
+
+## The problem with a point estimate
+
+Recall the [point estimate](/docs/Probability/distributions/sampling-and-estimation/estimates): the sample mean $\bar x$ is our single best guess for the population mean $\mu$.
+
+$$
+\bar x \;\longrightarrow\; \mu \qquad (\text{the point estimate stands in for the population mean})
+$$
+
+Here's the trouble. Suppose the true mean is $\mu = 3$ and one sample gives $\bar x = 2.5$. That's **less than 3.** Draw a *different* sample and $\bar x$ might come out **greater than 3.** Every sample lands somewhere slightly different, so a lone number is silent about how far off it might be. **That is the problem of using a point estimate.**
+
+The fix is to stop reporting one number and instead **define a range** — "my estimate lies between **2 and 4**." That range, tied to a confidence level, is the **confidence interval**, and it honestly represents an estimate of an unknown population parameter.
+
+## The formula
+
+A confidence interval runs from a **lower** bound to a **higher** bound, and it's built by one simple recipe:
+
+$$
+\boxed{\;\textbf{Confidence Interval} = \textbf{Point Estimate} \;\pm\; \textbf{Margin of Error}\;}
+$$
+
+We use $\pm$ because the point estimate will be a little **less than**, a little **more than**, or roughly **equal to** the true mean — so we reach out on both sides. The point estimate is $\bar x$; the margin of error is where the test machinery comes back:
+
+$$
+\underbrace{\bar x}_{\text{point estimate}} \;\pm\; \underbrace{z_{\alpha/2}\,\frac{\sigma}{\sqrt n}}_{\text{margin of error (z-test)}}
+$$
+
+- **$z_{\alpha/2}$** is the critical value that carves off area $\alpha/2$ in each tail — read straight from the **z-table**, exactly as in the z-test.
+- **$\sigma/\sqrt n$** is the [standard error](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem).
+
+If instead you're doing a **t-test** (population $\sigma$ unknown), the shape is identical — you just swap the z-table for the **t-table** and use the sample $s$, remembering to compute the **degrees of freedom**:
+
+$$
+\bar x \;\pm\; t_{\alpha/2}\,\frac{s}{\sqrt n} \qquad (\text{df} = n-1)
+$$
+
+## Worked example — the CAT exam
+
+> On the verbal section of the **CAT exam**, the population standard deviation is **known to be 100** (σ is known ⇒ use a **z-test**). A sample of **30 test takers** has a **mean of 520**. **Construct a 95% confidence interval about the mean.**
+
+**Set up the critical value.** With 95% confidence, $\alpha = 0.05$, so $\alpha/2 = 0.025$. From the z-table, the area to the left of the upper cutoff is $1 - 0.025 = 0.9750$, which maps to
+
+$$
+z_{\alpha/2} = z_{0.025} = 1.96 \qquad (\text{and the lower cutoff is } -1.96).
+$$
+
+**Lower confidence interval:**
+
+$$
+\text{Lower C.I.} = 520 - (1.96)\frac{100}{\sqrt{25}} = 520 - 39.2 = \boxed{480.8}
+$$
+
+**Higher confidence interval:**
+
+$$
+\text{Higher C.I.} = 520 + (1.96)\frac{100}{\sqrt{25}} = 520 + 39.2 = \boxed{559.2}
+$$
+
+**Conclusion:** *I am **95% confident** that the mean CAT exam score lies between **480.8 and 559.2**.* If a claimed mean falls inside this interval we'd accept the null; if it falls outside, we'd reject it — the interval and the test are two views of the same thing.
+
+:::note A slip in the source numbers
+The problem says **30** test takers, but the worked arithmetic uses $\sqrt{25}$ (i.e. $n = 25$) to reach the quoted $[480.8, 559.2]$. I've kept the notes' published answer. For the record, with $n = 30$ the margin would be $1.96 \times 100/\sqrt{30} \approx 35.8$, giving $[484.2,\ 555.8]$ — same method, slightly tighter interval.
+:::
+
+Drag the sliders — the defaults reproduce the example exactly. Watch the interval widen as you demand more confidence (99%) and tighten as $n$ grows:
+
+<ConfidenceIntervalLab />
+
+```python
+import numpy as np
+from scipy import stats
+
+def conf_interval(xbar, sigma, n, conf=0.95, sigma_known=True):
+    alpha = 1 - conf
+    se = sigma / np.sqrt(n)
+    if sigma_known:                      # z-test
+        crit = stats.norm.ppf(1 - alpha/2)
+    else:                                # t-test (sigma estimated by s)
+        crit = stats.t.ppf(1 - alpha/2, df=n-1)
+    moe = crit * se
+    return xbar - moe, xbar + moe, crit, moe
+
+lo, hi, crit, moe = conf_interval(xbar=520, sigma=100, n=25, conf=0.95)
+print(f"critical z = {crit:.2f},  margin of error = ±{moe:.1f}")
+print(f"95% CI = [{lo:.1f}, {hi:.1f}]")     # [480.8, 559.2]
+print("I am 95% confident the mean CAT score is in this range.")
+```
+
+## Why a quant cares
+
+The margin of error is the number risk reports quietly drop — and dropping it is how a point estimate masquerades as certainty:
+
+- **Every reported statistic deserves a ± band.** A mean return, a volatility, a Sharpe ratio — reporting "0.9 Sharpe" hides that the 95% interval might be $[0.1,\ 1.7]$. The *width*, driven by $\sigma/\sqrt n$, is the honest measure of how much you actually know.
+- **The $\sqrt n$ in the margin is the tax on precision.** To halve the margin of error you need **four times** the data — which is why a short track record produces a uselessly wide interval no matter how good the point estimate looks.
+- **Confidence level is a dial with a cost.** Demanding 99% instead of 95% widens the interval (the critical value grows from 1.96 to 2.58); more certainty buys you a vaguer range. Choosing it is a judgment call about how badly a miss would hurt.
+
+Report the point, but **size your decisions to the interval** — the band, not the center, is what tells you whether you can survive being wrong.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'A confidence interval is built as…',
+    options: [
+      'point estimate × margin of error',
+      'point estimate ± margin of error',
+      'margin of error ÷ n',
+      'the sample mean alone',
+    ],
+    answer: 1,
+    explain: 'CI = point estimate ± margin of error. The point estimate (x̄) sits in the middle and the margin reaches out on both sides.',
+  },
+  {
+    q: 'For a 95% z-interval, the margin of error is z(α/2)·σ/√n with z(α/2) equal to…',
+    options: ['1.64', '1.96 (since 1 − 0.025 = 0.9750 → 1.96 on the z-table)', '2.58', '2.045'],
+    answer: 1,
+    explain: 'A two-tailed 95% leaves 0.025 per tail; the area 0.9750 maps to z = 1.96. (1.64 is one-tailed 95%; 2.58 is two-tailed 99%.)',
+  },
+  {
+    q: 'For the CAT example — x̄ = 520, σ = 100, using √25 — the 95% interval is…',
+    options: [
+      '[500, 540]',
+      '[480.8, 559.2]  (520 ± 1.96·100/√25 = 520 ± 39.2)',
+      '[520, 559.2]',
+      '[460, 580]',
+    ],
+    answer: 1,
+    explain: 'Margin = 1.96 × (100/5) = 39.2, so the interval is 520 ± 39.2 = [480.8, 559.2]: “95% confident the mean lies in this range.”',
+  },
+]} />
