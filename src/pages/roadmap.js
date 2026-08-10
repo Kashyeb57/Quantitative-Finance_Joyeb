@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Heading from '@theme/Heading';
 import QuantRoadmap from '@site/src/components/QuantRoadmap';
 import MathDeepDive from '@site/src/components/MathDeepDive';
@@ -9,14 +10,11 @@ export default function RoadmapPage() {
     <Layout
       title="Quant Roadmap"
       description="An interactive, trackable roadmap for becoming a quant — five pillars across three levels, scored against the Trader, Developer, and Researcher tracks.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Quant Roadmap</Heading>
-          <p className="hero__subtitle">
-            Track your journey across Math, Probability &amp; Statistics, CS, ML, and Finance.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Career path"
+        title="Quant Roadmap"
+        subtitle="Track your journey across Math, Probability & Statistics, CS, ML, and Finance."
+      />
       <main>
         <QuantRoadmap />
         <MathDeepDive />

@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Heading from '@theme/Heading';
 import ResourceCards from '@site/src/components/ResourceCards';
 
@@ -90,12 +91,11 @@ const SECTIONS = [
 export default function ScopePage() {
   return (
     <Layout title="Scope" description="Quant firms and companies that hire from quantitative finance.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Scope</Heading>
-          <p className="hero__subtitle">Where quants get hired — the firms to aim for.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Careers · firms"
+        title="Scope"
+        subtitle="Where quants get hired — the firms to aim for."
+      />
       <main>
         <ResourceCards
           intro="Elite quantitative-finance firms, grouped by a community-circulated tier list (opinion, not official rankings). These are the “100% quant” shops; big tech and banks hire quant-skilled grads too."

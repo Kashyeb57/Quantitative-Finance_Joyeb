@@ -193,6 +193,18 @@ article a:not(.card):not(.button):not([class*='Card']):not([class*='btn']):hover
   border-radius: 8px;
 }
 
+/* Active nav item — a green indicator under the current section */
+.navbar__link {
+  transition: color var(--dur-1) var(--ease-out);
+}
+.navbar__link:hover {
+  color: var(--g-300);
+}
+.navbar__item .navbar__link--active {
+  color: var(--g-500);
+  box-shadow: inset 0 -2px 0 var(--g-500);
+}
+
 /* Mobile menu drawer: force a solid background. The navbar's translucent
    frosted-glass color is otherwise reused for the drawer, which made it
    see-through (the page bled through) and empty-looking on phones. */
@@ -338,6 +350,8 @@ blockquote {
 
 .menu__link--active:not(.menu__link--sublist) {
   font-weight: 700;
+  color: var(--g-500);
+  background: var(--g-wash);
 }
 
 .theme-doc-sidebar-container {
@@ -402,6 +416,61 @@ blockquote {
 .pagination-nav__link:hover {
   transform: translateY(-2px);
   border-color: var(--line-strong);
+  box-shadow: var(--e2);
+}
+.pagination-nav__sublabel {
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tx-muted);
+}
+.pagination-nav__label {
+  font-family: var(--ff-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.pagination-nav__link:hover .pagination-nav__label {
+  color: var(--g-500);
+}
+
+/* ── Docs reading polish ───────────────────────────────────────────── */
+/* TOC (right rail) active indicator */
+.table-of-contents__link--active,
+.table-of-contents__link--active code {
+  color: var(--g-500);
+  font-weight: 600;
+}
+
+/* Doc tables — mono uppercase headers, hairline rules */
+.markdown table thead th {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tx-muted);
+}
+.markdown table th,
+.markdown table td {
+  border-color: var(--line);
+}
+
+/* Admonitions — hairline frame + rounded corners (keep the colored left edge) */
+.theme-admonition {
+  border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+/* Breadcrumbs */
+.breadcrumbs__link {
+  border-radius: var(--r-sm);
+}
+.breadcrumbs__item--active .breadcrumbs__link {
+  background: var(--g-wash);
+  color: var(--g-500);
 }
 
 /* ── OS-level chrome: scrollbar, selection, focus ──────────────────── */

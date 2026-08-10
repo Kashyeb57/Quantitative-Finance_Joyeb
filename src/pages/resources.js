@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Heading from '@theme/Heading';
 import ResourceCards from '@site/src/components/ResourceCards';
 
@@ -63,12 +64,11 @@ const SECTIONS = [
 export default function ResourcesPage() {
   return (
     <Layout title="Resources" description="Courses, lectures, and channels for learning quantitative finance.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Resources</Heading>
-          <p className="hero__subtitle">Courses, lectures, and channels — where to learn each topic.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Learning sources"
+        title="Resources"
+        subtitle="Courses, lectures, and channels — where to learn each topic."
+      />
       <main>
         <ResourceCards
           intro="Free and paid courses, plus the YouTube channels worth following on the quant path."

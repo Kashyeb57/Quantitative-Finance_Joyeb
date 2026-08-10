@@ -1,0 +1,86 @@
+/* PHOSPHOR shared page header */
+
+.header {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--line);
+  padding: var(--s8) 0 var(--s7);
+}
+
+/* masked hairline lattice — the drafting-surface substrate */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 68% 82% at 18% 0%, #000, transparent 72%);
+  mask-image: radial-gradient(ellipse 68% 82% at 18% 0%, #000, transparent 72%);
+  pointer-events: none;
+}
+
+/* a soft green glow bleeding from the top-right, behind everything */
+.header::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 60%;
+  height: 200%;
+  background: radial-gradient(ellipse 50% 40% at 70% 30%, var(--g-wash), transparent 70%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+}
+
+.center {
+  text-align: center;
+}
+.center .subtitle { margin-left: auto; margin-right: auto; }
+.center .eyebrow { justify-content: center; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--g-500);
+  margin: 0 0 0.7rem;
+}
+.tick {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--g-500);
+  box-shadow: 0 0 0 3px var(--g-wash);
+}
+
+.title {
+  font-family: var(--ff-display);
+  font-size: clamp(2.1rem, 4vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+  margin: 0 0 0.55rem;
+}
+
+.subtitle {
+  color: var(--tx-secondary);
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  max-width: 46rem;
+  margin: 0;
+}
+
+.extra {
+  margin-top: var(--s5);
+}

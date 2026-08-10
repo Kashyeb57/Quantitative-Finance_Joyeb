@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './research.module.css';
@@ -63,12 +64,11 @@ export default function ResearchPapers() {
     <Layout
       title="Research Papers"
       description="Research papers in quantitative finance I'm reading, working through, and collecting — with a note on why each one matters.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Research Papers</Heading>
-          <p className="hero__subtitle">Papers I&rsquo;m reading and working through on the quant journey.</p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Reading list"
+        title="Research Papers"
+        subtitle="Papers I’m reading and working through on the quant journey."
+      />
 
       <main className="container" style={{ padding: '2rem 1rem 4rem' }}>
         {PAPERS.length === 0 ? (

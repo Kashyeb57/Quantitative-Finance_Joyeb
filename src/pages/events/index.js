@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
@@ -40,14 +41,11 @@ export default function BigEvents() {
     <Layout
       title="Big Events"
       description="A running log of the market blow-ups, manias and incidents worth understanding in full — what happened, the numbers, the charts, and the lesson.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Big Events &amp; Incidents</Heading>
-          <p className="hero__subtitle">
-            The blow-ups and manias worth remembering — explained in full, with the curves.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Post-mortems"
+        title="Big Events & Incidents"
+        subtitle="The blow-ups and manias worth remembering — explained in full, with the curves."
+      />
 
       <main className="container" style={{ padding: '2rem 1rem 4rem' }}>
         <p className={styles.intro}>

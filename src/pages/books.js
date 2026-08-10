@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import PageHeader from '@site/src/components/PageHeader';
 import Heading from '@theme/Heading';
 import ResourceCards from '@site/src/components/ResourceCards';
 import BookShelf from '@site/src/components/BookShelf';
@@ -288,14 +289,11 @@ const SECTIONS = [
 export default function BooksPage() {
   return (
     <Layout title="Books" description="My quant library — read textbooks, interview guides, and probability puzzle books right in the browser, plus a curated recommended-reading list.">
-      <header className="hero hero--primary" style={{ padding: '2.5rem 1rem' }}>
-        <div className="container">
-          <Heading as="h1" className="hero__title">Library</Heading>
-          <p className="hero__subtitle">
-            My own collection — click any cover to read it right in your browser.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="The library"
+        title="Library"
+        subtitle="My own collection — click any cover to read it right in your browser."
+      />
       <main>
         <section style={{ padding: '2rem 0 1rem' }}>
           <div className="container">
