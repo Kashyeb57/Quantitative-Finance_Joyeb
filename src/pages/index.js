@@ -120,16 +120,95 @@ const FEATURES = [
   {icon: 'terminal', title: 'A live market terminal', blurb: 'Charts and market news, right inside the site — theory meets the tape.', to: '/terminal'},
 ];
 
-// ── The Tearsheet: a two-series equity curve drawn inside the terminal ──
-const EQUITY = [[44.00, 229.07], [46.39, 229.55], [48.78, 224.96], [51.17, 225.53], [53.56, 227.37], [55.95, 224.72], [58.34, 224.61], [60.72, 225.74], [63.11, 226.44], [65.50, 225.96], [67.89, 222.13], [70.28, 221.80], [72.67, 218.26], [75.06, 217.02], [77.45, 216.72], [79.84, 218.27], [82.23, 215.16], [84.62, 211.49], [87.01, 211.42], [89.40, 214.48], [91.79, 211.12], [94.17, 213.82], [96.56, 219.69], [98.95, 219.18], [101.34, 217.45], [103.73, 219.09], [106.12, 220.59], [108.51, 215.15], [110.90, 214.62], [113.29, 214.96], [115.68, 216.70], [118.07, 213.59], [120.46, 214.12], [122.85, 212.54], [125.23, 213.59], [127.62, 214.03], [130.01, 212.41], [132.40, 214.38], [134.79, 214.85], [137.18, 214.81], [139.57, 219.65], [141.96, 216.55], [144.35, 217.10], [146.74, 221.02], [149.13, 218.23], [151.52, 216.21], [153.91, 213.93], [156.30, 215.88], [158.68, 212.83], [161.07, 210.54], [163.46, 207.62], [165.85, 207.61], [168.24, 210.17], [170.63, 213.31], [173.02, 216.03], [175.41, 217.32], [177.80, 219.29], [180.19, 223.20], [182.58, 222.94], [184.97, 228.14], [187.36, 225.78], [189.74, 221.38], [192.13, 221.62], [194.52, 219.93], [196.91, 219.95], [199.30, 215.68], [201.69, 213.51], [204.08, 213.65], [206.47, 212.77], [208.86, 207.04], [211.25, 208.42], [213.64, 208.27], [216.03, 208.59], [218.42, 209.57], [220.81, 209.42], [223.19, 203.84], [225.58, 204.68], [227.97, 202.48], [230.36, 198.40], [232.75, 201.37], [235.14, 199.29], [237.53, 199.48], [239.92, 195.81], [242.31, 190.79], [244.70, 181.44], [247.09, 177.57], [249.48, 180.49], [251.87, 165.80], [254.26, 158.68], [256.64, 162.90], [259.03, 157.47], [261.42, 161.52], [263.81, 169.05], [266.20, 175.37], [268.59, 172.85], [270.98, 167.97], [273.37, 163.56], [275.76, 165.19], [278.15, 143.94], [280.54, 139.17], [282.93, 139.88], [285.32, 132.92], [287.70, 123.46], [290.09, 119.27], [292.48, 117.00], [294.87, 129.25], [297.26, 148.61], [299.65, 136.11], [302.04, 138.07], [304.43, 144.52], [306.82, 129.27], [309.21, 131.36], [311.60, 115.76], [313.99, 125.62], [316.38, 122.33], [318.77, 109.01], [321.15, 97.66], [323.54, 121.07], [325.93, 121.55], [328.32, 97.34], [330.71, 109.26], [333.10, 107.36], [335.49, 106.04], [337.88, 123.93], [340.27, 132.25], [342.66, 130.90], [345.05, 137.70], [347.44, 136.18], [349.83, 129.89], [352.21, 131.70], [354.60, 137.91], [356.99, 131.14], [359.38, 142.71], [361.77, 150.20], [364.16, 150.82], [366.55, 148.40], [368.94, 132.95], [371.33, 134.61], [373.72, 130.10], [376.11, 140.26], [378.50, 143.30], [380.89, 154.99], [383.28, 166.95], [385.66, 147.05], [388.05, 154.62], [390.44, 153.67], [392.83, 144.41], [395.22, 144.33], [397.61, 146.05], [400.00, 146.62]];
-const BENCH = [[44.00, 231.33], [46.39, 230.94], [48.78, 230.55], [51.17, 230.16], [53.56, 229.77], [55.95, 229.38], [58.34, 228.99], [60.72, 228.60], [63.11, 228.20], [65.50, 227.81], [67.89, 227.42], [70.28, 227.03], [72.67, 226.64], [75.06, 226.25], [77.45, 225.86], [79.84, 225.47], [82.23, 225.08], [84.62, 224.68], [87.01, 224.29], [89.40, 223.90], [91.79, 223.51], [94.17, 223.12], [96.56, 222.73], [98.95, 222.34], [101.34, 221.95], [103.73, 221.56], [106.12, 221.16], [108.51, 220.77], [110.90, 220.38], [113.29, 219.99], [115.68, 219.60], [118.07, 219.21], [120.46, 218.82], [122.85, 218.43], [125.23, 218.04], [127.62, 217.64], [130.01, 217.25], [132.40, 216.86], [134.79, 216.47], [137.18, 216.08], [139.57, 215.69], [141.96, 215.30], [144.35, 214.91], [146.74, 214.52], [149.13, 214.12], [151.52, 213.73], [153.91, 213.34], [156.30, 212.95], [158.68, 212.56], [161.07, 212.17], [163.46, 211.78], [165.85, 211.39], [168.24, 211.00], [170.63, 210.60], [173.02, 210.21], [175.41, 209.82], [177.80, 209.43], [180.19, 209.04], [182.58, 208.65], [184.97, 208.26], [187.36, 207.87], [189.74, 207.48], [192.13, 207.08], [194.52, 206.69], [196.91, 206.30], [199.30, 205.91], [201.69, 205.52], [204.08, 205.13], [206.47, 204.74], [208.86, 204.35], [211.25, 203.96], [213.64, 203.56], [216.03, 203.17], [218.42, 202.78], [220.81, 202.39], [223.19, 202.00], [225.58, 201.61], [227.97, 201.22], [230.36, 200.83], [232.75, 200.44], [235.14, 200.04], [237.53, 199.65], [239.92, 199.26], [242.31, 198.87], [244.70, 198.48], [247.09, 198.09], [249.48, 197.70], [251.87, 197.31], [254.26, 196.92], [256.64, 196.52], [259.03, 196.13], [261.42, 195.74], [263.81, 195.35], [266.20, 194.96], [268.59, 194.57], [270.98, 194.18], [273.37, 193.79], [275.76, 193.40], [278.15, 193.00], [280.54, 192.61], [282.93, 192.22], [285.32, 191.83], [287.70, 191.44], [290.09, 191.05], [292.48, 190.66], [294.87, 190.27], [297.26, 189.88], [299.65, 189.48], [302.04, 189.09], [304.43, 188.70], [306.82, 188.31], [309.21, 187.92], [311.60, 187.53], [313.99, 187.14], [316.38, 186.75], [318.77, 186.36], [321.15, 185.96], [323.54, 185.57], [325.93, 185.18], [328.32, 184.79], [330.71, 184.40], [333.10, 184.01], [335.49, 183.62], [337.88, 183.23], [340.27, 182.84], [342.66, 182.44], [345.05, 182.05], [347.44, 181.66], [349.83, 181.27], [352.21, 180.88], [354.60, 180.49], [356.99, 180.10], [359.38, 179.71], [361.77, 179.32], [364.16, 178.92], [366.55, 178.53], [368.94, 178.14], [371.33, 177.75], [373.72, 177.36], [376.11, 176.97], [378.50, 176.58], [380.89, 176.19], [383.28, 175.80], [385.66, 175.40], [388.05, 175.01], [390.44, 174.62], [392.83, 174.23], [395.22, 173.84], [397.61, 173.45], [400.00, 173.06]];
+// ── Custom Hook for Live BTC Data ──
+function useLiveBTCData() {
+  const [data, setData] = useState({ points: [], currentPrice: 0, priceChange: 0, loading: true });
+
+  useEffect(() => {
+    async function fetchBTC() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m&limit=100');
+        const json = await res.json();
+        const points = json.map(k => ({
+          time: parseInt(k[0], 10),
+          price: parseFloat(k[4])
+        }));
+        
+        if (points.length > 0) {
+          const current = points[points.length - 1].price;
+          const prev = points.length > 1 ? points[points.length - 2].price : current;
+          setData({
+            points,
+            currentPrice: current,
+            priceChange: current - prev,
+            loading: false
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch BTC data:", err);
+      }
+    }
+    
+    fetchBTC();
+    const id = setInterval(fetchBTC, 60000); // Refresh every 1 minute
+    return () => clearInterval(id);
+  }, []);
+
+  return data;
+}
+
 const toPath = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
 
-function Tearsheet() {
-  const equityPath = toPath(EQUITY);
-  const areaPath = `${equityPath} L400 250 L44 250 Z`;
+// ── The Tearsheet: a live BTC curve drawn inside the terminal ──
+function Tearsheet({ data }) {
+  if (data.loading || data.points.length === 0) {
+    return (
+      <svg viewBox="0 0 440 300" className={styles.tearsheet} role="img" aria-label="Loading BTC chart...">
+        <rect x="40" y="26" width="366" height="228" rx="8" fill="var(--bg-sunken)" stroke="var(--line-strong)" />
+      </svg>
+    );
+  }
+
+  const { points } = data;
+  const prices = points.map(p => p.price);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  
+  // Add 10% padding so the line doesn't hit the top/bottom edges perfectly
+  const yRange = (maxPrice - minPrice) || 1;
+  const pMin = minPrice - (yRange * 0.1);
+  const pMax = maxPrice + (yRange * 0.1);
+  const pRange = pMax - pMin;
+  
+  // Map points to SVG coordinates (X: 44 to 400, Y: 254 to 26)
+  const equityPoints = points.map((p, i) => {
+    const x = 44 + (i / (points.length - 1)) * 356;
+    const y = 254 - ((p.price - pMin) / pRange) * 228;
+    return [x, y];
+  });
+
+  const equityPath = toPath(equityPoints);
+  const areaPath = `${equityPath} L400 254 L44 254 Z`;
+  const currentY = equityPoints[equityPoints.length - 1][1];
+  
+  // Format Y-axis labels
+  const formatY = (val) => val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val.toFixed(0);
+  const maxL = formatY(pMax);
+  const midL = formatY(pMin + pRange / 2);
+  const minL = formatY(pMin);
+
+  // Format X-axis labels to CT (HH:MM)
+  const formatTime = (ts) => {
+    const d = new Date(ts);
+    return d.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+  
+  const q1 = points[Math.floor(points.length * 0.25)].time;
+  const q2 = points[Math.floor(points.length * 0.5)].time;
+  const q3 = points[Math.floor(points.length * 0.75)].time;
+
   return (
-    <svg viewBox="0 0 440 300" className={styles.tearsheet} role="img" aria-label="A two-series equity curve — a green strategy line above a dashed benchmark — inside a research tearsheet">
+    <svg viewBox="0 0 440 300" className={styles.tearsheet} role="img" aria-label="Live BTC Chart">
       <defs>
         <linearGradient id="equityArea" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--g-500)" stopOpacity="0.22" />
@@ -152,27 +231,27 @@ function Tearsheet() {
       {/* area + series */}
       <g clipPath="url(#plotClip)">
         <path className={styles.area} d={areaPath} fill="url(#equityArea)" />
-        <path className={styles.bench} d={toPath(BENCH)} fill="none" stroke="var(--viz-series-2)" strokeWidth="1.5" strokeDasharray="4 4" />
         <path className={styles.equity} d={equityPath} fill="none" stroke="var(--g-500)" strokeWidth="2" pathLength="1" strokeLinecap="round" strokeLinejoin="round" />
       </g>
 
       {/* crosshair + leading tip */}
       <g className={styles.tip}>
         <line x1="400" x2="400" y1="30" y2="250" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <line x1="44" x2="406" y1="146.62" y2="146.62" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <circle cx="400" cy="146.62" r="4" fill="var(--g-500)" />
-        <circle cx="400" cy="146.62" r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
+        <line x1="44" x2="406" y1={currentY} y2={currentY} stroke="var(--line-strong)" strokeDasharray="2 3" />
+        <circle cx="400" cy={currentY} r="4" fill="var(--g-500)" />
+        <circle cx="400" cy={currentY} r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
       </g>
 
       {/* axis ticks (mono) */}
       <g fontFamily="var(--ff-mono)" fontSize="9" fill="var(--tx-muted)">
-        <text x="410" y="72" >1400</text>
-        <text x="410" y="158">800</text>
-        <text x="410" y="246">200</text>
-        <text x="44" y="270">JAN</text>
-        <text x="176" y="270">APR</text>
-        <text x="308" y="270">JUL</text>
-        <text x="388" y="270">OCT</text>
+        <text x="410" y="72">{maxL}</text>
+        <text x="410" y="158">{midL}</text>
+        <text x="410" y="246">{minL}</text>
+        
+        <text x="44" y="270">{formatTime(points[0].time)}</text>
+        <text x="133" y="270">{formatTime(q1)}</text>
+        <text x="222" y="270">{formatTime(q2)}</text>
+        <text x="311" y="270">{formatTime(q3)}</text>
       </g>
     </svg>
   );
@@ -194,6 +273,8 @@ function LiveClock() {
 }
 
 export default function Home() {
+  const btcData = useLiveBTCData();
+
   // Reveal-on-scroll — one tiny IntersectionObserver.
   useEffect(() => {
     const els = document.querySelectorAll('[data-reveal]');
@@ -252,7 +333,7 @@ export default function Home() {
                 </div>
               </div>
               <div className={styles.heroVisual}>
-                <Tearsheet />
+                <Tearsheet data={btcData} />
                 <span
                   className={clsx(styles.formula, styles.formulaTop)}
                   dangerouslySetInnerHTML={tex('dS = \\mu S\\,dt + \\sigma S\\,dW')}
@@ -261,7 +342,10 @@ export default function Home() {
                   className={clsx(styles.formula, styles.formulaBottom)}
                   dangerouslySetInnerHTML={tex('\\Delta = \\dfrac{\\partial V}{\\partial S}')}
                 />
-                <span className={styles.readoutChip}>MU $877.57&nbsp;<b>▲</b></span>
+                <span className={styles.readoutChip}>
+                  BTC ${btcData.loading ? '---' : btcData.currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  &nbsp;<b>{btcData.priceChange >= 0 ? '▲' : '▼'}</b>
+                </span>
               </div>
             </div>
           </div>
