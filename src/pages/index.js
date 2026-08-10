@@ -121,8 +121,8 @@ const FEATURES = [
 ];
 
 // ── The Tearsheet: a two-series equity curve drawn inside the terminal ──
-const EQUITY = [[44, 230], [80, 214], [116, 221], [152, 196], [188, 203], [224, 171], [260, 181], [296, 139], [332, 151], [368, 107], [400, 92]];
-const BENCH = [[44, 236], [80, 229], [116, 231], [152, 215], [188, 217], [224, 201], [260, 206], [296, 187], [332, 191], [368, 169], [400, 161]];
+const EQUITY = [[44, 214], [80, 201], [116, 194], [152, 187], [188, 178], [224, 123], [260, 87], [296, 105], [332, 141], [368, 178], [400, 150]];
+const BENCH = [[44, 220], [80, 210], [116, 190], [152, 195], [188, 180], [224, 160], [260, 150], [296, 140], [332, 130], [368, 135], [400, 120]];
 const toPath = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
 
 function Tearsheet() {
@@ -159,9 +159,9 @@ function Tearsheet() {
       {/* crosshair + leading tip */}
       <g className={styles.tip}>
         <line x1="400" x2="400" y1="30" y2="250" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <line x1="44" x2="406" y1="92" y2="92" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <circle cx="400" cy="92" r="4" fill="var(--g-500)" />
-        <circle cx="400" cy="92" r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
+        <line x1="44" x2="406" y1="150" y2="150" stroke="var(--line-strong)" strokeDasharray="2 3" />
+        <circle cx="400" cy="150" r="4" fill="var(--g-500)" />
+        <circle cx="400" cy="150" r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
       </g>
 
       {/* axis ticks (mono) */}
@@ -261,7 +261,7 @@ export default function Home() {
                   className={clsx(styles.formula, styles.formulaBottom)}
                   dangerouslySetInnerHTML={tex('\\Delta = \\dfrac{\\partial V}{\\partial S}')}
                 />
-                <span className={styles.readoutChip}>$412.66&nbsp;<b>▲</b></span>
+                <span className={styles.readoutChip}>MU $105.82&nbsp;<b>▲</b></span>
               </div>
             </div>
           </div>
