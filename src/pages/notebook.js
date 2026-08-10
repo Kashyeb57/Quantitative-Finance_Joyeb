@@ -10,7 +10,7 @@ export default function NotebookPage() {
       description="A Jupyter-style Python notebook that runs entirely in your browser — numpy, pandas and matplotlib included. No installs, no server.">
       <main className={styles.wrap}>
         <div className={styles.head}>
-          <Heading as="h1">🐍 Python Notebook</Heading>
+          <Heading as="h1">Python Notebook</Heading>
           <p>
             A Jupyter-style notebook that runs <b>entirely in your browser</b> — nothing to install,
             no server, no account. Variables persist between cells, <code>numpy</code>,{' '}

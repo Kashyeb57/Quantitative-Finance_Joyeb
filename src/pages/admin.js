@@ -100,7 +100,7 @@ export default function Admin() {
       </Head>
       <main className={styles.wrap}>
         <div className={styles.header}>
-          <Heading as="h1">✍️ Publishing Studio</Heading>
+          <Heading as="h1">Publishing Studio</Heading>
           <p>
             Create notes, upload files, and edit any page — <b>no code, no terminal</b>. Everything
             here runs through GitHub, so it works only for you: visitors without access to your

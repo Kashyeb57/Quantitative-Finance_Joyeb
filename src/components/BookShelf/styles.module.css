@@ -79,13 +79,13 @@
   overflow: hidden;
   color: #fff;
   background: linear-gradient(135deg, #205d3b, #2e8555);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .book:hover .cover {
   transform: translateY(-6px) rotate(-0.5deg);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.6);
 }
 
 /* category-tinted covers */

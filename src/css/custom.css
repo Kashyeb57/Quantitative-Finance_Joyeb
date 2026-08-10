@@ -1,10 +1,16 @@
 /**
- * Global design system for joyebkashyeb.com.np
- * Palette: professional deep-blue primary with light/dark variants.
+ * PHOSPHOR — the design system for joyebkashyeb.com.np
+ * "A trading terminal restored as a luxury object."
+ *
+ * Dark-only. Neutral graphite surfaces (never tinted). Green (#25c2a0) is the
+ * single chromatic accent; amber is the one support hue and is INK ONLY
+ * (negative deltas, warnings) — never a surface. Display = Space Grotesk,
+ * body = Inter, data/mono = JetBrains Mono.
  */
 
+/* ── Global scalar tokens (theme-independent) ──────────────────────── */
 :root {
-  /* Brand: the site's signature green — fresh, calm, and its own */
+  /* Brand green ramp (light-mode fallback — the UI ships dark-only) */
   --ifm-color-primary: #2e8555;
   --ifm-color-primary-dark: #29784c;
   --ifm-color-primary-darker: #277148;
@@ -16,18 +22,48 @@
   --ifm-code-font-size: 92%;
   --docusaurus-highlighted-code-line-bg: rgba(46, 133, 85, 0.08);
 
-  /* Typography */
-  --ifm-font-family-base: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --ifm-font-family-monospace: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
-  --ifm-heading-font-weight: 700;
-  --ifm-h1-font-size: 2.35rem;
-  --ifm-global-radius: 0.5rem;
+  /* Type roles */
+  --ff-display: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+  --ff-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+  --ifm-font-family-base: var(--ff-body);
+  --ifm-font-family-monospace: var(--ff-mono);
+  --ifm-heading-font-family: var(--ff-display);
+  --ifm-heading-font-weight: 600;
 
-  --ifm-navbar-shadow: 0 1px 0 rgba(15, 23, 42, 0.08);
-  --ifm-toc-border-color: rgba(15, 23, 42, 0.08);
+  /* Type scale */
+  --fs-display: clamp(2.9rem, 6vw, 4.2rem);
+  --fs-h1: 2.6rem;
+  --fs-h2: 2rem;
+  --fs-h3: 1.45rem;
+  --fs-h4: 1.2rem;
+  --fs-lead: 1.2rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-eyebrow: 0.75rem;
+  --fs-caption: 0.6875rem;
+  --ifm-h1-font-size: var(--fs-h1);
+
+  /* Spacing scale (4px base) */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
+
+  /* Radius scale (rectilinear terminal) */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-full: 999px;
+  --ifm-global-radius: 10px;
+  --ifm-button-border-radius: 6px;
+
+  /* Container widths (replace the ad-hoc per-page maxes) */
+  --w-narrow: 820px; --w-base: 1000px; --w-wide: 1180px; --w-max: 1280px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-1: 120ms; --dur-2: 180ms; --dur-3: 420ms; --dur-4: 900ms;
 }
 
-/* Dark mode: neutral charcoal background, light teal-green as the accent */
+/* ── Dark palette — neutral graphite, one green signal, amber as ink ── */
 [data-theme='dark'] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
@@ -37,24 +73,95 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
 
-  --ifm-navbar-background-color: rgba(27, 27, 29, 0.85);
+  /* Background layers — deep graphite, ZERO tint */
+  --bg-base: #0b0b0c;
+  --bg-sunken: #08080a;
+  --surface: #141416;
+  --surface-raised: #1a1a1d;
+  --overlay: #202024;
+  --scrim: rgba(8, 8, 10, 0.72);
+
+  /* Wire Docusaurus surfaces onto the graphite base */
+  --ifm-background-color: var(--bg-base);
+  --ifm-background-surface-color: var(--surface);
+  --ifm-navbar-background-color: rgba(18, 18, 20, 0.72);
   --docusaurus-highlighted-code-line-bg: rgba(37, 194, 160, 0.12);
-  --ifm-toc-border-color: rgba(160, 160, 160, 0.16);
+
+  /* Hairlines — low-opacity white only, never colored */
+  --line-faint: rgba(255, 255, 255, 0.04);
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.12);
+  --ifm-toc-border-color: var(--line);
+
+  /* Text */
+  --tx-primary: #ededef;
+  --tx-secondary: #a9a9b0;
+  --tx-muted: #6e6e76;
+  --tx-faint: #4a4a50;
+
+  /* Green ramp (identity — anchored on #25c2a0) */
+  --g-100: #d4f7ec;
+  --g-300: #5fe3c0;
+  --g-500: #25c2a0;
+  --g-600: #1da588;
+  --g-700: #137a64;
+  --g-glow: rgba(37, 194, 160, 0.28);
+  --g-wash: rgba(37, 194, 160, 0.08);
+
+  /* Single support hue: signal amber (ink only, never a surface) */
+  --amber-500: #e0a44a;
+  --amber-600: #c4863a;
+  --amber-wash: rgba(224, 164, 74, 0.1);
+
+  /* Semantic data (numbers only) */
+  --pos: var(--g-300);
+  --neg: var(--amber-500);
+
+  /* Elevation — near-black shadow + 1px inset top-light (theme-correct) */
+  --e0: none;
+  --e1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.4);
+  --e2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.45);
+  --e3: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 50px rgba(0, 0, 0, 0.55);
+  --e-glow: 0 0 0 1px var(--g-700), 0 0 28px var(--g-glow);
+  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--g-glow);
 }
 
-/* ── Typography polish ─────────────────────────────────────────────── */
-h1, h2, h3 {
-  letter-spacing: -0.02em;
+/* ── Typography ────────────────────────────────────────────────────── */
+h1, h2, h3, h4, .navbar__title {
+  font-family: var(--ff-display);
+  letter-spacing: -0.024em;
+  font-weight: 600;
 }
+h1 { letter-spacing: -0.028em; }
 
 .markdown h1:first-child {
-  font-size: 2.1rem;
+  font-size: var(--fs-h1);
 }
 
 .markdown > h2 {
   margin-top: 2.4rem;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--ifm-toc-border-color);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Data reads as data: tabular, slashed-zero */
+td, th, .tnum, time, code {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* Prose links — left-anchored draw-on underline (scoped away from cards/buttons) */
+.markdown a:not(.card):not(.button):not([class*='Card']),
+article a:not(.card):not(.button):not([class*='Card']) {
+  color: var(--g-500);
+  text-decoration: none;
+  background: linear-gradient(var(--g-500), var(--g-500)) 0 100% / 0 1.5px no-repeat;
+  transition: background-size var(--dur-2) var(--ease-out), color var(--dur-1);
+}
+.markdown a:not(.card):not(.button):not([class*='Card']):hover,
+article a:not(.card):not(.button):not([class*='Card']):hover {
+  color: var(--g-300);
+  background-size: 100% 1.5px;
+  text-decoration: none;
 }
 
 /* ── Navbar: frosted glass (desktop only) ──────────────────────────────
@@ -73,8 +180,12 @@ h1, h2, h3 {
   background: rgba(255, 255, 255, 0.85);
 }
 
+.navbar {
+  border-bottom: 1px solid var(--line);
+}
+
 .navbar__title {
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -86,39 +197,137 @@ h1, h2, h3 {
    frosted-glass color is otherwise reused for the drawer, which made it
    see-through (the page bled through) and empty-looking on phones. */
 .navbar-sidebar {
-  background: var(--ifm-background-color);
+  background: var(--surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 .navbar-sidebar__backdrop {
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--scrim);
 }
 
-/* ── Cards, tables, quotes ─────────────────────────────────────────── */
+/* ── Cards & surfaces ──────────────────────────────────────────────── */
 .card {
-  border: 1px solid var(--ifm-toc-border-color);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--e1);
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--e2);
+  border-color: var(--line-strong);
 }
 
+/* Canonical PHOSPHOR card — register-mark corner ticks on hover (drafting-surface feel) */
+.p-card {
+  position: relative;
+  padding: var(--s5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--e1);
+  transition: border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+}
+.p-card::before, .p-card::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--g-500);
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+  pointer-events: none;
+}
+.p-card::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.p-card::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+.p-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+  box-shadow: var(--e2);
+}
+.p-card:hover::before, .p-card:hover::after { opacity: 1; }
+
+/* Live phosphor pip (reusable signal) */
+.p-pip {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--g-500);
+  box-shadow: 0 0 0 4px var(--g-glow);
+  animation: p-pip 2s var(--ease-out) infinite;
+}
+@keyframes p-pip {
+  0%, 100% { box-shadow: 0 0 0 4px var(--g-glow); }
+  50% { box-shadow: 0 0 0 7px transparent; }
+}
+
+/* ── Page header — retire the stock solid-green hero--primary banner ──
+   Every bespoke page (tutorial, roadmap, terminal, projects, books, research,
+   resources, tools, scope, events) reuses Docusaurus's `hero hero--primary`
+   banner. Restyling it once here upgrades all of them to a graphite page
+   header with a masked hairline lattice — no per-page edits, one language. */
+[data-theme='dark'] .hero.hero--primary {
+  --ifm-hero-background-color: var(--bg-base);
+  --ifm-hero-text-color: var(--tx-primary);
+  background: var(--bg-base);
+  color: var(--tx-primary);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.hero.hero--primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 68% 80% at 18% 0%, #000, transparent 70%);
+  mask-image: radial-gradient(ellipse 68% 80% at 18% 0%, #000, transparent 70%);
+  pointer-events: none;
+}
+.hero.hero--primary > .container { position: relative; }
+.hero.hero--primary .hero__title {
+  font-family: var(--ff-display);
+  letter-spacing: -0.028em;
+}
+.hero.hero--primary .hero__subtitle {
+  color: var(--tx-secondary);
+  font-size: var(--fs-lead);
+  font-weight: 400;
+}
+
+/* ── Tables, quotes, admonitions ───────────────────────────────────── */
 table {
   border-collapse: collapse;
   font-size: 0.92rem;
 }
 
 table th {
-  background: var(--ifm-background-surface-color);
+  background: var(--surface);
 }
 
 blockquote {
   border-left: 3px solid var(--ifm-color-primary);
-  background: var(--viz-panel-bg);
+  background: var(--surface);
   border-radius: 0 8px 8px 0;
+}
+
+/* Warning admonition → amber ink (the one support hue) */
+[data-theme='dark'] .theme-admonition-warning,
+[data-theme='dark'] .theme-admonition-caution {
+  --ifm-alert-background-color: var(--amber-wash);
+  --ifm-alert-border-color: var(--amber-500);
+  border-left-color: var(--amber-500);
+}
+
+/* ── Code blocks ───────────────────────────────────────────────────── */
+[data-theme='dark'] .theme-code-block,
+[data-theme='dark'] pre[class*='language-'] {
+  border: 1px solid var(--line);
 }
 
 /* ── Sidebar refinement ────────────────────────────────────────────── */
@@ -132,41 +341,107 @@ blockquote {
 }
 
 .theme-doc-sidebar-container {
-  border-right: 1px solid var(--ifm-toc-border-color) !important;
+  border-right: 1px solid var(--line) !important;
 }
 
 /* ── Footer ────────────────────────────────────────────────────────── */
 .footer--dark {
-  --ifm-footer-background-color: #161617;
-  border-top: 1px solid rgba(160, 160, 160, 0.1);
+  --ifm-footer-background-color: var(--surface);
+  border-top: 1px solid var(--line);
 }
 
 .footer__title {
-  font-size: 0.8rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #8aa0c4;
+  letter-spacing: 0.16em;
+  color: var(--tx-muted);
 }
 
 .footer__copyright {
-  font-size: 0.82rem;
-  color: #64748b;
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  color: var(--tx-muted);
   margin-top: 1.5rem;
 }
 
 /* ── Buttons & pagination ──────────────────────────────────────────── */
 .button {
   font-weight: 600;
-  border-radius: 10px;
+  border-radius: var(--r-sm);
+}
+
+.button--primary {
+  background: var(--g-500);
+  color: var(--bg-base);
+  border: 0;
+}
+.button--primary:hover {
+  background: var(--g-300);
+  color: var(--bg-base);
+  box-shadow: 0 0 20px var(--g-wash);
+}
+
+[data-theme='dark'] .button--secondary {
+  background: transparent;
+  color: var(--tx-primary);
+  border: 1px solid var(--line-strong);
+}
+[data-theme='dark'] .button--secondary:hover {
+  background: var(--g-wash);
+  border-color: var(--g-700);
+  color: var(--tx-primary);
 }
 
 .pagination-nav__link {
-  border-radius: 12px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border-radius: var(--r-md);
+  border-color: var(--line);
+  transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
 }
 
 .pagination-nav__link:hover {
   transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
+/* ── OS-level chrome: scrollbar, selection, focus ──────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-raised) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--surface-raised);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--g-700); }
+
+[data-theme='dark'] ::selection {
+  background: var(--g-wash);
+  color: var(--g-100);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--r-xs);
+}
+
+/* ── Reveal-on-scroll ──────────────────────────────────────────────── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .p-pip { animation: none; }
 }
 
 /* ── Interactive-lab chart palette (CVD-validated, one set per color mode) ── */
@@ -195,8 +470,12 @@ blockquote {
   --viz-axis: #383835;
   --viz-muted: #898781;
   --viz-ink: #e3e3e3;
-  --viz-card-bg: #1b1b1d;
-  --viz-panel-bg: #242526;
+  --viz-card-bg: #16161a;
+  --viz-panel-bg: #1c1c20;
+  /* Semantic viz tokens for the terminal/hero (green up, amber down, neutral 2nd series) */
+  --viz-up: var(--g-500);
+  --viz-down: var(--amber-500);
+  --viz-series-2: rgba(255, 255, 255, 0.34);
 }
 
 /* "soon" badge on sidebar topics that are still in progress — signals to

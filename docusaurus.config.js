@@ -38,6 +38,19 @@ const config = {
 
   // SEO: structured data so search engines understand who/what this site is.
   headTags: [
+    // Warm the font-CDN connection so the display face paints without FOUT.
+    {
+      tagName: 'link',
+      attributes: {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossorigin: 'anonymous',
+      },
+    },
     {
       tagName: 'script',
       attributes: {type: 'application/ld+json'},
@@ -130,11 +143,11 @@ const config = {
             label: 'Library',
             position: 'left',
             items: [
-              {to: '/books', label: '📚 Books'},
-              {to: '/research', label: '📄 Research Papers'},
-              {to: '/resources', label: '🔗 Resources'},
-              {to: '/tools', label: '⚙️ Tools'},
-              {to: '/scope', label: '🎯 Scope'},
+              {to: '/books', label: 'Books'},
+              {to: '/research', label: 'Research Papers'},
+              {to: '/resources', label: 'Resources'},
+              {to: '/tools', label: 'Tools'},
+              {to: '/scope', label: 'Scope'},
             ],
           },
           {to: '/events', label: 'Big Events', position: 'left'},
@@ -206,7 +219,7 @@ const config = {
       crossorigin: 'anonymous',
     },
     {
-      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap',
+      href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap',
       type: 'text/css',
     },
   ],

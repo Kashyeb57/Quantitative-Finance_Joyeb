@@ -45,13 +45,14 @@
   gap: 1rem;
 }
 .panel {
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   background: var(--ifm-background-surface-color);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   min-height: 460px;
+  box-shadow: var(--e1);
 }
 .panelHead {
   display: flex;
@@ -312,10 +313,10 @@
   font-size: 0.72rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #f1f5f9;
-  background: #334155;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  color: var(--tx-primary);
+  background: var(--overlay);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   pointer-events: none;
   white-space: nowrap;
 }
