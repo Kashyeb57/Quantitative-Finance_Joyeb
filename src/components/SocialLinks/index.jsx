@@ -26,22 +26,23 @@ const InstagramIcon = () => (
 );
 
 const LINKS = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joyeb-kashyeb-b46468361', Icon: LinkedInIcon },
-  { label: 'GitHub', href: 'https://github.com/Kashyeb57', Icon: GitHubIcon },
-  { label: 'Email', href: 'mailto:kashyeb005@gmail.com', Icon: MailIcon },
-  { label: 'Instagram', href: 'https://www.instagram.com/kashyeb57/', Icon: InstagramIcon },
+  { label: 'LinkedIn',  brand: 'linkedin',  href: 'https://www.linkedin.com/in/joyeb-kashyeb-b46468361', Icon: LinkedInIcon },
+  { label: 'GitHub',    brand: 'github',    href: 'https://github.com/Kashyeb57',                          Icon: GitHubIcon   },
+  { label: 'Email',     brand: 'email',     href: 'mailto:kashyeb005@gmail.com',                           Icon: MailIcon     },
+  { label: 'Instagram', brand: 'instagram', href: 'https://www.instagram.com/kashyeb57/',                  Icon: InstagramIcon},
 ];
 
 export default function SocialLinks() {
   return (
     <div className={styles.row}>
-      {LINKS.map(({ label, href, Icon }) => {
+      {LINKS.map(({ label, brand, href, Icon }) => {
         const external = href.startsWith('http');
         return (
           <a
             key={label}
             href={href}
             className={styles.btn}
+            data-brand={brand}
             aria-label={label}
             title={label}
             {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>

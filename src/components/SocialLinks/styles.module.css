@@ -5,6 +5,7 @@
   margin: 10px 0 6px;
 }
 
+/* ── Base button ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -12,20 +13,16 @@
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid #e6e8eb;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  color: #1c1e21;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
-    color 0.18s ease, border-color 0.18s ease;
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  text-decoration: none;
 }
 
 .btn:hover {
   transform: translateY(-4px);
-  background: var(--ifm-color-primary);
-  border-color: var(--ifm-color-primary);
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(46, 133, 85, 0.35);
+  filter: brightness(1.12);
   text-decoration: none;
 }
 
@@ -35,16 +32,45 @@
   display: block;
 }
 
-/* Dark mode: neutral charcoal surface, light icon; green accent on hover. */
-:global([data-theme='dark']) .btn {
-  background: #1f2228;
-  border-color: #2b2f36;
-  color: #e6e8eb;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+/* ── LinkedIn — #0A66C2 ── */
+.btn[data-brand='linkedin'] {
+  background: #0A66C2;
+  box-shadow: 0 4px 14px rgba(10, 102, 194, 0.35);
+}
+.btn[data-brand='linkedin']:hover {
+  box-shadow: 0 10px 24px rgba(10, 102, 194, 0.5);
 }
 
-:global([data-theme='dark']) .btn:hover {
-  background: var(--ifm-color-primary);
-  border-color: var(--ifm-color-primary);
-  color: #14161a;
+/* ── GitHub — #24292e (dark charcoal) ── */
+.btn[data-brand='github'] {
+  background: #24292e;
+  box-shadow: 0 4px 14px rgba(36, 41, 46, 0.45);
+}
+.btn[data-brand='github']:hover {
+  box-shadow: 0 10px 24px rgba(36, 41, 46, 0.6);
+}
+
+/* ── Email — Gmail red #EA4335 ── */
+.btn[data-brand='email'] {
+  background: #EA4335;
+  box-shadow: 0 4px 14px rgba(234, 67, 53, 0.35);
+}
+.btn[data-brand='email']:hover {
+  box-shadow: 0 10px 24px rgba(234, 67, 53, 0.5);
+}
+
+/* ── Instagram — official gradient ── */
+.btn[data-brand='instagram'] {
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285AEB 90%
+  );
+  box-shadow: 0 4px 14px rgba(214, 36, 159, 0.35);
+}
+.btn[data-brand='instagram']:hover {
+  box-shadow: 0 10px 24px rgba(214, 36, 159, 0.5);
 }
