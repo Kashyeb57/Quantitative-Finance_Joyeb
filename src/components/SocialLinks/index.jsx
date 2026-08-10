@@ -2,15 +2,16 @@ import React from 'react';
 import styles from './styles.module.css';
 
 const MailIcon = () => (
-  <svg viewBox="0 0 512 512" aria-hidden="true" width="54" height="54">
-    <circle cx="256" cy="256" r="256" fill="#ffffff" />
-    <g transform="scale(0.65) translate(138, 138)">
-      <path d="M34.9 448h81.5V250.2L0 163v250.2C0 432.5 15.7 448 34.9 448" fill="#4285f4"/>
-      <path d="M395.6 448h81.5c19.3 0 34.9-15.7 34.9-34.9V163l-116.4 87.3" fill="#34a853"/>
-      <path d="M395.6 99v151.3L512 163v-46.5c0-43.2-49.3-67.8-83.8-41.9" fill="#fbbc04"/>
-      <path d="M116.4 250.2V99L256 203.7 395.6 99v151.3L256 355" fill="#ea4335"/>
-      <path d="M0 116.4V163l116.4 87.3V99L83.8 74.5C49.2 48.6 0 73.2 0 116.4" fill="#c5221f"/>
-    </g>
+  <svg viewBox="0 0 64 64" aria-hidden="true" width="54" height="54">
+    {/* Envelope Background */}
+    <rect x="0" y="8" width="64" height="48" rx="6" fill="#e0e0e0" />
+    <path d="M0 24 L32 44 L64 24 V50 C64 53.3 61.3 56 58 56 H6 C2.7 56 0 53.3 0 50 V24 Z" fill="#d1d1d1" />
+    
+    {/* Red M */}
+    <path d="M0 14 C0 10.7 2.7 8 6 8 H10 L32 24 L54 8 H58 C61.3 8 64 10.7 64 14 V56 H54 V26 L32 42 L10 26 V56 H0 V14 Z" fill="#db4437" />
+
+    {/* Inner shadow / crease for depth */}
+    <path d="M10 8 L32 24 L54 8" fill="none" stroke="#c53929" strokeWidth="2" strokeLinejoin="round" />
   </svg>
 );
 
