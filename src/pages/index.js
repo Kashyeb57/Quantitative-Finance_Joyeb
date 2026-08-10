@@ -121,8 +121,8 @@ const FEATURES = [
 ];
 
 // ── The Tearsheet: a two-series equity curve drawn inside the terminal ──
-const EQUITY = [[44, 214], [80, 201], [116, 194], [152, 187], [188, 178], [224, 123], [260, 87], [296, 105], [332, 141], [368, 178], [400, 150]];
-const BENCH = [[44, 220], [80, 210], [116, 190], [152, 195], [188, 180], [224, 160], [260, 150], [296, 140], [332, 130], [368, 135], [400, 120]];
+const EQUITY = [[44, 211], [80, 190], [116, 169], [152, 133], [188, 105], [224, 70], [260, 91], [296, 126], [332, 162], [368, 154], [400, 144]];
+const BENCH = [[44, 211], [80, 204], [116, 197], [152, 190], [188, 183], [224, 176], [260, 169], [296, 162], [332, 154], [368, 147], [400, 140]];
 const toPath = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
 
 function Tearsheet() {
@@ -159,16 +159,16 @@ function Tearsheet() {
       {/* crosshair + leading tip */}
       <g className={styles.tip}>
         <line x1="400" x2="400" y1="30" y2="250" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <line x1="44" x2="406" y1="150" y2="150" stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <circle cx="400" cy="150" r="4" fill="var(--g-500)" />
-        <circle cx="400" cy="150" r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
+        <line x1="44" x2="406" y1="144" y2="144" stroke="var(--line-strong)" strokeDasharray="2 3" />
+        <circle cx="400" cy="144" r="4" fill="var(--g-500)" />
+        <circle cx="400" cy="144" r="8" fill="none" stroke="var(--g-500)" strokeOpacity="0.4" />
       </g>
 
       {/* axis ticks (mono) */}
       <g fontFamily="var(--ff-mono)" fontSize="9" fill="var(--tx-muted)">
-        <text x="412" y="72" >440</text>
-        <text x="412" y="158">360</text>
-        <text x="412" y="246">280</text>
+        <text x="410" y="72" >1200</text>
+        <text x="410" y="158">950</text>
+        <text x="410" y="246">700</text>
         <text x="44" y="270">JAN</text>
         <text x="176" y="270">APR</text>
         <text x="308" y="270">JUL</text>
@@ -261,7 +261,7 @@ export default function Home() {
                   className={clsx(styles.formula, styles.formulaBottom)}
                   dangerouslySetInnerHTML={tex('\\Delta = \\dfrac{\\partial V}{\\partial S}')}
                 />
-                <span className={styles.readoutChip}>MU $105.82&nbsp;<b>▲</b></span>
+                <span className={styles.readoutChip}>MU $990.23&nbsp;<b>▲</b></span>
               </div>
             </div>
           </div>
