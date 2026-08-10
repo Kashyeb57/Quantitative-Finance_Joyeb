@@ -150,15 +150,15 @@ td, th, .tnum, time, code {
 }
 
 /* Prose links — left-anchored draw-on underline (scoped away from cards/buttons) */
-.markdown a:not(.card):not(.button):not([class*='Card']),
-article a:not(.card):not(.button):not([class*='Card']) {
+.markdown a:not(.card):not(.button):not([class*='Card']):not([class*='btn']),
+article a:not(.card):not(.button):not([class*='Card']):not([class*='btn']) {
   color: var(--g-500);
   text-decoration: none;
   background: linear-gradient(var(--g-500), var(--g-500)) 0 100% / 0 1.5px no-repeat;
   transition: background-size var(--dur-2) var(--ease-out), color var(--dur-1);
 }
-.markdown a:not(.card):not(.button):not([class*='Card']):hover,
-article a:not(.card):not(.button):not([class*='Card']):hover {
+.markdown a:not(.card):not(.button):not([class*='Card']):not([class*='btn']):hover,
+article a:not(.card):not(.button):not([class*='Card']):not([class*='btn']):hover {
   color: var(--g-300);
   background-size: 100% 1.5px;
   text-decoration: none;
