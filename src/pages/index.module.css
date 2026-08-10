@@ -10,7 +10,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 60% 70% at 82% 8%, var(--g-wash), transparent 60%);
+  background: radial-gradient(ellipse 70% 80% at 50% 10%, rgba(16, 185, 129, 0.15), transparent 60%),
+              radial-gradient(ellipse 50% 50% at 80% 30%, rgba(52, 211, 153, 0.1), transparent 50%);
   pointer-events: none;
 }
 
@@ -21,21 +22,25 @@
 .terminal {
   max-width: var(--w-wide);
   margin: 0 auto;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-lg);
-  box-shadow: var(--e3);
+  background: rgba(10, 10, 12, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-xl);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px inset rgba(255, 255, 255, 0.04);
   animation: bootPanel var(--dur-4) var(--ease-out) both;
+  position: relative;
+  overflow: hidden;
 }
 
 .titlebar {
   display: flex;
   align-items: center;
   gap: var(--s4);
-  padding: 0.6rem 1rem;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-raised);
-  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: 0.8rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
   font-family: var(--ff-mono);
   font-size: var(--fs-caption);
 }
@@ -75,16 +80,18 @@
 .heroTitle {
   font-family: var(--ff-display);
   font-size: var(--fs-display);
-  line-height: 1.03;
-  letter-spacing: -0.03em;
-  font-weight: 600;
-  margin-bottom: 1.1rem;
-  animation: bootUp 0.5s var(--ease-out) 0.25s both;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  animation: bootUp 0.6s var(--ease-out) 0.25s both;
 }
 
 .accent {
   position: relative;
-  color: var(--g-500);
+  background: linear-gradient(135deg, #a7f3d0, #10b981, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   white-space: nowrap;
 }
 .accent::after {

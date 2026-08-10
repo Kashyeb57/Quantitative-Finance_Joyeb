@@ -10,21 +10,21 @@
 
 /* ── Global scalar tokens (theme-independent) ──────────────────────── */
 :root {
-  /* Brand green ramp (light-mode fallback — the UI ships dark-only) */
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Brand emerald ramp (light-mode fallback — the UI ships dark-only) */
+  --ifm-color-primary: #10b981;
+  --ifm-color-primary-dark: #059669;
+  --ifm-color-primary-darker: #047857;
+  --ifm-color-primary-darkest: #064e3b;
+  --ifm-color-primary-light: #34d399;
+  --ifm-color-primary-lighter: #6ee7b7;
+  --ifm-color-primary-lightest: #a7f3d0;
 
   --ifm-code-font-size: 92%;
-  --docusaurus-highlighted-code-line-bg: rgba(46, 133, 85, 0.08);
+  --docusaurus-highlighted-code-line-bg: rgba(16, 185, 129, 0.08);
 
   /* Type roles */
-  --ff-display: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
-  --ff-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --ff-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --ff-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
   --ifm-font-family-base: var(--ff-body);
   --ifm-font-family-monospace: var(--ff-mono);
@@ -32,12 +32,12 @@
   --ifm-heading-font-weight: 600;
 
   /* Type scale */
-  --fs-display: clamp(2.9rem, 6vw, 4.2rem);
-  --fs-h1: 2.6rem;
-  --fs-h2: 2rem;
-  --fs-h3: 1.45rem;
-  --fs-h4: 1.2rem;
-  --fs-lead: 1.2rem;
+  --fs-display: clamp(3.2rem, 7vw, 4.8rem);
+  --fs-h1: 2.8rem;
+  --fs-h2: 2.2rem;
+  --fs-h3: 1.55rem;
+  --fs-h4: 1.25rem;
+  --fs-lead: 1.25rem;
   --fs-body: 1rem;
   --fs-small: 0.875rem;
   --fs-eyebrow: 0.75rem;
@@ -48,82 +48,82 @@
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
   --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
 
-  /* Radius scale (rectilinear terminal) */
-  --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-full: 999px;
-  --ifm-global-radius: 10px;
-  --ifm-button-border-radius: 6px;
+  /* Radius scale (sleeker curves) */
+  --r-xs: 6px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-full: 999px;
+  --ifm-global-radius: 12px;
+  --ifm-button-border-radius: 8px;
 
-  /* Container widths (replace the ad-hoc per-page maxes) */
+  /* Container widths */
   --w-narrow: 820px; --w-base: 1000px; --w-wide: 1180px; --w-max: 1280px;
 
   /* Motion */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --dur-1: 120ms; --dur-2: 180ms; --dur-3: 420ms; --dur-4: 900ms;
+  --dur-1: 150ms; --dur-2: 250ms; --dur-3: 450ms; --dur-4: 1000ms;
 }
 
-/* ── Dark palette — neutral graphite, one green signal, amber as ink ── */
+/* ── Dark palette — infinite void, glowing emerald signal, glassmorphism ── */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #10b981;
+  --ifm-color-primary-dark: #059669;
+  --ifm-color-primary-darker: #047857;
+  --ifm-color-primary-darkest: #064e3b;
+  --ifm-color-primary-light: #34d399;
+  --ifm-color-primary-lighter: #6ee7b7;
+  --ifm-color-primary-lightest: #a7f3d0;
 
-  /* Background layers — deep graphite, ZERO tint */
-  --bg-base: #0b0b0c;
-  --bg-sunken: #08080a;
-  --surface: #141416;
-  --surface-raised: #1a1a1d;
-  --overlay: #202024;
-  --scrim: rgba(8, 8, 10, 0.72);
+  /* Background layers — pitch dark void */
+  --bg-base: #030303;
+  --bg-sunken: #000000;
+  --surface: #0a0a0c;
+  --surface-raised: #111114;
+  --overlay: #18181c;
+  --scrim: rgba(0, 0, 0, 0.85);
 
-  /* Wire Docusaurus surfaces onto the graphite base */
+  /* Wire Docusaurus surfaces onto the void */
   --ifm-background-color: var(--bg-base);
   --ifm-background-surface-color: var(--surface);
-  --ifm-navbar-background-color: rgba(18, 18, 20, 0.72);
-  --docusaurus-highlighted-code-line-bg: rgba(37, 194, 160, 0.12);
+  --ifm-navbar-background-color: rgba(3, 3, 3, 0.65);
+  --docusaurus-highlighted-code-line-bg: rgba(16, 185, 129, 0.12);
 
-  /* Hairlines — low-opacity white only, never colored */
-  --line-faint: rgba(255, 255, 255, 0.04);
-  --line: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.12);
+  /* Hairlines — lower opacity for sleeker borders */
+  --line-faint: rgba(255, 255, 255, 0.03);
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.1);
   --ifm-toc-border-color: var(--line);
 
   /* Text */
-  --tx-primary: #ededef;
-  --tx-secondary: #a9a9b0;
-  --tx-muted: #6e6e76;
-  --tx-faint: #4a4a50;
+  --tx-primary: #ffffff;
+  --tx-secondary: #a1a1aa;
+  --tx-muted: #71717a;
+  --tx-faint: #52525b;
 
-  /* Green ramp (identity — anchored on #25c2a0) */
-  --g-100: #d4f7ec;
-  --g-300: #5fe3c0;
-  --g-500: #25c2a0;
-  --g-600: #1da588;
-  --g-700: #137a64;
-  --g-glow: rgba(37, 194, 160, 0.28);
-  --g-wash: rgba(37, 194, 160, 0.08);
+  /* Emerald ramp (identity) */
+  --g-100: #d1fae5;
+  --g-300: #6ee7b7;
+  --g-500: #10b981;
+  --g-600: #059669;
+  --g-700: #047857;
+  --g-glow: rgba(16, 185, 129, 0.35);
+  --g-wash: rgba(16, 185, 129, 0.1);
 
-  /* Single support hue: signal amber (ink only, never a surface) */
-  --amber-500: #e0a44a;
-  --amber-600: #c4863a;
-  --amber-wash: rgba(224, 164, 74, 0.1);
+  /* Single support hue: signal amber (ink only) */
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-wash: rgba(245, 158, 11, 0.1);
 
   /* Semantic data (numbers only) */
   --pos: var(--g-300);
   --neg: var(--amber-500);
 
-  /* Elevation — near-black shadow + 1px inset top-light (theme-correct) */
+  /* Elevation — deep soft shadows, glowing borders on hover */
   --e0: none;
-  --e1: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.4);
-  --e2: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(0, 0, 0, 0.45);
-  --e3: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 50px rgba(0, 0, 0, 0.55);
-  --e-glow: 0 0 0 1px var(--g-700), 0 0 28px var(--g-glow);
-  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--g-glow);
+  --e1: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 2px 8px rgba(0, 0, 0, 0.5);
+  --e2: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 32px rgba(0, 0, 0, 0.6);
+  --e3: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 64px rgba(0, 0, 0, 0.7);
+  --e-glow: 0 0 0 1px rgba(16, 185, 129, 0.4), 0 0 32px var(--g-glow);
+  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px rgba(16, 185, 129, 0.6);
 }
 
 /* ── Typography ────────────────────────────────────────────────────── */
