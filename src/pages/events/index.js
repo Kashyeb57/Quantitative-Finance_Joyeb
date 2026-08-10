@@ -13,6 +13,14 @@ import styles from './styles.module.css';
  */
 const EVENTS = [
   {
+    slug: 'kospi-leverage-crash',
+    tag: 'Blow-up',
+    date: 'July–August 2026',
+    title: 'The KOSPI leverage crash',
+    blurb:
+      'South Korea cheered its citizens into stocks, then let single-stock leveraged ETFs list to retail — stacked on record margin debt and concentrated in Samsung and SK Hynix. The KOSPI ran +116% to an all-time high, then fell 38.6% in five weeks; ~360,000 retail accounts were force-liquidated (62% under 35), and the finance minister apologized as the rules were rewritten mid-crash.',
+  },
+  {
     slug: 'situational-awareness-collapse',
     tag: 'Blow-up',
     date: 'July 2026',
