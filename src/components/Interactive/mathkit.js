@@ -147,6 +147,82 @@ export function chiSquareInv(p, k) {
   return (lo + hi) / 2;
 }
 
+// Continued fraction for the incomplete beta (Numerical Recipes betacf)
+function betacf(a, b, x) {
+  const FPMIN = 1e-300;
+  const qab = a + b;
+  const qap = a + 1;
+  const qam = a - 1;
+  let c = 1;
+  let d = 1 - (qab * x) / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  let h = d;
+  for (let m = 1; m <= 300; m++) {
+    const m2 = 2 * m;
+    let aa = (m * (b - m) * x) / ((qam + m2) * (a + m2));
+    d = 1 + aa * d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    h *= d * c;
+    aa = (-(a + m) * (qab + m) * x) / ((a + m2) * (qap + m2));
+    d = 1 + aa * d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < 1e-14) break;
+  }
+  return h;
+}
+
+// Regularized incomplete beta I_x(a, b) — underlies the F CDF
+export function regBetaI(a, b, x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(
+    lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(x) + b * Math.log(1 - x),
+  );
+  if (x < (a + 1) / (a + b + 2)) return (front * betacf(a, b, x)) / a;
+  return 1 - (front * betacf(b, a, 1 - x)) / b;
+}
+
+// F-distribution CDF with (d1, d2) degrees of freedom
+export function fCDF(x, d1, d2) {
+  if (x <= 0) return 0;
+  return regBetaI(d1 / 2, d2 / 2, (d1 * x) / (d1 * x + d2));
+}
+
+// F-distribution probability density with (d1, d2) degrees of freedom
+export function fPDF(x, d1, d2) {
+  if (x <= 0) return 0;
+  const logNum =
+    (d1 / 2) * Math.log(d1) +
+    (d2 / 2) * Math.log(d2) +
+    (d1 / 2 - 1) * Math.log(x) -
+    ((d1 + d2) / 2) * Math.log(d2 + d1 * x) -
+    (lgamma(d1 / 2) + lgamma(d2 / 2) - lgamma((d1 + d2) / 2));
+  return Math.exp(logNum);
+}
+
+// Inverse F CDF via bisection (critical values off the F table)
+export function fInv(p, d1, d2) {
+  if (p <= 0) return 0;
+  if (p >= 1) return Infinity;
+  let lo = 0;
+  let hi = 100000;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    if (fCDF(mid, d1, d2) < p) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 // Box–Muller standard normal sample
 export function randn() {
   let u = 0;

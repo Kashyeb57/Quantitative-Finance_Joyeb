@@ -1,0 +1,235 @@
+---
+title: "Partitioning of Variance (the F-test)"
+sidebar_position: 4
+description: Hypothesis testing in ANOVA end to end — the F = variance-between ÷ variance-within statistic, the between vs within intuition, and a full six-step one-way ANOVA worked to F = 86.56 against the critical value 3.5546.
+---
+
+# Partitioning of Variance in ANOVA
+
+This is where [ANOVA](/docs/Statistics/inferential-statistics/anova/anova-test) finally gets *computed*. We've defined it (comparing the means of two or more groups), listed its [assumptions](/docs/Statistics/inferential-statistics/anova/assumptions-of-anova), and named its [three types](/docs/Statistics/inferential-statistics/anova/types-of-anova). Now we perform the hypothesis test step by step — a process also called **partitioning the variance**, because the whole trick is splitting the total variation into a *between-groups* piece and a *within-groups* piece and comparing them.
+
+## The hypotheses
+
+ANOVA compares the means of two or more groups, so the **null hypothesis** says every group mean is the same:
+
+$$
+H_0:\ \mu_1 = \mu_2 = \mu_3 = \cdots = \mu_k
+$$
+
+The **alternate hypothesis** is where people slip. It is simply:
+
+$$
+H_1:\ \text{at least one of the sample means is not equal}
+$$
+
+:::warning Don't write H₁ as μ₁ ≠ μ₂ ≠ μ₃ ≠ ⋯
+It's tempting to write the alternate as $\mu_1 \neq \mu_2 \neq \mu_3 \neq \cdots \neq \mu_k$ — but that's a **stronger, wrong** claim. That notation insists **every** mean differs from **every** other. ANOVA only needs **at least one** mean to stand apart from the rest. So we say it in words: *at least one of the sample means is not equal.*
+:::
+
+## The test statistic: the F-test
+
+The statistic ANOVA uses is the **F-test**, and its shape is beautifully simple:
+
+$$
+F = \frac{\text{variance between samples}}{\text{variance within samples}}
+$$
+
+The formula is short; the work behind it is not. Getting those two variances takes a lot of small steps — so we'll walk them carefully. First, what do "between" and "within" actually mean? Take three samples:
+
+| $X_1$ | $X_2$ | $X_3$ |
+|---|---|---|
+| 1 | 6 | 5 |
+| 2 | 7 | 6 |
+| 4 | 3 | 3 |
+| 5 | 2 | 2 |
+| 3 | 1 | 4 |
+| **x̄₁ = 3** | **x̄₂ = 3.8** | **x̄₃ = 4** |
+
+- **Variance *between* samples** — how far the **group means** ($\bar x_1, \bar x_2, \bar x_3$) sit from one another (equivalently, from the overall grand mean). This is the *signal*: real differences between the groups.
+- **Variance *within* samples** — inside a single group, how far its points scatter from **their own** group mean. In $X_1$ the mean is 3, but 1 and 2 sit below it while 4 and 5 sit above — that spread around 3 is the within-group variance. This is the *noise*.
+
+F is signal over noise. If the gaps **between** the groups are large relative to the scatter **within** them, F is large and the group means are probably genuinely different. Slide the two knobs below and watch F respond:
+
+<AnovaVarianceLab />
+
+## A worked one-way ANOVA, step by step
+
+This is the biggest test in the module — heavy on arithmetic, not on code. Follow the six steps once and it clicks.
+
+> A **doctor wants to test a new medication that reduces headache.** Participants are split into **three conditions — 15 mg, 30 mg, 45 mg** (the dosage is the [factor's levels](/docs/Statistics/inferential-statistics/anova/anova-test)). Each patient then **rates their headache from 1 to 10** (10 = headache completely gone). **Are there differences between the three conditions, using α = 0.05?**
+
+Seven patients per dose:
+
+| Patient | 15 mg | 30 mg | 45 mg |
+|---|---|---|---|
+| 1 | 9 | 7 | 4 |
+| 2 | 8 | 6 | 3 |
+| 3 | 7 | 6 | 2 |
+| 4 | 8 | 7 | 3 |
+| 5 | 8 | 8 | 4 |
+| 6 | 9 | 7 | 3 |
+| 7 | 8 | 6 | 2 |
+| **Σ** | **57** | **47** | **21** |
+
+### Step 1 — Null and alternate hypotheses
+
+$$
+H_0:\ \mu_{15} = \mu_{30} = \mu_{45} \qquad H_1:\ \text{not all means are equal}
+$$
+
+### Step 2 — Significance level
+
+$$
+\alpha = 0.05 \qquad \text{confidence interval} = 0.95
+$$
+
+### Step 3 — Degrees of freedom
+
+Three counts drive everything. The **total sample size** $N = 7 \times 3 = 21$; the **per-group size** $n = 7$; and $a =$ the **number of categories** (groups) $= 3$.
+
+$$
+df_{\text{between}} = a - 1 = 3 - 1 = 2
+$$
+$$
+df_{\text{within}} = N - a = 21 - 3 = 18
+$$
+$$
+df_{\text{total}} = N - 1 = 21 - 1 = 20
+$$
+
+Notice $df_{\text{between}} + df_{\text{within}} = 2 + 18 = 20 = df_{\text{total}}$ — the degrees of freedom partition just like the variance will. The pair we carry forward is $(d_1, d_2) = (2, 18)$: the two numbers you look up in the **F table**.
+
+### Step 4 — Decision boundary
+
+The F-distribution is **right-skewed** (its tail is stretched to the right), so an ANOVA is **one-tailed**: the entire rejection region — area $\alpha = 0.05$ — is the right tail, leaving the $0.95$ acceptance region to its left. Looking up the F table at $d_1 = 2$, $d_2 = 18$, $\alpha = 0.05$ gives the **critical value**:
+
+$$
+\text{CV} = F_{2,18,\,0.05} = 3.5546
+$$
+
+**Decision rule:** *if the computed F is greater than 3.5546, reject the null hypothesis.*
+
+<FDistLab observed={86.56} />
+
+### Step 5 — Compute the F-test statistic
+
+We build the ANOVA table one column at a time: **SS** (sum of squares) → **df** → **MS** (mean square) → **F**.
+
+**① Sum of squares between groups.** With $\sum a_i$ = each group's total (57, 47, 21) and $T = \sum(\sum a_i) = 125$ the grand total:
+
+$$
+SS_{\text{between}} = \frac{\sum \left(\sum a_i\right)^2}{n} - \frac{T^2}{N}
+= \frac{57^2 + 47^2 + 21^2}{7} - \frac{125^2}{21}
+= 842.71 - 744.05 = 98.67
+$$
+
+**② Sum of squares within groups.** Here $\sum y^2$ squares **every** raw value and adds them ($9^2 + 8^2 + 7^2 + \cdots = 853$):
+
+$$
+SS_{\text{within}} = \sum y^2 - \frac{\sum \left(\sum a_i\right)^2}{n}
+= 853 - \frac{57^2 + 47^2 + 21^2}{7} = 853 - 842.71 = 10.29
+$$
+
+**③ Total** is just the two added (the partition):
+
+$$
+SS_{\text{total}} = SS_{\text{between}} + SS_{\text{within}} = 98.67 + 10.29 = 108.96
+$$
+
+Now **mean square = SS ÷ df**, and finally **F = MS between ÷ MS within**:
+
+| Source | SS | df | MS | F |
+|---|---|---|---|---|
+| **Between** | 98.67 | 2 | 98.67 / 2 = **49.34** | 49.34 / 0.57 = **86.56** |
+| **Within** | 10.29 | 18 | 10.29 / 18 = **0.57** | |
+| **Total** | 108.96 | 20 | | |
+
+$$
+F = \frac{MS_{\text{between}}}{MS_{\text{within}}} = \frac{49.34}{0.57} = 86.56
+$$
+
+(MS within is $10.29/18 = 0.571\ldots$, which rounds to $0.57$; carrying more decimals gives $F \approx 86.3$ — either way, enormous.)
+
+### Step 6 — Decision
+
+$$
+86.56 > 3.5546 \;\Rightarrow\; \textbf{reject } H_0
+$$
+
+F lands **far** past the critical value — deep in the right tail (p-value ≈ $6\times10^{-10}$). **Conclusion: there *are* differences between the three conditions.** Not all the dosage means are equal — at least one differs from the others. Higher doses really do change the headache rating.
+
+```python
+from scipy import stats
+
+g15 = [9, 8, 7, 8, 8, 9, 8]
+g30 = [7, 6, 6, 7, 8, 7, 6]
+g45 = [4, 3, 2, 3, 4, 3, 2]
+
+F, p = stats.f_oneway(g15, g30, g45)
+print(f"F = {F:.2f},  p = {p:.2e}")
+# F ≈ 86.3,  p ≈ 6e-10  — matches the by-hand F (small gaps are just rounding)
+
+# Critical value from the F table, α = 0.05, df = (a-1, N-a) = (2, 18):
+crit = stats.f.ppf(0.95, dfn=2, dfd=18)
+print(f"critical F(2,18) = {crit:.4f}")   # 3.5546
+print("reject H0" if F > crit else "fail to reject H0")
+```
+
+## Why a quant cares
+
+Partitioning variance into *between* and *within* is not just an ANOVA ritual — it's the same decomposition that runs underneath most of quantitative finance:
+
+- **Signal-to-noise is the whole game.** F = between ÷ within is literally *effect size ÷ dispersion* — the same shape as a **Sharpe ratio** (mean edge ÷ volatility) or an **information ratio**. A strategy's mean return can look different across regimes, but if the *within-regime* scatter dwarfs the *between-regime* gap, the difference is noise. ANOVA formalizes exactly that judgement.
+- **Variance decomposition is everywhere.** The $SS_{\text{total}} = SS_{\text{between}} + SS_{\text{within}}$ split is the ANOVA face of the [regression](/docs/Statistics/regression-analysis) identity *explained + residual variance*, and of risk attribution (systematic vs idiosyncratic). Once you see variance as something you **partition** rather than just measure, factor models and performance attribution read the same way.
+- **F over a table of p-values.** Testing three strategies (or venues, or signals) with one F-test controls the false-positive rate that many pairwise t-tests would inflate — the same discipline that keeps a research pipeline from data-mining spurious "winners."
+
+The mechanics are heavy, but the idea is one line: **real differences between groups are only convincing when they overwhelm the randomness inside them.**
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The F-statistic in ANOVA is the ratio of…',
+    options: [
+      'within-group variance to between-group variance',
+      'between-group variance to within-group variance',
+      'sample mean to population mean',
+      'SS total to degrees of freedom',
+    ],
+    answer: 1,
+    explain: 'F = variance BETWEEN samples ÷ variance WITHIN samples — signal over noise. Large F means the group means are far apart relative to the scatter inside each group.',
+  },
+  {
+    q: 'For a one-way ANOVA with a = 3 groups and N = 21 total observations, the degrees of freedom are…',
+    options: [
+      'df_between = 2, df_within = 18, df_total = 20',
+      'df_between = 3, df_within = 21, df_total = 24',
+      'df_between = 18, df_within = 2, df_total = 20',
+      'df_between = 20, df_within = 20, df_total = 20',
+    ],
+    answer: 0,
+    explain: 'df_between = a−1 = 2, df_within = N−a = 18, df_total = N−1 = 20. And 2 + 18 = 20, so the df partition too.',
+  },
+  {
+    q: 'The computed F = 86.56 and the critical value F(2,18, 0.05) = 3.5546. The decision is…',
+    options: [
+      'fail to reject H₀ — the means are equal',
+      'reject H₀ — at least one group mean differs',
+      'accept H₁ that every mean differs from every other',
+      'inconclusive without the p-value',
+    ],
+    answer: 1,
+    explain: 'F = 86.56 > 3.5546, so it falls in the right-tail rejection region → reject H₀. ANOVA concludes at least one mean is not equal (not that all are pairwise different).',
+  },
+  {
+    q: 'Why is an ANOVA one-tailed (rejection region only on the right)?',
+    options: [
+      'because the F-distribution is symmetric',
+      'because the F-distribution is right-skewed and non-negative, so only large F counts as evidence against H₀',
+      'because α is always 0.05',
+      'because the sample size is small',
+    ],
+    answer: 1,
+    explain: 'F is a ratio of variances — non-negative and right-skewed. Only a large F (much between-group spread vs within-group) is evidence against equal means, so the whole α region is the right tail.',
+  },
+]} />

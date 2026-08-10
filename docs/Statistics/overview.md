@@ -17,7 +17,7 @@ Statistics is how a quant turns noisy data into decisions you can defend. Every 
 | Topic | What it covers |
 |---|---|
 | [Descriptive Statistics](/docs/Statistics/descriptive-statistics) | Summarizing data — center, dispersion, percentiles, and covariance vs. correlation, each with a runnable example. |
-| [Inferential Statistics & Hypothesis Testing](/docs/Statistics/inferential-statistics) | A full module: the testing mechanism, p-values, Type I/II errors, the z- and t-tests, and Bayes' theorem — each with an interactive lab. |
+| [Inferential Statistics & Hypothesis Testing](/docs/Statistics/inferential-statistics) | A full module: the testing mechanism, p-values, Type I/II errors, the z- and t-tests, confidence intervals, chi-square, ANOVA (the F-test and variance partition), and Bayes' theorem — each with an interactive lab. |
 | [Regression Analysis](/docs/Statistics/regression-analysis) | OLS, factor models, and the assumptions that make a fit trustworthy. |
 | [Time Series (AR, MA, ARIMA, GARCH)](/docs/Statistics/time-series) | Modeling and forecasting serially-dependent financial data. |
 | [Bayesian Inference](/docs/Statistics/bayesian-inference) | Priors, posteriors, and MCMC — updating beliefs as data arrives. |
