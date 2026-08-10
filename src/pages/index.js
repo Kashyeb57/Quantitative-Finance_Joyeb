@@ -125,43 +125,19 @@ function useLiveBTCData() {
 
   useEffect(() => {
     let mounted = true;
-    let ws = null;
-
-    const initData = async () => {
+    const fetchBTC = async () => {
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=1');
         if (!res.ok) throw new Error('API Error');
         const json = await res.json();
         
-        const initialPoints = json.map(d => ({
+        const points = json.map(d => ({
           time: d[0],
           close: d[4]
         }));
         
         if (mounted) {
-          setData({ loading: false, points: initialPoints, error: null });
-          
-          // Connect to Kraken WebSocket for instant tick-by-tick live updates
-          ws = new WebSocket('wss://ws.kraken.com/');
-          ws.onopen = () => {
-            ws.send(JSON.stringify({ event: 'subscribe', pair: ['XBT/USD'], subscription: { name: 'ticker' } }));
-          };
-          ws.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            if (Array.isArray(message) && message[1] && message[1].c) {
-              const livePrice = parseFloat(message[1].c[0]);
-              setData(prev => {
-                if (prev.points.length === 0) return prev;
-                const newPoints = [...prev.points];
-                // Wiggle the very last point on the chart to the exact live tick price
-                newPoints[newPoints.length - 1] = {
-                  ...newPoints[newPoints.length - 1],
-                  close: livePrice
-                };
-                return { ...prev, points: newPoints };
-              });
-            }
-          };
+          setData({ loading: false, points, error: null });
         }
       } catch (err) {
         if (mounted) {
@@ -169,13 +145,9 @@ function useLiveBTCData() {
         }
       }
     };
-    
-    initData();
-    
-    return () => { 
-      mounted = false; 
-      if (ws) ws.close(); 
-    };
+    fetchBTC();
+    const id = setInterval(fetchBTC, 60000);
+    return () => { mounted = false; clearInterval(id); };
   }, []);
 
   return data;
