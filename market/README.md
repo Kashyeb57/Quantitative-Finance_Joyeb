@@ -16,6 +16,7 @@ browser  ──►  joyebkashyeb.com.np/_m/*  (this Worker, holds the keys)  ─
 |-------|---------|
 | `GET /_m/bars?symbol=AAPL&tf=1Min` | OHLC candles for the chart. `tf` = `1Min`, `5Min`, `1Hour`, `1Day` |
 | `GET /_m/snapshot?symbol=AAPL` | Last trade, previous close, day change — powers the price header |
+| `GET /_m/portfolio` | **Read-only** paper account (equity + open positions) — powers the Portfolio panel under the terminal chart. Never places or cancels orders. |
 | `GET /_m/health` | Returns `{ok:true}`; handy to confirm the deploy worked |
 
 ## One-time setup
@@ -69,6 +70,22 @@ Your `ALPACA_KEY_ID` / `ALPACA_SECRET_KEY` stay on Cloudflare and are untouched 
 deploys. Setting them (step 3) is one-time provisioning; after that, code changes
 ship through GitHub. You can also trigger a deploy manually from the **Actions**
 tab (“Deploy market worker” → *Run workflow*).
+
+## Paper portfolio panel
+
+The Terminal shows a **read-only paper portfolio** below the chart (`/_m/portfolio`).
+For it to show real positions, the `ALPACA_KEY_ID` / `ALPACA_SECRET_KEY` secrets must
+be **paper-account** keys (from *Paper Trading → API Keys* on Alpaca). Paper keys also
+serve the market-data feed, so a single paper key pair powers both the chart and the
+portfolio — nothing else to set up.
+
+- It hits Alpaca's **paper** trading base (`paper-api.alpaca.markets`), so it can
+  never touch real money.
+- It is **read-only** — it calls `/v2/account` and `/v2/positions` only, never
+  `POST /v2/orders`. (Automated buy/sell is a separate, deliberately server-side
+  step for later — a Cloudflare Cron Trigger, never a public endpoint.)
+- If no keys are set (or they aren't valid paper keys), the panel shows a friendly
+  "not connected yet" state instead of an error.
 
 ## Notes
 

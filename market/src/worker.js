@@ -18,6 +18,10 @@
  */
 
 const ALPACA = 'https://data.alpaca.markets/v2/stocks';
+// Paper TRADING API — the account + open positions for the portfolio panel.
+// (Live trading would be api.alpaca.markets; we deliberately use the paper
+// endpoint so nothing here can ever touch real money.)
+const ALPACA_PAPER = 'https://paper-api.alpaca.markets/v2';
 
 const ALLOWED_ORIGINS = [
   'https://joyebkashyeb.com.np',
@@ -62,6 +66,25 @@ async function alpaca(path, env) {
     return { ok: false, status: 503, error: 'Worker is missing Alpaca credentials.' };
   }
   const res = await fetch(`${ALPACA}${path}`, {
+    headers: {
+      'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
+      'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
+      'Accept': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    return { ok: false, status: res.status, error: text.slice(0, 300) || 'Upstream error' };
+  }
+  return { ok: true, data: await res.json() };
+}
+
+// Same auth, but against the PAPER TRADING base (account + positions).
+async function alpacaTrade(path, env) {
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) {
+    return { ok: false, status: 503, error: 'not_connected' };
+  }
+  const res = await fetch(`${ALPACA_PAPER}${path}`, {
     headers: {
       'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
       'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
@@ -127,6 +150,65 @@ async function handleSnapshot(request, env, url) {
     volume: (d.dailyBar && d.dailyBar.v) || null,
     at: (d.latestTrade && d.latestTrade.t) || null,
   }, 200, 5);
+}
+
+// The paper-trading account + open positions for the terminal's portfolio
+// panel. Read-only: it never places or cancels orders. Returns a graceful
+// { error: 'not_connected' } (HTTP 200) when no paper keys are configured, so
+// the UI can show a friendly "not connected yet" state instead of an error.
+const numOr = (v, d = null) => {
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : d;
+};
+
+async function handlePortfolio(request, env) {
+  const [acct, pos] = await Promise.all([
+    alpacaTrade('/account', env),
+    alpacaTrade('/positions', env),
+  ]);
+
+  if (!acct.ok) {
+    // 503 = no keys set; 401/403 = keys aren't valid paper keys. Both surface
+    // as a soft "not connected" so the panel degrades cleanly.
+    const soft = acct.status === 503 || acct.status === 401 || acct.status === 403;
+    return json(request, { error: soft ? 'not_connected' : acct.error }, soft ? 200 : acct.status);
+  }
+
+  const a = acct.data || {};
+  const equity = numOr(a.equity);
+  const lastEquity = numOr(a.last_equity);
+  const dayPL = equity != null && lastEquity != null ? equity - lastEquity : null;
+
+  const positions = ((pos.ok && Array.isArray(pos.data)) ? pos.data : [])
+    .map((p) => ({
+      symbol: p.symbol,
+      qty: numOr(p.qty, 0),
+      side: p.side || 'long',
+      avgEntry: numOr(p.avg_entry_price),
+      price: numOr(p.current_price),
+      marketValue: numOr(p.market_value),
+      costBasis: numOr(p.cost_basis),
+      unrealizedPL: numOr(p.unrealized_pl),
+      unrealizedPLpct: numOr(p.unrealized_plpc) != null ? numOr(p.unrealized_plpc) * 100 : null,
+      changeToday: numOr(p.change_today) != null ? numOr(p.change_today) * 100 : null,
+    }))
+    .sort((x, y) => Math.abs(y.marketValue || 0) - Math.abs(x.marketValue || 0));
+
+  return json(request, {
+    account: {
+      equity,
+      lastEquity,
+      cash: numOr(a.cash),
+      buyingPower: numOr(a.buying_power),
+      portfolioValue: numOr(a.portfolio_value),
+      dayPL,
+      dayPLpct: dayPL != null && lastEquity ? (dayPL / lastEquity) * 100 : null,
+      status: a.status || null,
+      currency: a.currency || 'USD',
+    },
+    positions,
+    asOf: new Date().toISOString(),
+  }, 200, 10);
 }
 
 // WebSocket proxy: browser <-> this Worker <-> Alpaca's live trade stream.
@@ -207,9 +289,10 @@ export default {
       return json(request, { error: 'Method not allowed' }, 405);
     }
 
-    if (url.pathname === '/_m/bars')     return handleBars(request, env, url);
-    if (url.pathname === '/_m/snapshot') return handleSnapshot(request, env, url);
-    if (url.pathname === '/_m/health')   return json(request, { ok: true });
+    if (url.pathname === '/_m/bars')      return handleBars(request, env, url);
+    if (url.pathname === '/_m/snapshot')  return handleSnapshot(request, env, url);
+    if (url.pathname === '/_m/portfolio') return handlePortfolio(request, env);
+    if (url.pathname === '/_m/health')    return json(request, { ok: true });
 
     return json(request, { error: 'Not found' }, 404);
   },
