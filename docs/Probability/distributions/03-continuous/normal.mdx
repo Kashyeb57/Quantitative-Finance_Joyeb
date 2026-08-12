@@ -86,6 +86,8 @@ for k in (1, 2, 3):
     print(f"within ±{k}σ: {inside*100:.2f}%")   # ≈ 68.27, 95.45, 99.73
 ```
 
+That round hill assumes the two variables are **independent**. When they co-move, the joint bell tilts and stretches along the direction they share — the **multivariate Gaussian**, parameterized by a covariance matrix $\Sigma$. It is covered alongside the covariance matrix on [Covariance](/docs/Statistics/descriptive-statistics/covariance-and-correlation/covariance).
+
 ## Why a quant cares
 
 The normal is the **default assumption** across finance — and both halves of that sentence matter:

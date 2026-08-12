@@ -1,0 +1,94 @@
+---
+title: "Law of Large Numbers"
+sidebar_position: 1
+description: Why the average of many independent draws converges to the true mean — the weak and strong laws, how it differs from the CLT, and why it underwrites Monte Carlo and every long-run edge.
+---
+
+# Law of Large Numbers
+
+The **Law of Large Numbers (LLN)** is the theorem that makes averages trustworthy: as you collect more independent observations, their **sample average converges to the true mean** $\mu$. It is why a casino profits with near-certainty over millions of bets while any single spin is a coin-flip — and why a Monte Carlo estimate creeps closer to the right answer the longer you run it.
+
+## The statement
+
+Take independent draws $x_1, x_2, \dots, x_n$ from a distribution with mean $\mu$, and form the running average
+
+$$
+\bar{x}_n = \frac{1}{n}\sum_{i=1}^{n} x_i .
+$$
+
+The LLN says that as $n \to \infty$, $\bar{x}_n \to \mu$. It comes in two strengths:
+
+- **Weak law** — for any tolerance $\varepsilon$, the probability that the average is more than $\varepsilon$ from $\mu$ goes to zero: $P(|\bar{x}_n - \mu| > \varepsilon) \to 0$. (Convergence *in probability*.)
+- **Strong law** — the running average *itself* settles onto $\mu$ with probability 1: $P(\lim_{n\to\infty} \bar{x}_n = \mu) = 1$. (Almost-sure convergence — the stronger "it will actually lock on" guarantee.)
+
+For everyday purposes they say the same practical thing: **average enough independent draws and you land on the true mean.**
+
+## See it happen
+
+Watch a running average of fair dice rolls (true mean $\mu = 3.5$) settle as the sample grows — jumpy at first, then pinned:
+
+```python
+import numpy as np
+rng = np.random.default_rng(0)
+
+rolls = rng.integers(1, 7, size=100_000)          # fair six-sided die, μ = 3.5
+running_avg = np.cumsum(rolls) / np.arange(1, len(rolls) + 1)
+
+for n in [10, 100, 1_000, 10_000, 100_000]:
+    print(f"n = {n:>7,}:  running average = {running_avg[n-1]:.4f}   (true μ = 3.5)")
+```
+
+Early on the average swings widely; by $n = 100{,}000$ it sits within a whisker of 3.5. Notice it does **not** snap to 3.5 and freeze — it wanders in, with the size of the wandering shrinking like $1/\sqrt{n}$.
+
+## LLN is not the CLT
+
+These two theorems are constantly confused. They answer different questions about the same $\bar{x}_n$:
+
+- **LLN — *where* it goes.** The average converges to $\mu$. A statement about the **center**.
+- **[Central Limit Theorem](/docs/Probability/distributions/sampling-and-estimation/central-limit-theorem) — *how* it's spread.** For finite $n$, the average is approximately $N(\mu,\, \sigma/\sqrt{n})$. A statement about the **shape and the error**.
+
+The LLN promises you arrive; the CLT tells you how far off you still are after $n$ draws (the standard error $\sigma/\sqrt{n}$). Both share one fine-print assumption: a **finite mean** and **independence**. In fat-tailed markets a mean can be effectively unstable and bets can be correlated — which is exactly when "just average more" quietly fails.
+
+## Why a quant cares
+
+- **Monte Carlo pricing *is* the LLN.** Estimating an option price as the average payoff over simulated paths works because that average converges to the true expectation; the CLT then sizes the error ($\propto 1/\sqrt{n}$).
+- **Edge only shows up in the long run.** A strategy with a small positive expectancy is indistinguishable from noise over ten trades and near-certain over ten thousand — *provided the trades are roughly independent*. Position sizing exists to keep you in the game long enough for the LLN to pay out.
+- **The gambler's fallacy is the LLN misread.** Convergence of the *average* does not mean the next draw "corrects" a losing streak — the dice have no memory. The average is dragged toward $\mu$ by accumulating fresh draws that dilute early deviations, not by reversals.
+
+## Check your understanding
+
+<Quiz questions={[
+  {
+    q: 'The Law of Large Numbers says that as the sample size grows, the sample average…',
+    options: [
+      'oscillates forever around the mean without settling',
+      'converges to the true population mean μ',
+      'becomes normally distributed',
+      'equals the median',
+    ],
+    answer: 1,
+    explain: 'The LLN is about the center: the running average converges to μ as n grows. How the average is distributed for finite n is the separate job of the CLT.',
+  },
+  {
+    q: 'What is the key difference between the LLN and the CLT?',
+    options: [
+      'they are two names for the same theorem',
+      'the LLN says the average converges to μ (where it lands); the CLT says the average is ≈ N(μ, σ/√n) (how it is spread)',
+      'the LLN only applies to normal populations',
+      'the CLT is about medians',
+    ],
+    answer: 1,
+    explain: 'LLN pins down the limit (the mean); CLT describes the distribution and the shrinking standard error σ/√n around that limit.',
+  },
+  {
+    q: 'After a long losing streak a gambler bets more, certain a win is "due" by the Law of Large Numbers. This reasoning is…',
+    options: [
+      'correct — the LLN forces a correction',
+      'wrong — independent draws have no memory; the average approaches μ through new draws, not reversals',
+      'correct only for fair games',
+      'the definition of the CLT',
+    ],
+    answer: 1,
+    explain: 'The gambler’s fallacy. The LLN works by accumulating independent draws that dilute early deviations, not by making future outcomes compensate for past ones.',
+  },
+]} />

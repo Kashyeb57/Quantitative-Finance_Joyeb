@@ -27,6 +27,17 @@ A few rules follow immediately and are worth stating:
 - The probabilities of the whole sample space sum to $1$.
 - **Complement:** $P(\text{not } A) = 1 - P(A)$ — the chance something *doesn't* happen.
 
+## What a probability *means*: four interpretations
+
+The ratio above is one *interpretation* of probability — but not the only one, and which you hold quietly shapes how you model. Four stances have competed for centuries:
+
+- **Classical** — probabilities come from **symmetry**: $n$ equally likely outcomes each get $1/n$, exactly the ratio above. Clean for dice and cards, but silent the moment outcomes are not symmetric (there is no "equally likely" split for a stock going up).
+- **Frequency** — a probability is the **long-run relative frequency** of an event over infinitely many repeatable trials. This is the interpretation behind classical (frequentist) statistics — and, as the [Law of Large Numbers](/docs/Probability/distributions/sampling-and-estimation/law-of-large-numbers) makes precise, that relative frequency really does converge to the probability. It strains, though, for one-shot events: there is no ensemble of *this Tuesday's Fed decision*.
+- **Logical / epistemic** — probability measures the **degree to which evidence supports** a proposition, aspiring to be as objective as logic.
+- **Subjective (Bayesian)** — a probability is a rational agent's **degree of belief**, calibrated so the bets you would accept stay consistent (no one can build a sure-loss *Dutch book* against you). It applies to *any* proposition, repeatable or not — which is why it fits markets, and why it is the foundation of [Bayesian inference](/docs/Statistics/bayesian-inference).
+
+These are not merely philosophy: the frequency view underwrites confidence intervals and p-values, while the subjective view underwrites priors and posteriors. Most working quants are pragmatic — frequentist for a quick test, Bayesian when they must fold in prior knowledge.
+
 ## Mutually exclusive events
 
 **Two events are mutually exclusive if they cannot occur at the same time.** On a single coin toss you get heads *or* tails, never both — $H$ and $T$ are mutually exclusive.
