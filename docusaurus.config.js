@@ -151,6 +151,7 @@ const config = {
             ],
           },
           {to: '/events', label: 'Big Events', position: 'left'},
+          {to: '/portfolio', label: 'Portfolio', position: 'left'},
           {to: '/about', label: 'About', position: 'right'},
           {
             href: 'https://github.com/Kashyeb57/quant-finance-journey',

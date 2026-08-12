@@ -161,6 +161,40 @@ const numOr = (v, d = null) => {
   return Number.isFinite(n) ? n : d;
 };
 
+function shapeAccount(a) {
+  const equity = numOr(a.equity);
+  const lastEquity = numOr(a.last_equity);
+  const dayPL = equity != null && lastEquity != null ? equity - lastEquity : null;
+  return {
+    equity,
+    lastEquity,
+    cash: numOr(a.cash),
+    buyingPower: numOr(a.buying_power),
+    portfolioValue: numOr(a.portfolio_value),
+    dayPL,
+    dayPLpct: dayPL != null && lastEquity ? (dayPL / lastEquity) * 100 : null,
+    status: a.status || null,
+    currency: a.currency || 'USD',
+  };
+}
+
+function shapePosition(p) {
+  return {
+    symbol: p.symbol,
+    qty: numOr(p.qty, 0),
+    side: p.side || 'long',
+    avgEntry: numOr(p.avg_entry_price),
+    price: numOr(p.current_price),
+    marketValue: numOr(p.market_value),
+    costBasis: numOr(p.cost_basis),
+    unrealizedPL: numOr(p.unrealized_pl),
+    unrealizedPLpct: numOr(p.unrealized_plpc) != null ? numOr(p.unrealized_plpc) * 100 : null,
+    changeToday: numOr(p.change_today) != null ? numOr(p.change_today) * 100 : null,
+  };
+}
+
+const softAuth = (s) => s === 503 || s === 401 || s === 403;
+
 async function handlePortfolio(request, env) {
   const [acct, pos] = await Promise.all([
     alpacaTrade('/account', env),
@@ -170,45 +204,114 @@ async function handlePortfolio(request, env) {
   if (!acct.ok) {
     // 503 = no keys set; 401/403 = keys aren't valid paper keys. Both surface
     // as a soft "not connected" so the panel degrades cleanly.
-    const soft = acct.status === 503 || acct.status === 401 || acct.status === 403;
-    return json(request, { error: soft ? 'not_connected' : acct.error }, soft ? 200 : acct.status);
+    return json(request, { error: softAuth(acct.status) ? 'not_connected' : acct.error }, softAuth(acct.status) ? 200 : acct.status);
   }
 
-  const a = acct.data || {};
-  const equity = numOr(a.equity);
-  const lastEquity = numOr(a.last_equity);
-  const dayPL = equity != null && lastEquity != null ? equity - lastEquity : null;
-
   const positions = ((pos.ok && Array.isArray(pos.data)) ? pos.data : [])
-    .map((p) => ({
-      symbol: p.symbol,
-      qty: numOr(p.qty, 0),
-      side: p.side || 'long',
-      avgEntry: numOr(p.avg_entry_price),
-      price: numOr(p.current_price),
-      marketValue: numOr(p.market_value),
-      costBasis: numOr(p.cost_basis),
-      unrealizedPL: numOr(p.unrealized_pl),
-      unrealizedPLpct: numOr(p.unrealized_plpc) != null ? numOr(p.unrealized_plpc) * 100 : null,
-      changeToday: numOr(p.change_today) != null ? numOr(p.change_today) * 100 : null,
-    }))
+    .map(shapePosition)
     .sort((x, y) => Math.abs(y.marketValue || 0) - Math.abs(x.marketValue || 0));
 
   return json(request, {
-    account: {
-      equity,
-      lastEquity,
-      cash: numOr(a.cash),
-      buyingPower: numOr(a.buying_power),
-      portfolioValue: numOr(a.portfolio_value),
-      dayPL,
-      dayPLpct: dayPL != null && lastEquity ? (dayPL / lastEquity) * 100 : null,
-      status: a.status || null,
-      currency: a.currency || 'USD',
-    },
+    account: shapeAccount(acct.data || {}),
     positions,
     asOf: new Date().toISOString(),
   }, 200, 10);
+}
+
+// The full ledger for the Portfolio page: account, open positions, order
+// history, realized/closed round-trips (FIFO, computed from fills), and the
+// equity curve. Read-only. Soft "not_connected" when no paper keys.
+async function handleLedger(request, env) {
+  const [acctR, posR, ordR, actR, histR] = await Promise.all([
+    alpacaTrade('/account', env),
+    alpacaTrade('/positions', env),
+    alpacaTrade('/orders?status=all&limit=100&direction=desc', env),
+    alpacaTrade('/account/activities/FILL?page_size=500', env),
+    alpacaTrade('/account/portfolio/history?period=3M&timeframe=1D', env),
+  ]);
+
+  if (!acctR.ok) {
+    return json(request, { error: softAuth(acctR.status) ? 'not_connected' : acctR.error }, softAuth(acctR.status) ? 200 : acctR.status);
+  }
+
+  const account = shapeAccount(acctR.data || {});
+  const positions = ((posR.ok && Array.isArray(posR.data)) ? posR.data : [])
+    .map(shapePosition)
+    .sort((x, y) => Math.abs(y.marketValue || 0) - Math.abs(x.marketValue || 0));
+
+  const orders = ((ordR.ok && Array.isArray(ordR.data)) ? ordR.data : []).map((o) => ({
+    id: o.id,
+    symbol: o.symbol,
+    side: o.side,
+    qty: numOr(o.qty) != null ? numOr(o.qty) : numOr(o.filled_qty, 0),
+    filledQty: numOr(o.filled_qty, 0),
+    type: o.type || o.order_type || 'market',
+    status: o.status,
+    limitPrice: numOr(o.limit_price),
+    filledAvgPrice: numOr(o.filled_avg_price),
+    submittedAt: o.submitted_at || o.created_at || null,
+    filledAt: o.filled_at || null,
+  }));
+
+  // FIFO realized P/L from fills — handles both long and short round-trips.
+  const fills = ((actR.ok && Array.isArray(actR.data)) ? actR.data : [])
+    .filter((f) => f.symbol && f.price != null && f.qty != null)
+    .sort((a, b) => new Date(a.transaction_time) - new Date(b.transaction_time));
+
+  const book = {}; // symbol -> [{ qty (signed), price }]
+  const closes = [];
+  let realizedTotal = 0;
+  for (const f of fills) {
+    const sym = f.symbol;
+    const price = numOr(f.price, 0);
+    const dir = f.side === 'buy' ? 1 : -1;
+    let remaining = numOr(f.qty, 0);
+    if (!book[sym]) book[sym] = [];
+    const lots = book[sym];
+    // Close against opposite-signed lots first (FIFO).
+    while (remaining > 1e-9 && lots.length && Math.sign(lots[0].qty) === -dir) {
+      const lot = lots[0];
+      const matched = Math.min(remaining, Math.abs(lot.qty));
+      const pl = lot.qty > 0 ? (price - lot.price) * matched : (lot.price - price) * matched;
+      realizedTotal += pl;
+      closes.push({
+        symbol: sym,
+        side: lot.qty > 0 ? 'long' : 'short',
+        qty: matched,
+        entry: lot.price,
+        exit: price,
+        pl,
+        plpct: lot.price ? (pl / (lot.price * matched)) * 100 : null,
+        closedAt: f.transaction_time,
+      });
+      lot.qty += dir * matched;
+      remaining -= matched;
+      if (Math.abs(lot.qty) < 1e-9) lots.shift();
+    }
+    // Any leftover opens a new lot in the fill's direction.
+    if (remaining > 1e-9) lots.push({ qty: dir * remaining, price });
+  }
+  closes.reverse(); // newest first
+
+  // Equity curve from portfolio history.
+  const h = histR.ok ? (histR.data || {}) : {};
+  const ts = Array.isArray(h.timestamp) ? h.timestamp : [];
+  const eq = Array.isArray(h.equity) ? h.equity : [];
+  const history = [];
+  for (let i = 0; i < ts.length; i++) {
+    if (eq[i] != null) history.push({ t: ts[i], value: numOr(eq[i]) });
+  }
+
+  return json(request, {
+    account,
+    positions,
+    orders,
+    closed: closes.slice(0, 100),
+    realizedTotal,
+    history,
+    baseValue: numOr(h.base_value),
+    asOf: new Date().toISOString(),
+  }, 200, 12);
 }
 
 // WebSocket proxy: browser <-> this Worker <-> Alpaca's live trade stream.
@@ -292,6 +395,7 @@ export default {
     if (url.pathname === '/_m/bars')      return handleBars(request, env, url);
     if (url.pathname === '/_m/snapshot')  return handleSnapshot(request, env, url);
     if (url.pathname === '/_m/portfolio') return handlePortfolio(request, env);
+    if (url.pathname === '/_m/ledger')    return handleLedger(request, env);
     if (url.pathname === '/_m/health')    return json(request, { ok: true });
 
     return json(request, { error: 'Not found' }, 404);
