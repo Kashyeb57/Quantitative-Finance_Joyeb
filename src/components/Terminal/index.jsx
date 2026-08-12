@@ -4,23 +4,54 @@ import styles from './styles.module.css';
 
 /*
  * Market Terminal.
- * Left: live price chart (candles refresh on a timer).
+ * Left: live price chart (candles refresh on a timer, every timeframe).
  * Right: live RSS news feed, which can be filtered to the selected ticker.
+ *
+ * Tickers are grouped into sectors (mirrors the Robinhood watchlists +
+ * the space / neocloud themes). Pick a sector tab → its symbols appear;
+ * pick a symbol → the chart + news follow it. Every symbol supports every
+ * timeframe offered by the chart (1m · 3m · 5m · 15m · 1H · 1D).
  */
 
-const TICKERS = ['AMD', 'MU', 'SNDK', 'META', 'COIN', 'SOXL', 'NVDA', 'TSLA', 'SPY', 'BTC-USD'];
+const SECTIONS = [
+  { name: 'Semis',        tickers: ['NVDA', 'AMD', 'AVGO', 'TSM', 'ASML', 'MU', 'QCOM', 'MRVL', 'ARM', 'AMAT', 'TXN', 'INTC', 'SNDK'] },
+  { name: 'Software',     tickers: ['MSFT', 'GOOGL', 'META', 'AMZN', 'ORCL', 'NOW', 'PLTR', 'IBM', 'BABA', 'NOK'] },
+  { name: 'Crypto',       tickers: ['COIN', 'MSTR', 'CRCL', 'BMNR', 'BTC-USD'] },
+  { name: 'Space',        tickers: ['RKLB', 'ASTS', 'LUNR', 'RDW', 'PL'] },
+  { name: 'Neocloud',     tickers: ['CRWV', 'NBIS', 'IREN', 'APLD', 'WULF'] },
+  { name: 'EV & Battery', tickers: ['TSLA', 'QS', 'ABAT'] },
+  { name: 'ETFs',         tickers: ['SPY', 'QQQ', 'IWM', 'SOXL'] },
+];
+
 const tickerLabel = (t) => (t === 'BTC-USD' ? '₿ BTC' : t);
+const sectionOf = (t) => (SECTIONS.find((s) => s.tickers.includes(t)) || SECTIONS[0]).name;
 
 export default function Terminal() {
-  const [ticker, setTicker] = useState(TICKERS[0]);
+  const [ticker, setTicker] = useState('AMD');
+  const [section, setSection] = useState(() => sectionOf('AMD'));
   const [timeframe, setTimeframe] = useState('5Min');
   const [source, setSource] = useState(null);
 
+  const active = SECTIONS.find((s) => s.name === section) || SECTIONS[0];
+
   return (
     <div className={styles.wrap}>
+      <div className={styles.sectionBar}>
+        {SECTIONS.map((s) => (
+          <button
+            key={s.name}
+            className={`${styles.sectionBtn} ${s.name === section ? styles.sectionBtnActive : ''}`}
+            onClick={() => setSection(s.name)}
+          >
+            {s.name}
+            <span className={styles.sectionCount}>{s.tickers.length}</span>
+          </button>
+        ))}
+      </div>
+
       <div className={styles.tickerBar}>
-        <span className={styles.tickerLabel}>Ticker:</span>
-        {TICKERS.map((t) => (
+        <span className={styles.tickerLabel}>{active.name}:</span>
+        {active.tickers.map((t) => (
           <button
             key={t}
             className={`${styles.tickerBtn} ${t === ticker ? styles.tickerBtnActive : ''}`}
@@ -29,7 +60,6 @@ export default function Terminal() {
             {tickerLabel(t)}
           </button>
         ))}
-
       </div>
 
       <div className={styles.grid}>
