@@ -100,6 +100,8 @@ The unifying view that ties the whole toolkit together:
 
 Same engine — a linear predictor $\eta = \alpha + \sum \beta_j x_j$ — wrapped in a **link function** and an outcome distribution. That's why "learn regression" really means "learn GLMs."
 
+**Encoding categories: dummies vs index variables.** A categorical predictor (say three sectors) enters a GLM one of two ways. **Dummy/indicator** coding picks a baseline level and gives every other level its own 0/1 column, so each coefficient is a *difference from the baseline*. The **index-variable** approach instead gives every level its own intercept $\alpha_{[k]}$ directly — no arbitrary baseline, cleaner priors, and the style favored in Bayesian GLM practice. Either way, the quantities you actually care about are **contrasts**: differences between group means (is sector A's mean return different from sector B's?), each read off *with its own uncertainty* rather than from a single "significant / not" verdict.
+
 ## 4. Logistic regression (binary outcomes)
 
 When the outcome is yes/no — *survived / didn't*, *defaulted / didn't*, *up day / down day* — a straight line is the wrong tool (it predicts probabilities above 1 and below 0). Instead model the **log-odds** as linear:
@@ -130,7 +132,27 @@ print(f"slope     = {w[1]:+.2f}   (true +1.80)")
 
 The recovered coefficients land near the truth. To read a logistic slope: $e^{\beta}$ is the **odds ratio** — how the odds multiply per one-unit rise in $x$.
 
-## 5. Beyond the p-value: the ROPE decision
+## 5. Interactions: when one slope bends another
+
+Real effects are not always additive. An **interaction** lets one predictor's slope depend on another — the effect of $x_1$ shifts with the level of $x_2$. You model it by adding a product term:
+
+$$
+y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \beta_3\,(x_1 x_2) + \varepsilon,
+$$
+
+so the effective slope on $x_1$ is $\beta_1 + \beta_3 x_2$ — it *bends* as $x_2$ moves. Markets are full of these: a stock's beta can rise in high-volatility regimes (market return interacted with a volatility indicator), or a factor's payoff can flip sign across the business cycle. The catch is that you cannot read an interaction off the coefficients alone, so the honest presentation is the **triptych** — three side-by-side plots of the $x_1 \to y$ line at a low, medium, and high value of $x_2$. Parallel lines mean no interaction; slopes that fan out mean there is one. Center the predictors first, or the "main-effect" coefficients describe a point (both predictors $= 0$) that may not even occur in your data.
+
+## 6. Count outcomes: Poisson regression
+
+When the outcome is a **count** — trades in an hour, defaults in a quarter, jumps in a day — it is a non-negative integer, and both linear and logistic regression are the wrong shape. The GLM for counts is **Poisson regression**, which models the *log* of the expected rate as linear:
+
+$$
+\log \mathbb{E}[y \mid x] = \alpha + \beta x \quad\Longleftrightarrow\quad \mathbb{E}[y \mid x] = e^{\alpha + \beta x}.
+$$
+
+The **log link** guarantees a positive predicted rate, and $e^{\beta}$ is a **rate ratio** — the multiplicative change in expected count per unit of $x$. Its Bayesian-conjugate partner is the **Gamma–Poisson** (see the [Bayesian Inference](/docs/Statistics/bayesian-inference) page). One caveat: the Poisson assumes the variance equals the mean; when real counts are **overdispersed** (variance well above the mean, common in finance), switch to the **negative-binomial**, which adds one parameter for the extra spread.
+
+## 7. Beyond the p-value: the ROPE decision
 
 Classical testing stops at *"is $\beta$ exactly zero?"* and answers with a $p$-value. But in markets almost nothing is *exactly* zero — the real question is whether an effect is **big enough to matter**. The Bayesian approach I studied answers that directly with a **Region of Practical Equivalence (ROPE)**: a band around zero, say $[-0.1, +0.1]$, that you'd treat as "practically no effect." Fit the model, then ask *how much of the coefficient's posterior distribution falls inside that band.*
 
@@ -192,5 +214,27 @@ For NVDA~SPY+META, my project found $P(\beta_{META} \in \text{ROPE}) \approx 0.7
     ],
     answer: 1,
     explain: 'ROPE asks how much of the posterior sits inside a "practically zero" band. Substantial-but-not-overwhelming mass (like ~76%) is an honest "we can’t call it either way yet."',
+  },
+  {
+    q: 'You add a market×volatility product term to a returns model. The cleanest way to show what that interaction does is…',
+    options: [
+      'report only the p-values of the three coefficients',
+      'a triptych: plot the fitted line at low, medium, and high values of the moderator',
+      'drop the interaction term',
+      'standardize the outcome variable',
+    ],
+    answer: 1,
+    explain: 'An interaction means one slope depends on another variable, which the raw coefficients hide. Plotting the fitted line across levels of the moderator shows whether the slopes fan out (interaction) or stay parallel (none).',
+  },
+  {
+    q: 'To model the number of trades per hour (a non-negative count), the right GLM is…',
+    options: [
+      'linear regression with an identity link',
+      'logistic regression',
+      'Poisson regression with a log link (negative-binomial if overdispersed)',
+      'a two-sample t-test',
+    ],
+    answer: 2,
+    explain: 'Counts are non-negative integers; the log link keeps the predicted rate positive and e^β is a rate ratio. If the variance exceeds the mean, the negative-binomial relaxes the Poisson mean = variance assumption.',
   },
 ]} />

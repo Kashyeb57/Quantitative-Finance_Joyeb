@@ -23,6 +23,15 @@ $X$ affects $Y$ *through* $Z$. If you control for $Z$ here, you accidentally era
 **The collider** — $X \to Z \leftarrow Y$
 $X$ and $Y$ both cause $Z$, but are otherwise unrelated. Here the danger is the opposite: **controlling for $Z$ creates a fake correlation** between $X$ and $Y$ that wasn't there. Conditioning on a collider is a subtle, common way to fool yourself.
 
+## Reading the graph: paths, d-separation, and the backdoor
+
+Those three shapes combine into a rule for *any* graph. Trace every **path** connecting $X$ and $Y$ (following arrows in either direction). A path is **open** — it carries a possibly-spurious association — unless it is **blocked**, and the blocking rules come straight from the shapes:
+
+- a **fork** or a **pipe** on the path is blocked *when you condition on* its middle variable;
+- a **collider** is blocked *by default*, and conditioning on it (or on a descendant of it) *opens* it.
+
+When every path between $X$ and $Y$ is blocked, they are **d-separated** — the graph implies no association. The recipe for an honest effect estimate is the **backdoor criterion**: control for the set of variables that blocks every *backdoor* path (a path leaving $X$ through an arrow pointing *into* $X$) without opening any collider — no more, no less. "Throw everything into the regression" fails precisely because an extra control can unblock a collider or close a pipe.
+
 ## The confounder, in code
 
 A market example: an interest-rate regime $Z$ pushes both a bond ETF's returns ($X$) and a utility stock's returns ($Y$). Neither causes the other, yet they'll look strongly linked — until you control for the regime.
@@ -55,9 +64,19 @@ The naive correlation looks large and convincing (~0.6); the moment you put the 
 - **Bad controls.** Throwing "everything" into a regression is not safe — adding a mediator or a collider can *bias* the coefficient you care about. More variables ≠ more truth.
 - **Backtest survivorship** is a collider bias in disguise: selecting on "still-listed" (an outcome of past returns) distorts the very relationships you're studying.
 
-## The intervention: do(·)
+## Simpson's paradox
 
-Causation is about **interventions**, not passive observation. The *do-operator* $P(Y \mid \operatorname{do}(X=x))$ asks "what would $Y$ be if I *reached in and set* $X$ to $x$?" — different from $P(Y \mid X=x)$, which merely observes $X$ happening to equal $x$ (and drags all its confounders along). A correctly-adjusted regression, guided by the DAG, is one way to estimate that interventional effect from observational data.
+The most vivid confounding trap is **Simpson's paradox**: a trend that holds inside *every* subgroup can *reverse* once the groups are pooled. A strategy might show a positive exposure-vs-return slope in each volatility regime separately, yet a *negative* slope when you lump all regimes together — because the regime (a confounder) drives both exposure and returns. It is not a curiosity: it is a warning that **the answer depends on which variables you condition on**, and only a causal graph — not the data alone — tells you which grouping is the honest one. Aggregate blindly and you can conclude the exact opposite of the truth.
+
+## Pearl's ladder of causation
+
+Judea Pearl arranges causal questions into three rungs — and no amount of rung-1 data answers a rung-2 or rung-3 question without a causal model:
+
+1. **Association — *seeing*.** $P(Y \mid X)$: what does *observing* $X$ tell me about $Y$? Pure correlation; this is all a plain dataset offers.
+2. **Intervention — *doing*.** $P(Y \mid \operatorname{do}(X=x))$: what happens to $Y$ if I *reach in and set* $X$? The **do-operator** severs the arrows *into* $X$, cutting its confounders loose — unlike $P(Y \mid X=x)$, which merely observes $X$ happening to equal $x$ and drags all its confounders along. A correctly-adjusted regression, guided by the DAG and the backdoor criterion, estimates this interventional effect from observational data.
+3. **Counterfactual — *imagining*.** $P(Y_x \mid X=x', Y=y')$: *given what actually happened*, what *would* have happened had $X$ been different? "Would my headache have cleared without the pill I took?" These are the deepest questions — retrospective, single-case, unanswerable by experiment alone — and they need a full structural model.
+
+Most of statistics lives on rung 1. Causal inference is the discipline of climbing to rungs 2 and 3 with every assumption made explicit in the graph.
 
 ## Check your understanding
 
@@ -111,5 +130,22 @@ Causation is about **interventions**, not passive observation. The *do-operator*
     ],
     answer: 1,
     explain: 'The do-operator severs the arrows into X, isolating X’s effect; passive conditioning lets confounders ride along, which is why observational correlations mislead.',
+  },
+  {
+    q: 'A strategy shows a positive exposure-vs-return slope within every volatility regime, but a negative slope when all regimes are pooled. This reversal is…',
+    options: ['a coding bug', "Simpson's paradox from a regime confounder", 'pure sampling noise', 'a collider that was correctly controlled'],
+    answer: 1,
+    explain: 'When a confounder (the regime) drives both exposure and returns, the pooled trend can flip the within-group trend. Which grouping is honest is a causal question, not a data question.',
+  },
+  {
+    q: 'The backdoor criterion says to control for a set of variables that…',
+    options: [
+      'is as large as possible',
+      'blocks every backdoor path into X without opening any collider',
+      'always includes the mediators',
+      'always contains the outcome Y',
+    ],
+    answer: 1,
+    explain: 'Adjust for exactly the set that closes non-causal (backdoor) paths while leaving mediators and colliders alone — extra controls can bias the estimate, not sharpen it.',
   },
 ]} />
