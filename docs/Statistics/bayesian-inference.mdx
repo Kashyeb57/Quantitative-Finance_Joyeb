@@ -121,6 +121,8 @@ Most real models are not conjugate. Three escalating tools:
 
 The normal–normal example is the friendly special case — the posterior has a closed form. Most real models don't cooperate: a stochastic-volatility model or a hierarchical model of many assets produces a posterior you can write down only up to that proportionality sign. **Markov Chain Monte Carlo** solves this by constructing a Markov chain whose stationary distribution *is* the posterior: you take a random walk through parameter space, accepting or rejecting proposed moves (Metropolis–Hastings) so that the chain spends time in each region in proportion to its posterior probability. Run the chain long enough, discard the burn-in, and the samples you collect are draws from the posterior — histograms of those samples give you means, credible intervals, and tail probabilities no formula could. Modern samplers like NUTS (used by PyMC and Stan) automate the hard parts.
 
+Why is a histogram of samples allowed to stand in for the posterior at all? The **Law of Large Numbers**: as you collect more draws, their sample average converges to the true expectation, so a posterior mean, tail probability, or credible interval computed from enough samples is as accurate as you like. That is the **Monte Carlo** principle every sampler leans on — trade an intractable integral for an average over draws.
+
 ## Summarizing the posterior: point estimates and credible intervals
 
 Once you hold posterior draws — from a formula or from MCMC — you *summarize* them. A single number (the posterior **mean**, **median**, or **mode/MAP**) is a point estimate, but point estimates throw away exactly what makes the Bayesian answer valuable: the shape of your uncertainty. Prefer an interval.
@@ -141,6 +143,8 @@ $$
 This is the Bayesian replacement for **null-hypothesis significance testing (NHST)**. Classical NHST forces a binary verdict — reject or fail-to-reject — and can never *accept* a null or return "not enough data yet." The ROPE instead yields a **trichotomous decision table**: *accept*, *reject*, or the honest **undecided**.
 
 That middle verdict — impossible to state cleanly with a p-value — is often the most useful answer a dataset can give, because it tells you to gather more data rather than force a false conclusion. I leaned on exactly this in a term project regressing NVDA on SPY and META: the peer stock's coefficient carried ~76% of its posterior inside the ROPE — plenty of mass near zero, but short of the 99% needed to *declare* it negligible. You can see it applied in [Regression Analysis](/docs/Statistics/regression-analysis).
+
+More generally, a decision needs a **loss function** — the cost of each action under each possible truth. Bayesian **decision theory** says: pick the action that minimizes *expected* loss, averaging that loss over the full posterior. The ROPE rule is the simple, symmetric case; when the payoff is lopsided — a false "trade" costs more than a missed one — you encode that asymmetry in the loss and let the posterior choose. Point estimates fall out of the same idea: minimizing expected squared error gives the posterior mean, while absolute error gives the median.
 
 ## Check your understanding
 
