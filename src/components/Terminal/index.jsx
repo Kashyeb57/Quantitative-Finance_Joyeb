@@ -101,9 +101,10 @@ export default function Terminal() {
       </BrowserOnly>
 
       <p className={styles.note}>
-        Live candles refresh automatically while this tab is open; the news feed
-        merges fresh headlines from ~22 RSS sources. Chart times are shown in
-        Central Time (CT).
+        Symbols are grouped by sector — pick a sector, then a symbol; every
+        symbol supports all timeframes. Live candles refresh automatically while
+        this tab is open; the news feed merges fresh headlines from ~22 RSS
+        sources. Chart times are shown in Central Time (CT).
         {source === 'fallback' && ' Prices are currently coming from the public fallback source.'}
       </p>
     </div>
