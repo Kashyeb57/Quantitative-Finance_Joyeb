@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Layout from '@theme/Layout';
+import Link from '@docusaurus/Link';
 import PageHeader from '@site/src/components/PageHeader';
 import {fmtPrice} from '@site/src/components/Terminal/marketData';
 import styles from './portfolio.module.css';
@@ -232,7 +233,8 @@ function Content() {
 
       <p className={styles.foot}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
-        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · closed P/L is computed FIFO from fills.
+        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · closed P/L is computed FIFO from fills ·
+        {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
       </p>
     </>
   );
