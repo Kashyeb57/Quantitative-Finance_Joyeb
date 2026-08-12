@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useColorMode } from '@docusaurus/theme-common';
-import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES } from './marketData';
+import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES, fmtPrice } from './marketData';
 import { subscribeCryptoTicker } from './cryptoStream';
 import { subscribeStockTrades } from './stockStream';
 import styles from './styles.module.css';
@@ -79,6 +79,10 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const [countdown, setCountdown] = useState('');
   const [cdTop, setCdTop] = useState(8);
   const [isFs, setIsFs] = useState(false);
+  const [pos, setPos] = useState(null);   // open position in this ticker (or null)
+  const [pl, setPl] = useState(null);      // live { value, pct } for that position
+  const [plY, setPlY] = useState(null);    // y-pixel of the entry line (for the pill)
+  const entryLineRef = useRef(null);
 
   const toggleFs = () => {
     const el = areaRef.current;
@@ -286,6 +290,71 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     return () => clearInterval(id);
   }, [timeframe]);
 
+  /* ---- open-position overlay: is there a position in THIS ticker? ---- */
+  useEffect(() => {
+    let cancelled = false;
+    setPos(null); setPl(null); setPlY(null);
+    const sym = (ticker || '').toUpperCase();
+    async function pull() {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const res = await fetch('/_m/portfolio', { cache: 'no-store' });
+        if (!res.ok) return;
+        const d = await res.json();
+        if (cancelled || !d || !Array.isArray(d.positions)) return;
+        setPos(d.positions.find((x) => (x.symbol || '').toUpperCase() === sym) || null);
+      } catch (_) { /* overlay is optional — never break the chart */ }
+    }
+    pull();
+    const id = setInterval(pull, 20000);
+    const onVis = () => { if (document.visibilityState === 'visible') pull(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => { cancelled = true; clearInterval(id); document.removeEventListener('visibilitychange', onVis); };
+  }, [ticker]);
+
+  /* ---- draw the entry line + keep the live P/L in sync (TradingView-style) ---- */
+  useEffect(() => {
+    const removeLine = () => {
+      if (entryLineRef.current && seriesRef.current) {
+        try { seriesRef.current.removePriceLine(entryLineRef.current); } catch (_) {}
+      }
+      entryLineRef.current = null;
+    };
+    removeLine();
+    if (!pos || pos.avgEntry == null) { setPl(null); setPlY(null); return undefined; }
+
+    const signedQty = pos.side === 'short' ? -Math.abs(pos.qty) : Math.abs(pos.qty);
+    const cost = Math.abs(pos.avgEntry * pos.qty);
+
+    const update = () => {
+      const s = seriesRef.current;
+      if (!s) return;
+      if (!entryLineRef.current) {
+        try {
+          entryLineRef.current = s.createPriceLine({
+            price: pos.avgEntry,
+            color: '#3b82f6',
+            lineWidth: 1,
+            lineStyle: 2, // dashed
+            axisLabelVisible: true,
+            title: `${pos.side === 'short' ? 'SHORT' : 'LONG'} ${pos.qty}`,
+          });
+        } catch (_) {}
+      }
+      const last = lastBarRef.current ? lastBarRef.current.close : null;
+      if (last != null) {
+        const value = (last - pos.avgEntry) * signedQty;
+        setPl({ value, pct: cost ? (value / cost) * 100 : null });
+      }
+      const y = s.priceToCoordinate(pos.avgEntry);
+      setPlY(y != null && !Number.isNaN(y) && y >= 0 ? y : null);
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => { clearInterval(id); removeLine(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pos]);
+
   return (
     <div className={styles.chartArea} ref={areaRef}>
       <div className={styles.chartToolbar}>
@@ -330,6 +399,19 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         >
           <span className={styles.cdDot} />
           {countdown}
+        </div>
+      )}
+      {status === 'ok' && pos && pl && plY != null && (
+        <div
+          className={styles.posPill}
+          style={{ top: plY }}
+          title={`${pos.side === 'short' ? 'Short' : 'Long'} ${pos.qty} ${pos.symbol} @ ${fmtPrice(pos.avgEntry)}`}
+        >
+          <span className={styles.posMeta}>{pos.side === 'short' ? 'SHORT' : 'LONG'} {pos.qty}</span>
+          <span className={pl.value >= 0 ? styles.up : styles.down}>
+            {pl.value >= 0 ? '+' : '−'}${fmtPrice(Math.abs(pl.value))}
+            {pl.pct != null && ` (${pl.value >= 0 ? '+' : '−'}${Math.abs(pl.pct).toFixed(2)}%)`}
+          </span>
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />
