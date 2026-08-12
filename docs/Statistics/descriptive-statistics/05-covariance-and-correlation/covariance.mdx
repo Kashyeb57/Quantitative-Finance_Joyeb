@@ -68,6 +68,18 @@ print(f"\nCov(X, Y) = {cov[0,1]:.1f}   (positive: they move together)")
 print(f"Cov(X, X) = {cov[0,0]:.1f} = Var(X) = {x.var(ddof=1):.1f}   (the diagonal)")
 ```
 
+## The covariance matrix and the multivariate Gaussian
+
+With more than two variables, all the pairwise covariances collect into a **covariance matrix** $\Sigma$: variances on the diagonal, covariances off it, symmetric by construction. For a vector of asset returns $\mathbf{r}$ it *is* the object portfolio math runs on — a portfolio with weights $\mathbf{w}$ has variance $\mathbf{w}^\top \Sigma\, \mathbf{w}$, the whole of Markowitz risk in a single expression.
+
+$\Sigma$ is also the shape parameter of the **multivariate Gaussian**, the joint distribution that generalizes the bell curve to many dimensions:
+
+$$
+\mathbf{X} \sim \mathcal{N}(\boldsymbol\mu, \Sigma), \qquad f(\mathbf{x}) \propto \exp\!\Big(-\tfrac{1}{2}(\mathbf{x}-\boldsymbol\mu)^\top \Sigma^{-1}(\mathbf{x}-\boldsymbol\mu)\Big)
+$$
+
+Geometrically its density contours are ellipses whose axes are set by $\Sigma$: near-zero covariance gives axis-aligned circles, while strong covariance tilts and stretches them along the line the two assets move together. This is the workhorse joint model behind correlated-asset simulation, PCA, and the Gaussian copulas used (and abused) in risk.
+
 ## The flaw that forces us to go further
 
 Covariance nails the *direction* of a relationship but is almost useless for its *strength*, for one reason: **its magnitude is unbounded and unit-dependent.**
@@ -104,5 +116,16 @@ The fix is to **normalize** covariance into a fixed, comparable range. That's [c
     ],
     answer: 1,
     explain: 'Covariance ranges over (−∞, ∞) and rescales with the data’s units. It gives the sign but not an interpretable, comparable strength — which is exactly what correlation fixes.',
+  },
+  {
+    q: 'In a covariance matrix Σ for several assets, the diagonal entries are…',
+    options: [
+      'always zero',
+      'the individual variances of each asset',
+      'the pairwise correlations',
+      'the asset means',
+    ],
+    answer: 1,
+    explain: 'Cov(X, X) = Var(X), so each diagonal entry is that variable’s variance; the off-diagonals are the pairwise covariances. A portfolio’s variance is wᵀΣw.',
   },
 ]} />

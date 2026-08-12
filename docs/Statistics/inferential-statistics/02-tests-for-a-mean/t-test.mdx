@@ -87,6 +87,22 @@ print("decision       :", "REJECT H0 — medication changed IQ" if abs(t) > t_cr
 # t, p = stats.ttest_1samp(sample, popmean=100)
 ```
 
+## From one sample to two: Welch's t-test
+
+The one-sample test generalizes to comparing **two** group means — *does strategy A's mean return differ from strategy B's?* The classic **two-sample (pooled) t-test** assumes both groups share a single variance and pools them:
+
+$$
+t = \frac{\bar x_1 - \bar x_2}{s_p\sqrt{\tfrac{1}{n_1}+\tfrac{1}{n_2}}}.
+$$
+
+That equal-variance assumption almost never holds for financial series — a small-cap and a mega-cap do not have the same return volatility. **Welch's t-test** drops it, using each group's *own* variance and a fractional degrees-of-freedom (the Welch–Satterthwaite formula):
+
+$$
+t = \frac{\bar x_1 - \bar x_2}{\sqrt{\tfrac{s_1^2}{n_1}+\tfrac{s_2^2}{n_2}}}.
+$$
+
+Welch's is the safer default: it reduces to the pooled test when the variances happen to match and stays valid when they do not, at almost no cost. It is in fact SciPy's default — `stats.ttest_ind(a, b, equal_var=False)`.
+
 ## Why a quant cares
 
 The one-sample t-test is the exact tool for the most basic quant question — *is this average different from a benchmark?*
@@ -125,5 +141,16 @@ The one-sample t-test is the exact tool for the most basic quant question — *i
     ],
     answer: 1,
     explain: '10.96 is far beyond 2.045, so H₀ is rejected with a tiny p-value; since x̄ = 140 > 100, the effect is an increase.',
+  },
+  {
+    q: 'Comparing two strategies with clearly different return volatilities, the safer test is…',
+    options: [
+      'the pooled two-sample t-test (assumes equal variance)',
+      "Welch's t-test, which uses each group's own variance",
+      'a one-sample t-test',
+      'a chi-square test',
+    ],
+    answer: 1,
+    explain: "Welch's t-test drops the equal-variance assumption, so it stays valid under unequal spreads and reduces to the pooled test when the variances match. It is SciPy's default (equal_var=False).",
   },
 ]} />
