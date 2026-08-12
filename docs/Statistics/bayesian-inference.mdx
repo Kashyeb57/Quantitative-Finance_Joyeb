@@ -1,7 +1,7 @@
 ---
 sidebar_position: 6
 title: Bayesian Inference
-description: Priors, likelihoods, and posteriors — how a quant updates beliefs when new market data arrives, with an interactive prior-to-posterior lab.
+description: Priors, likelihoods, and posteriors — interpretations of probability, conjugate priors, the posterior predictive, grid/quadratic approximation and MCMC, credible intervals (HPDI) and the ROPE decision — with an interactive prior-to-posterior lab.
 ---
 
 # Bayesian Inference
@@ -15,6 +15,17 @@ P(\theta \mid \text{data}) \;\propto\; P(\text{data} \mid \theta)\, P(\theta)
 $$
 
 The **prior** $P(\theta)$ is what you believed before seeing evidence. The **likelihood** $P(\text{data} \mid \theta)$ measures how well each candidate value of $\theta$ explains what you observed. Multiply them and you get the **posterior** — your updated belief. This is precisely how a quant updates a model when new market data arrives: yesterday's posterior becomes today's prior, and the market never stops handing you new evidence.
+
+## Where the prior comes from: interpretations of probability
+
+Before you can put a number on a prior, you have to decide what a probability *is*. Four stances have competed for centuries:
+
+- **Classical** — probabilities come from symmetry: a fair die has six equally likely faces, so $P(\text{six}) = 1/6$. Elegant, but silent the moment outcomes are not symmetric (what is the equally likely decomposition of a stock going up?).
+- **Frequency** — a probability is the long-run relative frequency of an event over infinitely many repeatable trials. This underwrites classical (frequentist) statistics, but it strains for one-shot events: there is no ensemble of *this Tuesday's Fed decision* to average over.
+- **Logical / epistemic** — probability measures the degree to which evidence *supports* a proposition, aspiring to be as objective as logic itself.
+- **Subjective (Bayesian)** — a probability is a rational agent's *degree of belief*, calibrated so the bets you would accept stay internally consistent (nobody can build a sure-loss *Dutch book* against you). It applies to any proposition, repeatable or not — which is exactly why it fits markets.
+
+Bayesian inference lives in the last two camps: the prior $P(\theta)$ encodes a **state of information** — what you know before the data — and Bayes' theorem is the consistent rule for updating that state as evidence arrives. There is no prior-free analysis; a frequentist simply fixes an implicit flat prior instead of stating one.
 
 ## A concrete finance example: estimating drift
 
@@ -48,13 +59,78 @@ Experiments worth running:
 3. **Make the prior vague** (τ = 0.5) and repeat. Now a handful of observations dominate. A vague prior means "let the data speak."
 4. **Make the prior dogmatic** (τ = 0.03). Even 250 days barely move it. Priors are levers — choose them consciously.
 
+## Beyond normal–normal: conjugate priors
+
+The drift example was friendly because a normal prior times a normal likelihood is again normal. That property — the posterior staying in the *same family* as the prior — is called **conjugacy**, and it turns Bayesian updating into arithmetic on the prior's parameters. Three pairings cover a huge share of everyday modeling:
+
+| Data / likelihood | Conjugate prior | Posterior update (in words) |
+|---|---|---|
+| Binary outcomes — Binomial(n, p) | **Beta**(α, β) | add successes to α, failures to β |
+| Counts — Poisson(λ) | **Gamma**(α, β) | add the total count to α, exposure to β |
+| K categories — Multinomial | **Dirichlet**(α₁ … αₖ) | add each category count cₖ to its αₖ |
+
+**Beta–Binomial.** Model a hit rate $p$ (a signal's win probability, a fill rate) with a $\text{Beta}(\alpha,\beta)$ prior. Observe $s$ successes in $n$ trials and the posterior is simply
+
+$$
+p \mid \text{data} \sim \text{Beta}(\alpha + s,\; \beta + n - s).
+$$
+
+The prior behaves like $\alpha+\beta$ "pseudo-observations" you had already seen — a clean dial for how much the prior should count against the real data.
+
+**Gamma–Poisson.** For event counts (trades per hour, jumps per day) with rate $\lambda$ and a $\text{Gamma}(\alpha,\beta)$ prior, observing counts $x_1,\dots,x_n$ gives
+
+$$
+\lambda \mid \text{data} \sim \text{Gamma}\!\left(\alpha + \textstyle\sum_i x_i,\; \beta + n\right).
+$$
+
+Because a Poisson's variance equals its mean, the Gamma–Poisson also stretches into the **negative-binomial** when real counts are overdispersed.
+
+**Dirichlet–Multinomial.** The multi-category generalization of Beta–Binomial: a Dirichlet prior over category probabilities becomes $\text{Dirichlet}(\alpha_1 + c_1,\dots,\alpha_K + c_K)$ after observing counts $c_k$. Handy for regime classification or discrete state models.
+
+Conjugacy is a computational luxury, not a modeling requirement — but when it is available, the update is exact and instant.
+
+## Choosing a prior
+
+A prior is an assumption, so state it deliberately. The usual options, from least to most opinionated:
+
+- **Diffuse / uninformative** — deliberately vague (a very wide normal, a $\text{Beta}(1,1)$ uniform), meant to "let the data speak." Convenient, but a flat prior is not the same as *no* assumption: flatness on one scale is informative on another (a uniform prior on a variance is not uniform on the standard deviation).
+- **Weakly informative** — the sensible default. Rule out the absurd (drifts of ±50% per day, correlations outside the plausible range) while staying gentle inside it. Weakly informative priors *regularize*: they pull wild estimates back toward sanity, exactly like ridge regression.
+- **Maximum entropy** — when you want the *least committal* distribution consistent with what you actually know (a mean, a variance, a support), pick the one with the highest entropy. This is why the normal is the natural choice given only a mean and variance, and the exponential given only a positive mean — a MaxEnt prior bakes in your constraints and nothing more.
+
+The lab above makes the stakes tangible: $\tau$ *is* the prior's strength. Dogmatic priors resist data; diffuse priors surrender to it. Neither is "correct" — the honest move is to choose consciously and show that your conclusions survive a reasonable change of prior (a **prior-sensitivity** check).
+
+## Predicting new data: the posterior predictive
+
+A posterior over $\theta$ is rarely the end goal — you want to predict the *next observation* $\tilde{y}$. Averaging the likelihood over the *full* posterior (not just a point estimate) gives the **posterior predictive distribution**:
+
+$$
+P(\tilde{y} \mid \text{data}) = \int P(\tilde{y}\mid\theta)\, P(\theta\mid\text{data})\, d\theta.
+$$
+
+It carries *two* sources of uncertainty — the noise in a fresh draw **and** your remaining uncertainty about $\theta$ — which is why plugging in a single "best" $\theta$ always understates risk. Its sibling, the **prior predictive**, runs the same integral against the prior and is the best sanity check you have *before* touching the data: simulate fake datasets from the prior and ask whether they look remotely like reality. If your prior predictive coughs up 300%-per-day returns, fix the prior, not the data.
+
+## Computing posteriors without conjugacy
+
+Most real models are not conjugate. Three escalating tools:
+
+1. **Grid approximation.** Chop the parameter space into a fine grid, evaluate prior × likelihood at each point, and normalize. Exact in the limit and wonderfully intuitive — but the grid explodes with the number of parameters (the curse of dimensionality), so it is a teaching tool, not a workhorse.
+2. **Quadratic (Laplace) approximation.** Find the posterior mode and fit a Gaussian using the curvature there. Cheap and often excellent when the posterior is roughly bell-shaped near its peak; the basis of the classic "MAP estimate ± standard error."
+3. **MCMC** — when the posterior is high-dimensional or badly shaped, sample from it directly. That is the next section.
+
 ## When there's no formula: MCMC
 
 The normal–normal example is the friendly special case — the posterior has a closed form. Most real models don't cooperate: a stochastic-volatility model or a hierarchical model of many assets produces a posterior you can write down only up to that proportionality sign. **Markov Chain Monte Carlo** solves this by constructing a Markov chain whose stationary distribution *is* the posterior: you take a random walk through parameter space, accepting or rejecting proposed moves (Metropolis–Hastings) so that the chain spends time in each region in proportion to its posterior probability. Run the chain long enough, discard the burn-in, and the samples you collect are draws from the posterior — histograms of those samples give you means, credible intervals, and tail probabilities no formula could. Modern samplers like NUTS (used by PyMC and Stan) automate the hard parts.
 
-## Making the call: credible intervals and the ROPE
+## Summarizing the posterior: point estimates and credible intervals
 
-Once you hold posterior draws, you *summarize* them. The **credible interval** is the Bayesian cousin of the confidence interval — but with the interpretation people wrongly wish confidence intervals had: a 95% credible interval genuinely carries a 95% posterior probability of containing the parameter.
+Once you hold posterior draws — from a formula or from MCMC — you *summarize* them. A single number (the posterior **mean**, **median**, or **mode/MAP**) is a point estimate, but point estimates throw away exactly what makes the Bayesian answer valuable: the shape of your uncertainty. Prefer an interval.
+
+A **credible interval** is the Bayesian cousin of the confidence interval — with the interpretation people wrongly wish confidence intervals had: a 95% credible interval genuinely carries a 95% posterior probability of containing the parameter. Two ways to draw one:
+
+- **Equal-tailed interval (ETI)** — chop 2.5% off each tail. Simple and reported by default, but for a skewed posterior it can exclude the most probable values while keeping less probable ones.
+- **Highest posterior density interval (HPDI)** — the *narrowest* interval holding 95% of the mass, so every point inside is more probable than every point outside. It is the honest summary for skewed or bounded posteriors (a variance, or a probability near 0 or 1). For a symmetric posterior the two coincide.
+
+## Making the call: the ROPE and decision tables
 
 For actual decisions, credible intervals pair beautifully with a **Region of Practical Equivalence (ROPE)** — a band around a null value (say $[-0.1, +0.1]$) you'd treat as "practically zero." Rather than testing whether an effect is *exactly* zero (almost never true in markets), you ask how much of the posterior lands inside that practically-zero band:
 
@@ -62,7 +138,9 @@ $$
 P(\theta \in \text{ROPE} \mid \text{data}) \;\begin{cases} > 0.99 & \Rightarrow \text{accept "no practical effect"} \\ < 0.01 & \Rightarrow \text{the effect is real} \\ \text{else} & \Rightarrow \textbf{inconclusive} \end{cases}
 $$
 
-That middle verdict — impossible to state cleanly with a p-value — is often the most honest answer. I leaned on exactly this in a term project regressing NVDA on SPY and META: the peer stock's coefficient carried ~76% of its posterior inside the ROPE — plenty of mass near zero, but short of the 99% needed to *declare* it negligible. You can see it applied in [Regression Analysis](/docs/Statistics/regression-analysis).
+This is the Bayesian replacement for **null-hypothesis significance testing (NHST)**. Classical NHST forces a binary verdict — reject or fail-to-reject — and can never *accept* a null or return "not enough data yet." The ROPE instead yields a **trichotomous decision table**: *accept*, *reject*, or the honest **undecided**.
+
+That middle verdict — impossible to state cleanly with a p-value — is often the most useful answer a dataset can give, because it tells you to gather more data rather than force a false conclusion. I leaned on exactly this in a term project regressing NVDA on SPY and META: the peer stock's coefficient carried ~76% of its posterior inside the ROPE — plenty of mass near zero, but short of the 99% needed to *declare* it negligible. You can see it applied in [Regression Analysis](/docs/Statistics/regression-analysis).
 
 ## Check your understanding
 
@@ -110,5 +188,38 @@ That middle verdict — impossible to state cleanly with a p-value — is often 
     ],
     answer: 1,
     explain: 'Conjugacy is the exception, not the rule. For stochastic volatility, hierarchical, or nonlinear models the posterior can only be evaluated up to a constant — MCMC samples from it anyway by building a Markov chain whose stationary distribution is the posterior.',
+  },
+  {
+    q: 'You model a win rate p with a Beta(2,2) prior and then observe 8 wins in 10 trials. The posterior is…',
+    options: [
+      'Beta(8, 2)',
+      'Beta(10, 4)',
+      'Beta(2, 2) — the prior does not change',
+      'Beta(10, 12)',
+    ],
+    answer: 1,
+    explain: 'Beta–Binomial conjugacy adds successes to α and failures to β: α = 2 + 8 = 10 and β = 2 + (10 − 8) = 4, giving Beta(10, 4).',
+  },
+  {
+    q: 'For a strongly skewed posterior, which 95% interval is the narrowest band whose every inside point is more probable than every outside point?',
+    options: [
+      'The equal-tailed interval',
+      'The highest posterior density interval (HPDI)',
+      'A frequentist confidence interval',
+      'The interquartile range',
+    ],
+    answer: 1,
+    explain: 'The HPDI is by construction the shortest interval holding the target mass, so no point outside it is more probable than a point inside. For a symmetric posterior it matches the equal-tailed interval.',
+  },
+  {
+    q: 'Why does predicting the next observation by plugging in only the single best-fit θ understate the risk?',
+    options: [
+      'It double-counts the prior',
+      'It keeps the sampling noise but drops your remaining uncertainty about θ',
+      'It always overestimates the variance',
+      'It ignores the likelihood entirely',
+    ],
+    answer: 1,
+    explain: 'The posterior predictive integrates the likelihood over the whole posterior, carrying both the noise in a fresh draw and the uncertainty in θ. A single plug-in value keeps only the first source, so its intervals come out too narrow.',
   },
 ]} />
