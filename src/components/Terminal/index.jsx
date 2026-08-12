@@ -17,7 +17,7 @@ const SECTIONS = [
   { name: 'Semis',        tickers: ['NVDA', 'AMD', 'AVGO', 'TSM', 'ASML', 'MU', 'QCOM', 'MRVL', 'ARM', 'AMAT', 'TXN', 'INTC', 'SNDK'] },
   { name: 'Software',     tickers: ['MSFT', 'GOOGL', 'META', 'AMZN', 'ORCL', 'NOW', 'PLTR', 'IBM', 'BABA', 'NOK'] },
   { name: 'Crypto',       tickers: ['COIN', 'MSTR', 'CRCL', 'BMNR', 'BTC-USD'] },
-  { name: 'Space',        tickers: ['RKLB', 'ASTS', 'LUNR', 'RDW', 'PL'] },
+  { name: 'Space',        tickers: ['SPCX', 'RKLB', 'ASTS', 'LUNR', 'RDW', 'PL'] },
   { name: 'Neocloud',     tickers: ['CRWV', 'NBIS', 'IREN', 'APLD', 'WULF'] },
   { name: 'EV & Battery', tickers: ['TSLA', 'QS', 'ABAT'] },
   { name: 'ETFs',         tickers: ['SPY', 'QQQ', 'IWM', 'SOXL'] },
