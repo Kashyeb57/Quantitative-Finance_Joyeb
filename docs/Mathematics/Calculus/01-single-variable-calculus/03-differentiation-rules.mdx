@@ -1,0 +1,282 @@
+---
+title: "Chapter 3: Differentiation Rules"
+sidebar_position: 3
+---
+
+### 3.1 Basic Differentiation Rules
+
+```
+  ┌────────────────────────────────────────────┐
+  │  RULE              FORMULA                 │
+  ├────────────────────────────────────────────┤
+  │  Constant          d/dx[c] = 0             │
+  │  Power             d/dx[xⁿ] = nxⁿ⁻¹       │
+  │  Constant Multiple d/dx[cf] = c·f'         │
+  │  Sum               d/dx[f+g] = f'+g'       │
+  │  Difference        d/dx[f−g] = f'−g'       │
+  │  Exponential       d/dx[eˣ] = eˣ           │
+  │  General Exp       d/dx[bˣ] = bˣ·ln(b)     │
+  └────────────────────────────────────────────┘
+```
+
+**Visual: Power Rule**
+```
+  f(x) = x³         f'(x) = 3x²
+
+  y      *           y        *    *
+  |     *            |       *      *
+  |    *             |      *        *
+  |   *              |     *
+  |  *               |────*────────── 0
+  | *                |  *
+  +──────> x         +──────> x
+  cubic              parabola (always ≥ 0)
+```
+
+---
+
+### 3.2 Product and Quotient Rules
+
+**Product Rule:**
+```
+  d/dx[f·g] = f'·g + f·g'
+
+  Think: "first times derivative of second
+         plus second times derivative of first"
+
+  Example: d/dx[x²·sin(x)]
+         = 2x·sin(x) + x²·cos(x)
+```
+
+**Quotient Rule:**
+```
+  d/dx[f/g] = (f'·g − f·g') / g²
+
+  Memory trick: "low d-high minus high d-low, over low squared"
+
+  Example: d/dx[sin(x)/x]
+         = (cos(x)·x − sin(x)·1) / x²
+         = (x·cos(x) − sin(x)) / x²
+```
+
+---
+
+### 3.3 Derivatives of Trigonometric Functions
+
+```
+  ┌───────────────────────────────────────┐
+  │  d/dx[sin(x)]  =  cos(x)             │
+  │  d/dx[cos(x)]  = −sin(x)             │
+  │  d/dx[tan(x)]  =  sec²(x)            │
+  │  d/dx[cot(x)]  = −csc²(x)            │
+  │  d/dx[sec(x)]  =  sec(x)tan(x)       │
+  │  d/dx[csc(x)]  = −csc(x)cot(x)       │
+  └───────────────────────────────────────┘
+```
+
+**Visual: sin and its derivative cos**
+```
+  sin(x):                    cos(x) = [sin(x)]':
+
+  y  1 ─ *   *              y  1 ─ *           *
+  |      * * *              |    ** *         * *
+  |   *       *             |  **    *       *   *
+  |  *         *            | *       *     *     *
+  |──*───────────*──── 0    |*─────────*───*────────0
+  |               *  *      |           * *
+  −1 ─               *      −1 ─         *
+  +──0──π──2π────> x        +──0──π──2π────> x
+
+  Where sin rises → cos is positive (slope is positive)
+  Where sin falls → cos is negative (slope is negative)
+  Where sin peaks → cos = 0 (slope = zero)
+```
+
+---
+
+### 3.4 The Chain Rule
+
+**The most important rule in calculus.**
+
+```
+  If y = f(u) and u = g(x), then:
+  dy/dx = dy/du · du/dx = f'(g(x)) · g'(x)
+
+  VISUAL — think of it as gears:
+
+  x ──[g]──> u ──[f]──> y
+
+  Rate of change of y w.r.t. x
+    = (rate y changes per u) × (rate u changes per x)
+```
+
+**Examples:**
+```
+  d/dx[sin(x²)]  = cos(x²) · 2x
+                    ↑outer      ↑inner derivative
+
+  d/dx[e^(3x)]   = e^(3x) · 3
+
+  d/dx[(x²+1)⁵]  = 5(x²+1)⁴ · 2x
+```
+
+**Nested chain rule:**
+```
+  d/dx[sin(e^(x²))] = cos(e^(x²)) · e^(x²) · 2x
+                        ↑outer      ↑middle    ↑inner
+```
+
+> **Quant Finance:** Chain rule is THE fundamental tool in derivatives pricing. Itô's lemma (stochastic chain rule) derives Black-Scholes PDE.
+
+---
+
+### 3.5 Implicit Differentiation
+
+Sometimes y is not solved explicitly for x. Differentiate both sides and treat y as y(x):
+
+```
+  Example: x² + y² = 25  (circle of radius 5)
+
+  y
+  5─   *****
+  |  **     **
+  | *         *
+  |*           *         Differentiate:
+  |             *        2x + 2y·(dy/dx) = 0
+  |*           *
+  | *         *          dy/dx = −x/y
+  |  **     **
+  −5─   *****
+  +──−5────5────> x
+
+  At point (3,4): slope = −3/4
+```
+
+> **Quant Finance:** Extracting implied volatility from option prices; yield curve bootstrapping.
+
+---
+
+### 3.6 Derivatives of Logarithmic Functions
+
+```
+  d/dx[ln(x)]      = 1/x        (x > 0)
+  d/dx[ln|x|]      = 1/x        (x ≠ 0)
+  d/dx[log_b(x)]   = 1/(x·ln b)
+
+  Visual: d/dx[ln(x)] = 1/x
+
+  y     ln(x)            y  1/x
+  |         ****         |*
+  |      ***             | *
+  |   ***                |  *
+  |***                   |   *
+  +─────────────> x      |    **
+  (0,1) zero crossing    |      ****
+                         +─────────────> x
+```
+
+**Logarithmic Differentiation** — take ln of both sides first:
+```
+  y = xˣ
+  ln(y) = x·ln(x)
+  y'/y = ln(x) + 1
+  y' = xˣ(ln(x) + 1)
+```
+
+---
+
+### 3.7–3.8 Rates of Change and Exponential Growth
+
+**Economics Applications:**
+```
+  C(x) = total cost to produce x units
+  C'(x) = marginal cost (cost of one more unit)
+
+  y  C(x)                 C'(x)
+  |       *               |       *
+  |      *                |     **
+  |    **                 |   **
+  |  **                   | **
+  | *                     |*
+  +──────────> x          +──────────> x
+```
+
+**Natural Growth/Decay:**
+```
+  dy/dt = ky     →     y(t) = y₀·e^(kt)
+
+  This ODE says: "rate of change is proportional to current value"
+  — bacteria, compound interest, radioactive decay, ...
+```
+
+---
+
+### 3.9 Related Rates
+
+Variables that all change with time — use chain rule w.r.t. t:
+
+```
+  Classic: Ladder sliding down wall
+
+  y
+  |\ ← ladder of length L
+  | \
+  | h\      h² + x² = L²
+  |   \
+  |    \
+  +─x───\──> x
+
+  Differentiate w.r.t. t:
+  2h(dh/dt) + 2x(dx/dt) = 0
+  → find dh/dt given dx/dt
+```
+
+---
+
+### 3.10 Linearization and Differentials
+
+**Linear approximation (tangent line approximation):**
+```
+  L(x) = f(a) + f'(a)(x − a)
+
+  y       *
+  |      * ← curve f(x)
+  |     *  ← linear approx L(x)
+  |    * /
+  |   */
+  |  *  (a, f(a))
+  | */
+  +─────────────> x
+        a
+
+  L(x) ≈ f(x) near x = a
+```
+
+**Differential:**
+```
+  dy = f'(x) dx
+
+  When x changes by dx, y changes by approximately dy.
+```
+
+---
+
+### 3.11 Hyperbolic Functions
+
+```
+  sinh(x) = (eˣ − e⁻ˣ)/2
+  cosh(x) = (eˣ + e⁻ˣ)/2
+  tanh(x) = sinh(x)/cosh(x)
+
+  y   cosh(x)          y   tanh(x)
+  |     *              | 1─────────*****
+  |    * *             |       ****
+  |   *   *            |   ****
+  |  *     *           |***
+  | *       *          +──────────────> x
+  +──────────> x       |       (bounded −1 to 1)
+  (catenary shape)
+
+  Identity: cosh²(x) − sinh²(x) = 1
+  (analogous to cos²+sin²=1 for trig)
+```

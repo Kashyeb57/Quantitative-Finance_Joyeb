@@ -1,0 +1,209 @@
+---
+title: "Chapter 14: Partial Derivatives"
+sidebar_position: 14
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 14.1–14.2 Functions of Several Variables
+
+```
+  z = f(x,y)   → surface in 3D space
+
+         z
+         |     surface z=f(x,y)
+         |    .─────────.
+         |  .'           '.
+         | /      *        \
+         |/      * *        \
+         +────────────────> y
+        /   level curves
+       x
+
+  Level curves: f(x,y) = c  (slices at constant height)
+
+  Topographic map:
+  y
+  4 ──────────────────
+  3    (···)           ← level curves
+  2   (·····)
+  1    (···)
+  0 ──────────────────
+  +──0──1──2──3──> x
+```
+
+<CalcPlot name="multivariable-surface" />
+
+
+---
+
+### 14.3 Partial Derivatives
+
+```
+  ∂f/∂x = rate of change in x-direction (holding y constant)
+  ∂f/∂y = rate of change in y-direction (holding x constant)
+
+  GEOMETRIC:
+
+         z
+         |        ∂f/∂x = slope of this curve
+         |        (cut surface with plane y=b)
+         |      ─────────────
+         |     /  surface z=f(x,y)
+         |    /──────────────
+         +────────────────> y
+        /
+       x   ← fix y=b, vary x
+
+  CALCULATION:
+  f(x,y) = x²y + sin(y)
+  ∂f/∂x = 2xy          (treat y as constant)
+  ∂f/∂y = x² + cos(y)  (treat x as constant)
+```
+
+**Higher partial derivatives:**
+```
+  fₓₓ = ∂²f/∂x²          fᵧᵧ = ∂²f/∂y²
+  fₓᵧ = ∂²f/∂y∂x         fᵧₓ = ∂²f/∂x∂y
+
+  Clairaut's Theorem: fₓᵧ = fᵧₓ  (if both continuous)
+```
+
+<CalcPlot name="partial-derivatives" />
+
+
+---
+
+### 14.4 Tangent Planes
+
+```
+  Tangent plane to z=f(x,y) at (a,b,f(a,b)):
+
+  z − f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+
+         z
+         |      /   tangent plane (flat)
+         |     /── ─ ─ ─ ─
+         |    /  surface z=f(x,y)
+         |   / (a,b,f(a,b)) ← point of tangency
+         +────────────────> y
+        /
+       x
+
+  Linear Approximation (the tangent plane itself):
+  f(x,y) ≈ f(a,b) + fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+```
+
+<CalcPlot name="tangent-plane" />
+
+
+---
+
+### 14.5 The Chain Rule (Multivariable)
+
+```
+  z = f(x,y), where x=x(t), y=y(t):
+
+  dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
+
+  TREE DIAGRAM (helps remember):
+
+         z
+        / \
+       x   y
+       |   |
+       t   t
+
+  Each path contributes: (∂z/∂x)(dx/dt) and (∂z/∂y)(dy/dt)
+  ADD all paths to get dz/dt.
+
+  TWO independent variables (x=x(s,t), y=y(s,t)):
+  ∂z/∂s = (∂z/∂x)(∂x/∂s) + (∂z/∂y)(∂y/∂s)
+  ∂z/∂t = (∂z/∂x)(∂x/∂t) + (∂z/∂y)(∂y/∂t)
+```
+
+---
+
+### 14.6 Directional Derivatives and the Gradient
+
+```
+  Directional derivative in direction u = <a,b>:
+  Dᵤf = ∇f · u     (dot product of gradient with unit vector)
+
+  Gradient:  ∇f = <∂f/∂x, ∂f/∂y>
+
+  ∇f ALWAYS points in direction of STEEPEST ASCENT
+
+  Level curves with gradient:
+
+  y
+  |   level curve f=3
+  |   ────────────────
+  |    ↑↑↑↑↑↑↑↑↑↑↑↑   ← ∇f (perpendicular to level curves)
+  |   ────────────────
+  |    f=2
+  |   ────────────────
+  |    f=1
+  +───────────────────> x
+
+  Max rate of increase: |∇f|  (in direction of ∇f)
+  Min rate of increase: −|∇f| (opposite direction)
+  Zero rate of change:   perpendicular to ∇f (along level curve)
+```
+
+<CalcPlot name="gradient-vectors" />
+
+
+---
+
+### 14.7 Optimization in Several Variables
+
+```
+  CRITICAL POINT: (a,b) where fₓ=0 and fᵧ=0
+
+  SECOND DERIVATIVE TEST:
+  D = fₓₓ·fᵧᵧ − (fₓᵧ)²
+
+  D > 0, fₓₓ > 0  →  local MINIMUM  (bowl up)
+  D > 0, fₓₓ < 0  →  local MAXIMUM  (bowl down)
+  D < 0            →  SADDLE POINT
+  D = 0            →  inconclusive
+
+  Saddle point (D<0):       Local min (D>0, fxx>0):
+
+       z                         z
+       |     surface              |         *
+       |   / ─ ─ ─               |        * *
+       |  /  high                |       *   *
+       | *    one way            |      *  ↑  *
+       |  \ low                  |     *  min  *
+       |   \ another way         |
+       +──────────> y            +──────────> y
+```
+
+<CalcPlot name="critical-points" />
+
+
+---
+
+### 14.8 Lagrange Multipliers
+
+```
+  Optimize f(x,y) SUBJECT TO constraint g(x,y) = k
+
+  METHOD: Solve ∇f = λ·∇g  and  g(x,y) = k
+
+  Geometric interpretation:
+
+  y
+  |   constraint g=k
+  |     ─────────────────
+  |    level curves of f:  f=5
+  |    ─────────────────   f=4 ← solution: where f's
+  |     ─────────────────  f=3   level curve TOUCHES
+  |    ─────────────────         constraint g=k
+  +───────────────────────> x
+
+  At solution: ∇f ∥ ∇g  (gradients are parallel)
+  → λ is the multiplier (Lagrange multiplier)
+```

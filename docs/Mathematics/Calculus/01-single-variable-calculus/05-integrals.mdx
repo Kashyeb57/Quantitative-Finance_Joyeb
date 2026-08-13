@@ -1,0 +1,148 @@
+---
+title: "Chapter 5: Integrals"
+sidebar_position: 5
+---
+
+### 5.1 Areas and Distances
+
+```
+  GOAL: Area under f(x) from a to b
+
+  STEP 1: Divide into n rectangles
+
+  y        ████░░░▒▒▒▓▓▓
+  |    ████████░░░▒▒▒▓▓▓
+  |    ████████░░░▒▒▒▓▓▓▓
+  |    ████████░░░░░▒▒▒▓▓▓▓▓
+  +────┼───┼───┼───┼──────> x
+       x₀  x₁  x₂  x₃  x₄=b
+       a
+
+  Width of each: Δx = (b−a)/n
+  Rₙ = f(x₁)Δx + f(x₂)Δx + ... + f(xₙ)Δx
+
+  STEP 2: Take n → ∞
+
+  As n increases, approximation improves:
+
+  n=4:  ████████    n=8: ██░░██░░   n=∞: perfect
+        ████████         ██░░██░░
+```
+
+---
+
+### 5.2 The Definite Integral
+
+```
+  DEFINITION:
+
+  ∫_a^b f(x)dx = lim  Σ f(xᵢ*)Δx
+                  n→∞ i=1
+
+  GEOMETRIC INTERPRETATION:
+
+  f(x) ≥ 0:  ∫_a^b f dx = area above x-axis
+  f(x) ≤ 0:  ∫_a^b f dx = −(area below x-axis)
+  Mixed:      ∫_a^b f dx = net signed area
+
+  y     *
+  |   * + *  ← positive area
+  |  *       *
+  +──a────────b──> x
+  |            *
+  |   negative ─ area
+  |              *
+```
+
+**Properties:**
+```
+  ∫_a^a f dx = 0
+  ∫_a^b f dx = −∫_b^a f dx
+  ∫_a^b [f±g] dx = ∫f dx ± ∫g dx
+  ∫_a^b c·f dx = c·∫_a^b f dx
+  ∫_a^b f dx = ∫_a^c f dx + ∫_c^b f dx
+```
+
+---
+
+### 5.3 The Fundamental Theorem of Calculus
+
+**THE most important theorem in calculus — links differentiation and integration.**
+
+**FTC Part 1:**
+```
+  g(x) = ∫_a^x f(t) dt     →     g'(x) = f(x)
+
+  Differentiating an integral gives back the integrand.
+
+  Visualize: g(x) = accumulated area from a to x
+
+  y
+  |    ░░░░░░░░░
+  |    ░░░░░░░░░░░░
+  |    ░░░░░░░░░░░░░
+  +────a────────x──> x
+       └─ g(x) = shaded area ─┘
+
+  g'(x) = rate area grows = f(x)  ← height of curve
+```
+
+**FTC Part 2 (Evaluation Theorem):**
+```
+  ∫_a^b f(x) dx = F(b) − F(a)     where F' = f
+
+  This lets us compute areas exactly!
+
+  Example: ∫_0^1 x² dx
+    F(x) = x³/3
+    = F(1) − F(0) = 1/3 − 0 = 1/3
+
+  y  x²
+  |    *
+  |   *
+  |  *  ← area = 1/3
+  | *
+  |* ← shaded region
+  +──0──1──> x
+```
+
+> **Quant Finance:** FTC connects PDEs to integral formulas; basis of Green's functions in option pricing.
+
+---
+
+### 5.4 Indefinite Integrals and Net Change
+
+```
+  ∫ f(x) dx = F(x) + C     (general antiderivative)
+
+  Net Change Theorem:
+  ∫_a^b F'(x) dx = F(b) − F(a)
+
+  If v(t) = velocity:
+  ∫_a^b v(t) dt = displacement (net change in position)
+  ∫_a^b |v(t)| dt = total distance traveled
+```
+
+---
+
+### 5.5 The Substitution Rule
+
+**Reverse chain rule for integration:**
+
+```
+  ∫ f(g(x))·g'(x) dx  =  ∫ f(u) du     where u = g(x)
+
+  STEPS:
+  1. Choose u = g(x)  (the "inside" function)
+  2. Compute du = g'(x)dx
+  3. Rewrite integral entirely in u
+  4. Integrate
+  5. Substitute back
+
+  Example: ∫ 2x·cos(x²) dx
+    u = x²
+    du = 2x dx
+    = ∫ cos(u) du
+    = sin(u) + C
+    = sin(x²) + C
+```

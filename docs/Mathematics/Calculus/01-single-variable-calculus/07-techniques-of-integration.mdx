@@ -1,0 +1,157 @@
+---
+title: "Chapter 7: Techniques of Integration"
+sidebar_position: 7
+---
+
+### 7.1 Integration by Parts
+
+```
+  ∫ u dv = uv − ∫ v du
+
+  Derived from product rule: d(uv) = u dv + v du
+
+  CHOOSING u and dv — use "LIATE" priority for u:
+  L → Logarithms
+  I → Inverse trig
+  A → Algebraic (polynomials)
+  T → Trigonometric
+  E → Exponential
+
+  Example: ∫ x·eˣ dx
+    u = x     →  du = dx
+    dv = eˣdx →  v = eˣ
+
+    = x·eˣ − ∫ eˣ dx
+    = x·eˣ − eˣ + C
+    = eˣ(x − 1) + C
+```
+
+---
+
+### 7.2 Trigonometric Integrals
+
+```
+  ∫ sinᵐ(x) cosⁿ(x) dx
+
+  Strategy:
+  ┌──────────────────────────────────────────────────┐
+  │ m ODD:  save one sin, convert rest using         │
+  │         sin²=1−cos², substitute u=cos(x)         │
+  │                                                  │
+  │ n ODD:  save one cos, convert rest using         │
+  │         cos²=1−sin², substitute u=sin(x)         │
+  │                                                  │
+  │ BOTH EVEN: use half-angle formulas               │
+  │   sin²(x) = (1−cos2x)/2                         │
+  │   cos²(x) = (1+cos2x)/2                         │
+  └──────────────────────────────────────────────────┘
+```
+
+---
+
+### 7.3 Trigonometric Substitution
+
+```
+  Expression          Substitution         Identity used
+  ─────────────────────────────────────────────────────
+  √(a²−x²)          x = a·sin(θ)         1−sin²=cos²
+  √(a²+x²)          x = a·tan(θ)         1+tan²=sec²
+  √(x²−a²)          x = a·sec(θ)         sec²−1=tan²
+
+  Visual: x = a·sin(θ) substitution for √(a²−x²)
+
+                  a
+               /|
+              / |
+        hyp  /  | √(a²−x²)
+            /   |
+           / θ  |
+          /─────|
+              x
+
+  When x = a·sin(θ): √(a²−x²) = a·cos(θ)  ✓
+```
+
+---
+
+### 7.4 Partial Fractions
+
+Decompose rational functions into simpler fractions:
+
+```
+  P(x)/Q(x)  where deg(P) < deg(Q)
+
+  CASE 1: Q has distinct linear factors
+  ─────────────────────────────────────
+  1/[(x−1)(x+2)] = A/(x−1) + B/(x+2)
+
+  Multiply both sides by denominator, solve for A,B
+
+  CASE 2: Q has repeated linear factors
+  ──────────────────────────────────────
+  1/(x−1)² = A/(x−1) + B/(x−1)²
+
+  CASE 3: Q has irreducible quadratic factors
+  ────────────────────────────────────────────
+  1/[(x²+1)(x−1)] = (Ax+B)/(x²+1) + C/(x−1)
+```
+
+---
+
+### 7.7 Approximate Integration
+
+```
+  MIDPOINT RULE (rectangles at midpoints):
+  ∫_a^b f dx ≈ Δx[f(x̄₁) + f(x̄₂) + ... + f(x̄ₙ)]
+
+  TRAPEZOIDAL RULE (trapezoids):
+  ∫_a^b f dx ≈ (Δx/2)[f(x₀) + 2f(x₁) + ... + 2f(xₙ₋₁) + f(xₙ)]
+
+  SIMPSON'S RULE (parabolas — most accurate):
+  ∫_a^b f dx ≈ (Δx/3)[f(x₀) + 4f(x₁) + 2f(x₂) + 4f(x₃) + ... + f(xₙ)]
+
+  Visual comparison:
+
+  Midpoint:       Trapezoid:       Simpson's:
+  y  ─┬─┬─┬─     y  /\/\/\        y   parabola
+  |  █│█│█│       |  / \ / \      |   fit per
+  |  █│█│█│       | /   X   \     |   3 points
+  +──────────     +──────────     +──────────
+
+  Accuracy:  Midpoint ≈ Trapezoid  <<  Simpson's
+```
+
+---
+
+### 7.8 Improper Integrals
+
+**Type 1: Infinite limits**
+```
+  ∫_a^∞ f(x) dx = lim  ∫_a^t f(x) dx
+                   t→∞
+
+  y    *                   Example:
+  |   * *   Total area     ∫_1^∞ 1/x² dx
+  |  *   *  might be       = lim [−1/x]_1^t
+  | *     * FINITE!        = lim (−1/t+1)
+  |*       ****──────      = 1    ← converges!
+  +──1──────────> x
+
+  But ∫_1^∞ 1/x dx = ∞  (diverges — "just barely")
+```
+
+**Type 2: Discontinuous integrands**
+```
+  ∫_a^b f(x) dx  where f blows up at a:
+
+  = lim  ∫_t^b f(x) dx
+    t→a⁺
+
+  y     |← discontinuity
+  |     |
+  |     |*
+  |     | *
+  |     |  *
+  |     |   ***
+  +─────a──────b──> x
+```

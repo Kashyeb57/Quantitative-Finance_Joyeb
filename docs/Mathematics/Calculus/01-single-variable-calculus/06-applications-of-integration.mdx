@@ -1,0 +1,104 @@
+---
+title: "Chapter 6: Applications of Integration"
+sidebar_position: 6
+---
+
+### 6.1 Areas Between Curves
+
+```
+  A = ∫_a^b [f(x) − g(x)] dx     where f(x) ≥ g(x)
+
+  y     f(x) ←
+  |       *
+  |      * *
+  |     *░░░*  ← shaded region between curves
+  |    *░░░░░*
+  |   *░░░░░░░*
+  |    *░░░*
+  |      * ↑ g(x)
+  +──a──────b──> x
+```
+
+---
+
+### 6.2 Volumes (Disk Method)
+
+```
+  Rotate f(x) around x-axis → solid of revolution
+
+  V = π·∫_a^b [f(x)]² dx
+
+  Cross-section is a DISK with radius f(x):
+
+      ┌────────────────────────────────┐
+      │ f(x)     .─────.              │
+  ────│────── .-'   ┊   '-.          │
+      │      |   r=f(x)┊  |   → disk │
+  ────│────── '-.   ┊   .-'          │
+      │          '─────'              │
+      └────────────────────────────────┘
+  x-axis
+
+  Volume = sum of infinitely thin disk areas
+```
+
+**Washer Method** (hole in the middle):
+```
+  V = π·∫_a^b ([f(x)]² − [g(x)]²) dx
+
+       Outer²        Inner²
+```
+
+---
+
+### 6.3 Shell Method
+
+```
+  V = ∫ 2π·(radius)·(height)·(thickness)
+
+  Imagine cylindrical shells like tree rings:
+
+  y
+  |    ┌───────────┐
+  |    │ ┌───────┐ │
+  |    │ │ ┌───┐ │ │
+  |    │ │ │   │ │ │  shells stacked
+  |    │ │ │   │ │ │
+  |    │ │ └───┘ │ │
+  |    │ └───────┘ │
+  |    └───────────┘
+  +────────────────────> x
+```
+
+---
+
+### 6.4–6.5 Work and Average Value
+
+**Work:**
+```
+  W = ∫_a^b F(x) dx
+
+  (when force F varies with position x)
+
+  y  F(x)
+  |  *
+  |  *  *
+  |  *  * *           Area under F(x) = Work done
+  |  *  * * *
+  +──a──────b──> x
+```
+
+**Average Value:**
+```
+  f_avg = 1/(b−a) · ∫_a^b f(x) dx
+
+  y         f(x)
+  |      *    *
+  |     * *  * *
+  |    *   **   *
+  |─────────────────── f_avg (horizontal line)
+  |   *               *
+  +────a───────────b──> x
+
+  Area under f(x) = Rectangle with height f_avg
+```

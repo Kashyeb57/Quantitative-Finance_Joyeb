@@ -1,0 +1,100 @@
+---
+title: "Chapter 17: Second-Order Differential Equations"
+sidebar_position: 17
+---
+
+### 17.1 Second-Order Linear Equations
+
+```
+  ay'' + by' + cy = 0     (homogeneous, constant coefficients)
+
+  AUXILIARY EQUATION: ar² + br + c = 0
+
+  Solve for r — three cases:
+
+  Case 1: Two real roots r₁ ≠ r₂
+  y = C₁e^(r₁x) + C₂e^(r₂x)
+
+  Case 2: Repeated root r₁ = r₂ = r
+  y = (C₁ + C₂x)e^(rx)
+
+  Case 3: Complex roots r = α ± βi
+  y = e^(αx)(C₁cos(βx) + C₂sin(βx))
+
+  Case 3 gives oscillations:
+
+  y      ← envelope e^(αx)
+  |   *   *   *
+  |  * * * * * * *          α < 0: decaying oscillation
+  | *   *   *   *   *       α = 0: sustained oscillation
+  +──────────────────> x    α > 0: growing oscillation
+```
+
+---
+
+### 17.2 Nonhomogeneous Equations
+
+```
+  ay'' + by' + cy = G(x)
+
+  GENERAL SOLUTION:
+  y = yₚ + yc
+
+  yc = complementary (solution to homogeneous part)
+  yₚ = particular  (any one solution to full equation)
+
+  METHOD OF UNDETERMINED COEFFICIENTS:
+  ┌─────────────────────────────────────────┐
+  │ G(x)           Try yₚ =                │
+  ├─────────────────────────────────────────┤
+  │ polynomial pₙ  Ax^n+...+A₀             │
+  │ Ce^(kx)        Ae^(kx)                 │
+  │ C cos(kx)      A cos(kx) + B sin(kx)   │
+  │ C sin(kx)      A cos(kx) + B sin(kx)   │
+  └─────────────────────────────────────────┘
+```
+
+---
+
+### 17.3 Spring-Mass System
+
+```
+  m·x'' + c·x' + k·x = F(t)
+
+  m = mass, c = damping, k = spring constant, F = external force
+
+  Undamped free oscillation (c=0, F=0):
+  x'' + ω₀²x = 0     ω₀ = √(k/m)
+  x(t) = A cos(ω₀t) + B sin(ω₀t)   (pure oscillation)
+
+  x
+  |  *   *   *   *   *        ← sustained oscillation
+  | * * * * * * * * * *
+  +──────────────────────> t
+  |* * * * * * * * * *
+  |  *   *   *   *   *
+
+  Damped oscillation (c > 0):
+  x
+  |  *                         ← amplitude decays
+  | * *   *
+  |*   * * *   *
+  +────────────────────────> t  ← approaches 0
+  |         *   *
+  |           ***
+```
+
+---
+
+### 17.4 Series Solutions
+
+```
+  For variable-coefficient ODEs, try:
+  y = Σ cₙxⁿ = c₀ + c₁x + c₂x² + c₃x³ + ...
+
+  Substitute into ODE and match coefficients.
+
+  Example: y'' − y = 0
+  → y = cosh(x) = 1 + x²/2! + x⁴/4! + ...
+     or y = sinh(x) = x + x³/3! + x⁵/5! + ...
+```

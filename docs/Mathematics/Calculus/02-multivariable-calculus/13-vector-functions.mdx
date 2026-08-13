@@ -1,0 +1,79 @@
+---
+title: "Chapter 13: Vector Functions"
+sidebar_position: 13
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 13.1–13.2 Vector Functions and Derivatives
+
+```
+  r(t) = <f(t), g(t), h(t)>     (space curve)
+
+  Example: Helix
+  r(t) = <cos(t), sin(t), t>
+
+       z
+       |        ← helix spiraling up
+       |      *
+       |    *
+       |   *
+       |  *      *
+       | *     *
+       |      *
+       +──────────> y
+      /  *  *
+     x
+
+  Derivative (tangent vector):
+  r'(t) = <f'(t), g'(t), h'(t)>
+
+  r'(t) is TANGENT to the curve at each point.
+```
+
+<CalcPlot name="helix-tangent" />
+
+
+---
+
+### 13.3 Arc Length and Curvature
+
+```
+  Arc Length: L = ∫_a^b |r'(t)| dt
+
+  Curvature κ measures how sharply a curve bends:
+  κ = |r'(t) × r''(t)| / |r'(t)|³
+
+  Low κ:              High κ:
+  (gentle curve)      (sharp curve)
+        ────           )(
+  almost straight    tight spiral
+
+  κ = 0:  straight line
+  κ = 1/r: circle of radius r
+```
+
+---
+
+### 13.4 Velocity and Acceleration
+
+```
+  r(t) = position
+  v(t) = r'(t) = velocity
+  a(t) = v'(t) = r''(t) = acceleration
+
+  Speed = |v(t)|
+
+  Projectile motion:
+  r(t) = <v₀cos(α)·t, v₀sin(α)·t − ½gt²>
+
+  y         *  ← maximum height
+  |        * *
+  |       *   *
+  |      *     *
+  |     *       *
+  |    *         *
+  |   *           *
+  +──────────────────> x
+  launch              landing
+```

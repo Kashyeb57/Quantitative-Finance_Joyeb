@@ -1,0 +1,214 @@
+---
+title: "Chapter 4: Applications of Differentiation"
+sidebar_position: 4
+---
+
+### 4.1 Maximum and Minimum Values
+
+```
+  y           absolute max
+  |           ●
+  |         *   *     local max ●
+  |        *     *            *   *
+  |       *  local *         *     *
+  |      *    min   *       *
+  |     *      ●    *     *   absolute min
+  |    *              *  *    ●
+  +──────────────────────────────> x
+```
+
+**Finding extrema:**
+```
+  ① Extreme Value Theorem: if f continuous on [a,b],
+    then f attains both abs max and abs min.
+
+  ② Critical numbers: f'(c) = 0  OR  f'(c) undefined
+
+  ③ Check: critical points + endpoints → evaluate f
+```
+
+---
+
+### 4.2 The Mean Value Theorem
+
+**Rolle's Theorem:**
+```
+  If f(a) = f(b) and f is continuous/differentiable,
+  then ∃ c where f'(c) = 0
+
+  y   *─────────*       ← f(a)=f(b)
+  |  * *       * *
+  | *   *     *   *
+  |*     *   *
+  |       *** ← f'(c)=0 here
+  +──a──────────b──> x
+```
+
+**Mean Value Theorem (MVT):**
+```
+  ∃ c in (a,b) where f'(c) = [f(b)−f(a)] / (b−a)
+
+  y         *  ← f(b)
+  |       */ |  ← secant line slope = avg rate of change
+  |      *   |
+  |     *    |
+  |    /     |  ← tangent at c has same slope!
+  |   /      |
+  | *  ← f(a)|
+  +─a───c────b──> x
+```
+
+---
+
+### 4.3 How Derivatives Affect Graph Shape
+
+```
+  f'(x) > 0  →  f is INCREASING  ↗
+  f'(x) < 0  →  f is DECREASING  ↘
+  f'(x) = 0  →  f has horizontal tangent (potential extremum)
+
+  f''(x) > 0  →  f is CONCAVE UP    ∪
+  f''(x) < 0  →  f is CONCAVE DOWN  ∩
+  f''(x) = 0  →  possible INFLECTION POINT
+
+  Full picture:
+
+  y             local max          inflection pt
+  |               ●                     ×
+  |         *   *   *           *   *   *   *
+  |        * ↗   ↘   *         * ↗   ↘   ↗   *
+  |       *     ↓      *      *             *
+  |      *    local      *  *
+  |     *     min ●       **
+  +────────────────────────────────────> x
+        [f'>0] [f'<0]   [f'<0][f'>0]
+        [f''>0]         [f''<0] [f''>0]
+         ∪                  ∩     ∪
+```
+
+**Second Derivative Test:**
+```
+  At critical point c where f'(c) = 0:
+  f''(c) > 0  →  local MINIMUM  (concave up = bowl)  ∪
+  f''(c) < 0  →  local MAXIMUM  (concave down = hill) ∩
+  f''(c) = 0  →  test inconclusive (need more analysis)
+```
+
+---
+
+### 4.4 L'Hôpital's Rule
+
+For **0/0** or **∞/∞** indeterminate forms:
+
+```
+  lim f(x)/g(x) = lim f'(x)/g'(x)
+  x→a             x→a
+
+  (provided the right-hand limit exists)
+
+  Examples:
+
+  lim  sin(x)/x  [0/0 form]
+  x→0
+  = lim  cos(x)/1  = 1
+    x→0
+
+  lim  x/eˣ  [∞/∞ form]
+  x→∞
+  = lim  1/eˣ  = 0    (exponential beats polynomial!)
+    x→∞
+```
+
+**Other indeterminate forms — convert first:**
+```
+  0·∞ → rewrite as 0/(1/∞) or ∞/(1/0)
+  ∞−∞ → find common denominator
+  0⁰, 1^∞, ∞⁰ → take logarithm first
+```
+
+---
+
+### 4.5 Curve Sketching Checklist
+
+```
+  STEP-BY-STEP:
+
+  A  Domain          Where is f defined?
+  B  Intercepts      Set f=0 (x-int), x=0 (y-int)
+  C  Symmetry        Even? f(-x)=f(x)  Odd? f(-x)=-f(x)
+  D  Asymptotes      Vertical (where f→∞), Horizontal (limits at ±∞)
+  E  Increase/Dec    Sign of f'
+  F  Local Extrema   f'=0 and sign change
+  G  Concavity       Sign of f''
+  H  Inflection pts  f'' changes sign
+  I  Sketch!
+```
+
+---
+
+### 4.7 Optimization Problems
+
+```
+  STRATEGY:
+  1. Read carefully — what to maximize/minimize?
+  2. Draw a diagram
+  3. Label variables, write constraint equation
+  4. Write objective function in ONE variable
+  5. Find critical points (set derivative = 0)
+  6. Verify it's max/min (2nd derivative test or interval check)
+
+  CLASSIC EXAMPLE: Maximize area of rectangle with perimeter = 40
+
+  P = 2x + 2y = 40  →  y = 20 − x
+  A = xy = x(20−x) = 20x − x²
+  A' = 20 − 2x = 0  →  x = 10, y = 10
+  → Square maximizes area!
+```
+
+---
+
+### 4.8 Newton's Method
+
+Iterative root-finding using tangent lines:
+
+```
+  y            *← curve f(x)
+  |           *
+  |          *
+  |─────────*────────────> x
+  |        *|  ↑
+  |       * |  x₂ = x₁ − f(x₁)/f'(x₁)
+  |      *  |
+  |     *   x₁ (initial guess)
+  |    *
+  |
+
+  Iteration: xₙ₊₁ = xₙ − f(xₙ)/f'(xₙ)
+
+  Each step gives a BETTER approximation of the root.
+```
+
+---
+
+### 4.9 Antiderivatives
+
+F is an antiderivative of f if F'(x) = f(x).
+
+```
+  ∫ f(x) dx = F(x) + C     (C = constant of integration)
+
+  Example:
+  d/dx[x³] = 3x²
+  ∴ antiderivative of 3x² is x³ + C
+
+  Key antiderivatives:
+  ┌──────────────────────────────────┐
+  │  f(x)          F(x) = ∫f dx     │
+  ├──────────────────────────────────┤
+  │  xⁿ (n≠−1)    xⁿ⁺¹/(n+1) + C  │
+  │  1/x           ln|x| + C        │
+  │  eˣ            eˣ + C           │
+  │  sin(x)       −cos(x) + C       │
+  │  cos(x)        sin(x) + C       │
+  └──────────────────────────────────┘
+```

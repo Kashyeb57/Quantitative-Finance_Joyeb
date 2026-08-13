@@ -1,0 +1,278 @@
+---
+title: "Chapter 2: Limits and Derivatives"
+sidebar_position: 2
+---
+
+### 2.1 The Tangent and Velocity Problems
+
+```
+  Secant line → Tangent line as Q → P
+
+  y         Q(x, f(x))
+  |           o
+  |          /|
+  |         / |
+  |        /  |
+  |       /   |
+  |      / ↑  |
+  |     /  secant
+  |    o P(a, f(a))
+  |
+  +--a--x---------> x
+
+  slope_PQ = [f(x)−f(a)] / (x−a)
+
+  As x → a:
+  slope_tangent = lim  [f(x)−f(a)] / (x−a)
+                  x→a
+```
+
+---
+
+### 2.2 The Limit of a Function
+
+```
+  lim f(x) = L
+  x→a
+
+  Meaning: f(x) gets arbitrarily close to L
+           as x approaches a (from either side)
+
+  y
+  |             ○ ← hole: f(a) might not exist
+  |           * | *         but limit still = L!
+  |         *   |   *
+  | ───────*────────*────── L
+  |       *           *
+  |
+  +──────────a──────────> x
+
+  LEFT side → L    AND    RIGHT side → L
+  ∴ limit exists and equals L
+```
+
+**When limits do NOT exist:**
+```
+  Case 1: Jump              Case 2: Oscillation
+
+  y    *                    y   *  *  *  *
+  |    *    ○               |  * *  * *  *
+  |    *    *               |          ...
+  |    ●                    |
+  +────a───────> x          +────────────> x
+  Left ≠ Right limit        sin(1/x) as x→0
+```
+
+---
+
+### 2.3 Limit Laws
+
+If lim f(x) = L and lim g(x) = M (as x→a), then:
+
+```
+  ┌─────────────────────────────────────────┐
+  │ Sum:      lim [f+g] = L + M             │
+  │ Difference: lim [f−g] = L − M           │
+  │ Constant: lim [c·f] = c·L              │
+  │ Product:  lim [f·g] = L·M              │
+  │ Quotient: lim [f/g] = L/M  (M ≠ 0)    │
+  │ Power:    lim [f]ⁿ = Lⁿ               │
+  │ Root:     lim ⁿ√f = ⁿ√L              │
+  └─────────────────────────────────────────┘
+```
+
+**The Squeeze Theorem:**
+```
+  If f(x) ≤ g(x) ≤ h(x)  near x=a
+  and  lim f(x) = lim h(x) = L
+  then lim g(x) = L
+
+  y          h(x) ─ ─ ─ ─ ─ ─
+  |              g(x) ~~~~~~       All three
+  |          f(x) ─ ─ ─ ─ ─ ─     squeeze to L
+  | L ━━━━━━━━━━━━━━━━━━━━━━━━
+  +──────────a──────────> x
+
+  KEY RESULT:  lim sin(x)/x = 1
+               x→0
+```
+
+---
+
+### 2.4 The Precise Definition (ε-δ)
+
+```
+  lim f(x) = L  means:
+  x→a
+
+  For every ε > 0, ∃ δ > 0 such that:
+  if 0 < |x − a| < δ  then  |f(x) − L| < ε
+
+  y
+  | L+ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─    ← ε-band
+  |        * within ε of L
+  | L  ━━━━━━━━━━━━━━━━━━━━━
+  |       *
+  | L−ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+  |
+  +──a−δ──a──a+δ──────> x
+         ↑
+    all x within δ of a
+    produce f(x) within ε of L
+```
+
+---
+
+### 2.5 Continuity
+
+A function f is **continuous at a** if all three hold:
+
+```
+  ① f(a) is defined
+  ② lim f(x) exists
+     x→a
+  ③ lim f(x) = f(a)
+     x→a
+
+  CONTINUOUS:        DISCONTINUITIES:
+
+  y    *             Removable:      Jump:        Infinite:
+  |   * *            y   ○           y   *        y     |
+  |  *   *           |  *            |   *        |    /|
+  | *     *          | * ← hole      |   *        |   / |
+  +-------> x        +-----> x       | * ← gap    |  /  |
+                                     +-----> x    +--/--+-> x
+```
+
+**Intermediate Value Theorem:**
+```
+  If f is continuous on [a,b] and N is between f(a) and f(b),
+  then ∃ c in (a,b) where f(c) = N.
+
+  y
+  f(b)─ ─ ─ ─ ─ ─*
+  |              *
+  N  ─ ─ ─ ─ ─*── ← guaranteed crossing!
+  |           *
+  f(a)── ─ ─*
+  |         *
+  +──a───c───b───> x
+```
+
+> **Quant Finance:** Guarantees a yield exists for bond pricing; root-finding for implied volatility.
+
+---
+
+### 2.6 Limits at Infinity and Asymptotes
+
+```
+  Horizontal asymptote y = L:
+
+  y        *****──────────── L  ← f(x) → L as x → ∞
+  |      **
+  |    **
+  |  **
+  | *
+  +──────────────────────> x
+
+  Vertical asymptote x = a:
+
+  y   |
+  |   |  *
+  | * |
+  |  *|
+  |   *
+  |   |*
+  +───a──────────────> x
+  f(x) → ∞ as x → a
+```
+
+**Important limits:**
+```
+  lim  xⁿ = ∞   (n>0)       lim  1/xⁿ = 0
+  x→∞                        x→∞
+
+  lim  eˣ = ∞                lim  eˣ = 0
+  x→∞                        x→−∞
+
+  lim  ln(x) = ∞
+  x→∞
+```
+
+---
+
+### 2.7 Derivatives and Rates of Change
+
+The **derivative** is the slope of the tangent line = instantaneous rate of change.
+
+```
+  DEFINITION:
+
+        f(a+h) − f(a)
+  f'(a) = lim ─────────────
+           h→0       h
+
+  Visually:
+
+  y         f(a+h)─────o Q
+  |                   /
+  |                  /  ← secant (slope = Δf/h)
+  |         f(a)────o P
+  |                /
+  |               / ← tangent as h→0
+  +────────a──a+h────> x
+                 ↑
+                 h
+```
+
+**Three interpretations:**
+```
+  ① Geometric:  slope of tangent line to y=f(x) at x=a
+  ② Physical:   instantaneous rate of change
+  ③ Kinematic:  velocity if f is a position function
+```
+
+> **Quant Finance:** Delta = ∂V/∂S (option price sensitivity to underlying); DV01 = ∂P/∂y (bond price sensitivity to yield)
+
+---
+
+### 2.8 The Derivative as a Function
+
+```
+  f'(x) = lim  [f(x+h) − f(x)] / h
+           h→0
+
+  From the original function, we derive a NEW function f'(x):
+
+  f(x) = x²             f'(x) = 2x
+
+  y   *       *         y         *
+  |    *     *          |        *
+  |     *   *           |       *
+  |      * *            |      *
+  |       *             |─────*──────── 0
+  +──────────> x        |   *
+                        |  *
+                        +──────────> x
+  Parabola              Straight line (2x)
+```
+
+**Notations for derivative:**
+```
+  f'(x)   (Lagrange)
+  df/dx   (Leibniz)
+  Df(x)   (Euler)
+  ẋ       (Newton, time derivative)
+```
+
+**Higher Derivatives:**
+```
+  f(x)   → position
+  f'(x)  → velocity   (1st derivative)
+  f''(x) → acceleration (2nd derivative)
+  f'''(x)→ jerk        (3rd derivative)
+
+  f''(x) = [f'(x)]' = d²f/dx²
+```
+
+> **Quant Finance:** Gamma = ∂²V/∂S² (rate of change of Delta); Convexity = ∂²P/∂y² for bonds.

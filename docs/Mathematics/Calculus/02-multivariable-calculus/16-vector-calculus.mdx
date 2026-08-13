@@ -1,0 +1,180 @@
+---
+title: "Chapter 16: Vector Calculus"
+sidebar_position: 16
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 16.1 Vector Fields
+
+```
+  F(x,y) = P(x,y)i + Q(x,y)j
+
+  Assigns a VECTOR to each point in space.
+
+  Examples:
+  Gravitational field:     Wind velocity field:
+
+  y                        y
+  |  ↓ ↓ ↓ ↓              |  → → ↗ ↑
+  |  ↓ ↓ ↓ ↓              |  → → → ↑
+  |  ↓ ↓ ↓ ↓              |  → → → →
+  +──────────> x           +──────────> x
+
+  All arrows point down    Arrows vary by location
+```
+
+<CalcPlot name="vector-field-3d" />
+
+
+---
+
+### 16.2 Line Integrals
+
+```
+  ∫_C F·dr = work done by F along curve C
+
+  Think: Force dotted with tiny displacement, summed along path
+
+  y       F(x,y)
+  |    ↗↗↗/← force vectors
+  |   ↗ / ← curve C
+  |  ↗/
+  | ↗/
+  |/
+  +──────────> x
+
+  ∫_C F·dr = ∫_C P dx + Q dy
+
+  Parametrize C as r(t) = <x(t), y(t)>:
+  = ∫_a^b F(r(t)) · r'(t) dt
+```
+
+---
+
+### 16.3 Fundamental Theorem for Line Integrals
+
+```
+  If F = ∇f (conservative field), then:
+
+  ∫_C F·dr = f(r(b)) − f(r(a))
+
+  KEY CONSEQUENCE:
+  For conservative fields:
+  - Integral depends only on ENDPOINTS, not path
+  - ∮_C F·dr = 0  (closed curve integral = 0)
+
+  Path 1:                 Path 2:
+  y    ___                y
+  |   /   \               |   _____
+  |  /     \              |  /     |
+  | A       B             | A      B
+  +──────────> x          +──────────> x
+
+  Both give same answer if F is conservative!
+```
+
+---
+
+### 16.4 Green's Theorem
+
+```
+  ∮_C P dx + Q dy = ∬_D (∂Q/∂x − ∂P/∂y) dA
+
+  Converts LINE integral (boundary) to DOUBLE integral (region)
+
+  y
+  |    ┌──────┐
+  |    │      │ ← D (region)
+  |    │      │
+  |    └──────┘
+  |      ↑ C (boundary, counterclockwise)
+  +────────────────> x
+
+  Great for computing areas:
+  A = (1/2) ∮_C (x dy − y dx)
+```
+
+---
+
+### 16.5 Curl and Divergence
+
+```
+  CURL: curl F = ∇ × F
+
+  Measures ROTATION in a vector field
+
+  curl F > 0: counterclockwise rotation
+  curl F < 0: clockwise rotation
+  curl F = 0: irrotational (conservative?)
+
+  y                        y
+  |   ↙ ↓ ↘              |   → → →
+  |   ← · →  ← rotation  |   → → →  ← no rotation
+  |   ↖ ↑ ↗              |   → → →
+  +──────────> x           +──────────> x
+  curl F ≠ 0               curl F = 0
+
+  DIVERGENCE: div F = ∇ · F = ∂P/∂x + ∂Q/∂y + ∂R/∂z
+
+  div F > 0: source (flow out)     div F < 0: sink (flow in)
+  y   ↗ ↑ ↖                       y   ↘ ↓ ↙
+  |   ← · →                       |   → · ←
+  |   ↙ ↓ ↘                       |   ↗ ↑ ↖
+  +──────────> x                   +──────────> x
+```
+
+---
+
+### 16.7 Surface Integrals (Flux)
+
+```
+  ∬_S F·dS = ∬_S F·n dS  =  flux through surface S
+
+  Measures how much of F "flows through" S
+
+        n ↑ (outward normal)
+        |
+  ──────┼──────  ← surface S
+  F →→→ | →→→→→
+  →→→→→ | →→→→→  F flowing through S
+  ──────┼──────
+        |
+```
+
+---
+
+### 16.8 Stokes' Theorem
+
+```
+  ∮_C F·dr = ∬_S curl F · dS
+
+  Relates LINE integral on boundary to SURFACE integral
+
+         ↑ n
+        /|  S (surface)
+       / |
+      /  |
+   C─────  ← boundary curve (counterclockwise)
+
+  Generalizes Green's Theorem to 3D surfaces.
+```
+
+---
+
+### 16.9 The Divergence Theorem
+
+```
+  ∬_S F·dS = ∭_E div F dV
+
+  Flux through CLOSED SURFACE = integral of divergence over VOLUME
+
+       ↑ outward normals all around
+      ↗ ↑ ↖
+  ←  [  E  ]  →   ← closed surface S
+      ↙ ↓ ↘
+
+  "What flows out of the surface = what is created inside"
+
+  Generalizes FTC to 3D — unifies all major theorems!
+```

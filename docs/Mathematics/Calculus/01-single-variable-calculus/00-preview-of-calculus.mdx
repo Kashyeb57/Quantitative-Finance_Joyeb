@@ -1,0 +1,117 @@
+---
+title: "Chapter 0: A Preview of Calculus"
+sidebar_position: 0
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 0.1 The Two Central Problems of Calculus
+
+Calculus is built on two problems: **finding areas** and **finding slopes of curves**.
+
+---
+
+#### The Area Problem (Integral Calculus)
+
+We want the exact area under a curve. Since we can't compute curved areas directly, we approximate with rectangles and take a limit.
+
+```
+  y
+  |
+6 |        *****
+5 |      **     **
+4 |    **    ░░░  **
+3 |   *   ░░░░░░░░  *
+2 |  *  ░░░░░░░░░░░░ *
+1 | * ░░░░░░░░░░░░░░░░*
+  +----+----+----+----+-> x
+  a                   b
+
+  ░ = area we want to compute
+  * = the curve f(x)
+```
+
+**Riemann Sum approach** — divide [a,b] into n rectangles:
+
+```
+  y             Each rectangle has:
+  |  |  |  |   - width:  Δx = (b-a)/n
+  |▓▓|▓▓|▓▓|   - height: f(xᵢ*)
+  |▓▓|▓▓|▓▓|
+  |▓▓|▓▓|▓▓|   Area ≈ Σ f(xᵢ*)·Δx
+  +-----------> x
+  a         b
+
+  As n → ∞, approximation becomes exact.
+```
+
+<CalcPlot name="riemann-sum" />
+
+
+**Formula:**
+```
+A = lim     Σ f(xᵢ*)·Δx     where Δx = (b-a)/n
+    n→∞   i=1 to n
+```
+
+> **Quant Finance:** Area under a probability density function = probability of an event. Used in option pricing (risk-neutral valuation) and expected value of payoffs.
+
+---
+
+#### The Tangent Problem (Differential Calculus)
+
+Given a curve, find the slope of the line that just "touches" it at one point.
+
+```
+  y
+  |              / ← tangent line (what we want)
+  |          __/
+  |       __/ ← curve y = f(x)
+  |    __/
+  |   /
+  | P(a, f(a))
+  +-------------------> x
+       a
+```
+
+**Secant line approach** — take two points and slide Q → P:
+
+```
+  y
+  |           Q(x, f(x))
+  |         o
+  |       / ← secant line
+  |     /
+  |   o ← P(a, f(a))
+  |
+  +-------------------> x
+
+  slope of PQ = [f(x) - f(a)] / (x - a)
+
+  As x → a, secant → tangent:
+
+  m = lim   [f(x) - f(a)]
+      x→a   ─────────────
+                x - a
+```
+
+> **Quant Finance:** Delta (Δ) is the tangent slope of an option price curve vs. underlying price — the hedge ratio.
+
+---
+
+#### The Velocity Problem
+
+```
+  Position
+  s(t)
+  |          *
+  |        *
+  |      *         Average velocity = Δs/Δt = [s(b)-s(a)]/(b-a)
+  |    *
+  |  *
+  +-----------> time t
+  a         b
+
+  Instantaneous velocity = lim  [s(t) - s(a)] / (t - a)
+                           t→a
+```

@@ -1,0 +1,88 @@
+---
+title: "Chapter 10: Parametric Equations & Polar Coordinates"
+sidebar_position: 10
+---
+
+### 10.1–10.2 Parametric Curves
+
+```
+  Instead of y=f(x), use:
+  x = f(t),   y = g(t)     (t = parameter, often time)
+
+  Example: Circle  x = cos(t), y = sin(t), 0≤t≤2π
+
+  t=π/2 → (0,1)
+  t=0 → (1,0)         y
+  t=π → (−1,0)        1     *
+  t=3π/2 → (0,−1)         *   *
+                       |  *     *
+                       | *   +   *
+                       |  *     *
+                       |    *   *
+                       −1    *
+                       +──−1───1──> x
+
+  Derivatives:
+  dy/dx = (dy/dt) / (dx/dt)
+
+  Arc Length:
+  L = ∫ √((dx/dt)² + (dy/dt)²) dt
+```
+
+---
+
+### 10.3–10.4 Polar Coordinates
+
+```
+  Point P = (r, θ) where:
+  r = distance from origin
+  θ = angle from positive x-axis
+
+  Conversions:
+  x = r·cos(θ)        r² = x² + y²
+  y = r·sin(θ)        tan(θ) = y/x
+
+  y
+  |    P(r,θ)
+  |   /
+  | r/
+  |  /
+  | / θ
+  +─────────────> x
+
+  Common curves:
+  r = a             → circle of radius a
+  r = a·cos(θ)      → circle through origin
+  r = 1+cos(θ)      → cardioid (heart shape)
+
+  Cardioid r=1+cos(θ):
+       y
+       |  * *
+     * |       *
+   *   |         *
+  *────+──────────*──> x
+   *   |         *
+     * |       *
+       |  * *
+
+  Area in polar:  A = (1/2)∫r² dθ
+```
+
+---
+
+### 10.5–10.6 Conic Sections
+
+```
+  All conics: locus of points where (dist to focus)/(dist to directrix) = e
+
+  e = 0:  Circle         e = 0.5: Ellipse      e = 1: Parabola   e = 2: Hyperbola
+
+       *                    * *                  *                 *     *
+     *   *                *     *               * *               *       *
+    *     *              *       *             *   *             *         *
+     *   *                *     *            *     *             *         *
+       *                    * *             *       *             *       *
+                                                                  *     *
+```
+
+**Polar form:** r = ed/(1 ± e·cos θ) or r = ed/(1 ± e·sin θ)

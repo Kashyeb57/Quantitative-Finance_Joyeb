@@ -1,0 +1,113 @@
+---
+title: "Chapter 15: Multiple Integrals"
+sidebar_position: 15
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 15.1–15.2 Double Integrals
+
+```
+  ∬_R f(x,y) dA  =  volume under surface z=f(x,y)
+
+         z
+         |  surface z = f(x,y)
+         |    ___
+         |   /   \
+         |  /  V  \  ← volume we integrate
+         | /________\
+         +────────────> y
+        /
+       x    R = region in xy-plane
+
+  FUBINI'S THEOREM (iterate the integral):
+  ∬_R f dA = ∫_a^b ∫_c^d f(x,y) dy dx = ∫_c^d ∫_a^b f(x,y) dx dy
+
+  Evaluate inner integral first, then outer.
+```
+
+<CalcPlot name="double-integral" />
+
+
+---
+
+### 15.3 Polar Coordinates for Double Integrals
+
+```
+  dA = r dr dθ  (area element in polar)
+
+  ∬_R f(x,y) dA = ∫∫ f(r·cosθ, r·sinθ)·r dr dθ
+
+  Why r? — Annular ring at radius r:
+  Area of ring ≈ (2πr)(dr)  →  each bit = r dr dθ
+
+  y
+  |    ╭────╮   ← outer boundary r=b
+  |  ╭─╯ ░░ ╰─╮
+  | ╭╯  ░░░░  ╰╮ ← shaded annulus
+  | |  ░░░░░░  |
+  |  ╰╮░░░░╭╯
+  |    ╰────╯   ← inner boundary r=a
+  +────────────> x
+
+  Useful for circles, rings, sectors!
+```
+
+---
+
+### 15.6–15.8 Triple Integrals and Coordinate Systems
+
+```
+  ∭_E f(x,y,z) dV
+
+  CYLINDRICAL (r, θ, z):
+  x = r cosθ,  y = r sinθ,  z = z
+  dV = r dz dr dθ
+
+         z
+         |        ← cylinder of height h, radius a
+         |   ─────
+         |  /     \
+         | |   +   |  ← center at origin
+         |  \     /
+         |   ─────
+         +────────────> y
+        /
+       x
+
+  SPHERICAL (ρ, φ, θ):
+  x = ρ sinφ cosθ
+  y = ρ sinφ sinθ
+  z = ρ cosφ
+  dV = ρ² sinφ dρ dφ dθ
+
+         z
+         |   ρ = distance from origin
+         | . ← P(ρ,φ,θ)
+         |/ φ ← polar angle from z-axis
+         +──────────> y
+        / θ ← azimuthal angle
+       x
+
+  Use spherical for spheres, cones, balls.
+```
+
+<CalcPlot name="coordinate-systems" />
+
+
+---
+
+### 15.9 Change of Variables (Jacobian)
+
+```
+  ∬_R f(x,y) dA = ∬_S f(x(u,v), y(u,v)) · |J| du dv
+
+  Jacobian: J = ∂(x,y)/∂(u,v) = |∂x/∂u  ∂x/∂v|
+                                  |∂y/∂u  ∂y/∂v|
+
+  |J| is the "stretch factor" of the transformation.
+
+  Example: Polar coordinates
+  x = r cosθ,  y = r sinθ
+  J = r  →  dA = r dr dθ  ✓
+```

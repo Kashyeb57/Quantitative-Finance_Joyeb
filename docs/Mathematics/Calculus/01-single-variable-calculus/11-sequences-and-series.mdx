@@ -1,0 +1,158 @@
+---
+title: "Chapter 11: Infinite Sequences and Series"
+sidebar_position: 11
+---
+
+### 11.1 Sequences
+
+```
+  A sequence {aₙ} is a list: a₁, a₂, a₃, ...
+
+  CONVERGENT:                DIVERGENT:
+
+  aₙ  •                     aₙ           •
+  |    •                    |         •
+  |     •                   |    •
+  |      ••                 | •
+  L ─ ─ ─ •••───           |•──────────────
+  |                         +──────────> n
+  +──────────> n
+  aₙ → L  as n→∞            aₙ → ∞ (no limit)
+
+  lim aₙ = L  (converges)  OR  limit DNE (diverges)
+  n→∞
+```
+
+---
+
+### 11.2 Series
+
+```
+  Series = sum of sequence terms:
+  S = a₁ + a₂ + a₃ + ... = Σ aₙ
+
+  Partial sums: Sₙ = a₁ + a₂ + ... + aₙ
+
+  Series CONVERGES if lim Sₙ = S (finite)
+                       n→∞
+
+  GEOMETRIC SERIES:
+  Σ arⁿ = a/(1−r)    for |r| < 1
+
+  |r|<1: converges          |r|≥1: diverges
+  Sₙ                        Sₙ
+  |      ─────────── S      |            •
+  |  •••• ─ ─ ─              |         •
+  |••                        |      •
+  |                          |   •
+  +──────────> n             +──────────> n
+
+  TEST FOR DIVERGENCE:
+  If lim aₙ ≠ 0, then Σaₙ DIVERGES (necessary condition!)
+```
+
+---
+
+### 11.3 The Integral Test
+
+```
+  If f(n) = aₙ and f is continuous, positive, DECREASING:
+
+  Σaₙ converges  ⟺  ∫_1^∞ f(x)dx converges
+
+  y  a₁            Series sum ≈ integral (area)
+  |  ████
+  |  ████ a₂        Integral: shaded
+  |  ████ ████      Series:   rectangles
+  |  ████ ████ ████
+  +──1────2────3────> n
+
+  p-SERIES: Σ 1/nᵖ
+  converges if p > 1
+  diverges  if p ≤ 1
+```
+
+---
+
+### 11.4–11.6 Convergence Tests Summary
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │ TEST              WHEN TO USE          RESULT               │
+  ├─────────────────────────────────────────────────────────────┤
+  │ Divergence Test   Always try first     aₙ↛0 → diverges     │
+  │ Geometric Series  Σarⁿ form           |r|<1 conv, |r|≥1 div│
+  │ p-Series          Σ1/nᵖ form          p>1 conv, p≤1 div    │
+  │ Integral Test     f(n)=aₙ, decreasing ∫ converges ↔ Σ conv │
+  │ Comparison Test   Compare to known    squeeze argument      │
+  │ Limit Comparison  aₙ~bₙ similar form  lim(aₙ/bₙ)=L>0      │
+  │ Alternating Series (-1)ⁿaₙ, aₙ↘0     converges!           │
+  │ Ratio Test        factorials/powers   L=lim|aₙ₊₁/aₙ|<1→cv │
+  │ Root Test         nᵗʰ powers          L=lim|aₙ|^(1/n)<1→cv│
+  └─────────────────────────────────────────────────────────────┘
+```
+
+**Ratio Test visual:**
+```
+  L = lim |aₙ₊₁/aₙ|
+      n→∞
+
+  L < 1  →  CONVERGES absolutely
+  L > 1  →  DIVERGES
+  L = 1  →  INCONCLUSIVE (try another test)
+```
+
+---
+
+### 11.8–11.9 Power Series
+
+```
+  Σ cₙ(x−a)ⁿ = c₀ + c₁(x−a) + c₂(x−a)² + ...
+
+  RADIUS OF CONVERGENCE R:
+  - Series converges for |x−a| < R
+  - Series diverges  for |x−a| > R
+  - Endpoints: check separately!
+
+  Number line:
+  ───────[────────────────────]───────>
+         a−R        a       a+R
+         ↑                   ↑
+     might converge       might converge
+         or diverge       or diverge
+
+  Find R using Ratio Test: R = lim |cₙ/cₙ₊₁|
+
+  Key example:
+  1/(1−x) = Σ xⁿ = 1 + x + x² + x³ + ...  for |x| < 1
+```
+
+---
+
+### 11.10 Taylor and Maclaurin Series
+
+```
+  f(x) = Σ f⁽ⁿ⁾(a)/n! · (x−a)ⁿ    (Taylor series centered at a)
+
+  When a = 0: MACLAURIN SERIES
+
+  ┌──────────────────────────────────────────────────────┐
+  │  eˣ   = 1 + x + x²/2! + x³/3! + x⁴/4! + ...        │
+  │  sin(x)= x − x³/3! + x⁵/5! − x⁷/7! + ...           │
+  │  cos(x)= 1 − x²/2! + x⁴/4! − x⁶/6! + ...           │
+  │  ln(1+x)= x − x²/2 + x³/3 − x⁴/4 + ...  (|x|<1)   │
+  │  1/(1−x)= 1 + x + x² + x³ + ...          (|x|<1)   │
+  └──────────────────────────────────────────────────────┘
+
+  Visual: approximating sin(x) with Taylor polynomials
+
+  y  *    T₁=x       T₃=x−x³/6    T₅=x−x³/6+x⁵/120
+  | * *
+  |*   *───────      → better and better approximation
+  |    *
+  |     *       *
+  +─────────────────> x
+  0    π         2π
+```
+
+> **Quant Finance:** Taylor expansion of option price gives delta-gamma approximation; Taylor series of e^(iσ) used in characteristic functions.

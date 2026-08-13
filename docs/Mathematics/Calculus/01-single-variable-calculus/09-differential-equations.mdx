@@ -1,0 +1,147 @@
+---
+title: "Chapter 9: Differential Equations"
+sidebar_position: 9
+---
+
+### 9.1 What is a Differential Equation?
+
+```
+  An equation involving a function AND its derivatives.
+
+  ORDER = highest derivative present.
+
+  Examples:
+  y' = ky                    (1st order — population growth)
+  y'' + ω²y = 0              (2nd order — oscillation)
+  ∂u/∂t = k·∂²u/∂x²         (PDE — heat equation)
+```
+
+---
+
+### 9.2 Direction Fields and Euler's Method
+
+**Direction Field:** At each point (x,y), draw a short line with slope f'=F(x,y).
+
+```
+  y' = y (solution is eˣ)
+
+  Direction field:         Solution curves:
+
+  y                        y
+  3  → → → → →            3       /
+  2  → → → → →            2      /
+  1  → → → → →            1     /
+  0  → → → → →     →      0 ───/──────
+  −1 → → → → →           −1   /
+  +──────────> x           +──────────> x
+
+  Arrows show direction    Curves follow arrows
+```
+
+**Euler's Method** — numerical approximation:
+```
+  yₙ₊₁ = yₙ + h·F(xₙ, yₙ)
+
+  Start at (x₀, y₀), take steps of size h:
+
+  y         *  ← exact solution
+  |       * ↑ error grows
+  |      /  *
+  |    */  *
+  |   /*  * ← Euler steps
+  |  /*  *
+  | /* *
+  +────────────> x
+  x₀  x₁  x₂
+```
+
+---
+
+### 9.3 Separable Equations
+
+```
+  Form: dy/dx = g(x)·h(y)
+
+  Separate variables:
+  1/h(y) dy = g(x) dx
+
+  Integrate both sides:
+  ∫ 1/h(y) dy = ∫ g(x) dx
+
+  Example: dy/dx = xy
+
+  dy/y = x dx
+  ∫ dy/y = ∫ x dx
+  ln|y| = x²/2 + C
+  y = Ae^(x²/2)
+```
+
+---
+
+### 9.4 Logistic Growth
+
+```
+  dP/dt = kP(1 − P/M)
+
+  M = carrying capacity (maximum population)
+
+  Solution: P(t) = M / (1 + A·e^(−kt))
+
+  P
+  M ─────────────────── ← carrying capacity (asymptote)
+  |              *****
+  |          ****
+  |        ***
+  M/2 ─ ─**** ← inflection point (fastest growth)
+  |      *
+  |    **
+  |  **
+  | *
+  +──────────────────> t
+
+  Growth slows as population approaches M
+```
+
+> **Quant Finance:** Logistic model for market saturation, adoption curves.
+
+---
+
+### 9.5 First-Order Linear ODEs
+
+```
+  Form: y' + P(x)y = Q(x)
+
+  SOLUTION METHOD — Integrating Factor:
+  I(x) = e^(∫P(x)dx)
+
+  Multiply both sides by I(x):
+  [I(x)·y]' = I(x)·Q(x)
+
+  Integrate both sides:
+  I(x)·y = ∫ I(x)·Q(x) dx
+
+  Solve for y.
+```
+
+---
+
+### 9.6 Predator-Prey Systems (Lotka-Volterra)
+
+```
+  dx/dt = ax − bxy     (prey — grows alone, dies with predator)
+  dy/dt = −cy + dxy    (predator — dies alone, grows with prey)
+
+  Population cycles:
+
+  Population
+  |    prey      predator
+  |   *    *    *    *
+  |  * *  * *  * *  * *
+  | *   **   **   **   *
+  |*                     *
+  +──────────────────────> t
+
+  When prey peaks → predator grows
+  When predator peaks → prey declines
+  → oscillating cycle!
+```

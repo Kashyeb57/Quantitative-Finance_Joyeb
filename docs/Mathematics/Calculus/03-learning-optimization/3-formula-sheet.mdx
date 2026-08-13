@@ -1,0 +1,77 @@
+---
+title: "Formula Master-Sheet"
+sidebar_position: 3
+---
+
+```
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  LIMITS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  lim sin(x)/x = 1              (x→0)
+  lim (1−cos x)/x = 0           (x→0)
+  lim (1+1/x)^x = e             (x→∞)
+  lim (eˣ−1)/x = 1              (x→0)
+  lim ln(1+x)/x = 1             (x→0)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DERIVATIVES
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  d/dx[xⁿ]        = nxⁿ⁻¹
+  d/dx[eˣ]        = eˣ
+  d/dx[aˣ]        = aˣ ln(a)
+  d/dx[ln x]      = 1/x
+  d/dx[log_a x]   = 1/(x ln a)
+  d/dx[sin x]     = cos x
+  d/dx[cos x]     = −sin x
+  d/dx[tan x]     = sec²x
+  d/dx[sin⁻¹x]   = 1/√(1−x²)
+  d/dx[tan⁻¹x]   = 1/(1+x²)
+
+  RULES:
+  (fg)'    = f'g + fg'
+  (f/g)'   = (f'g − fg')/g²
+  [f(g(x))]' = f'(g(x))·g'(x)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  INTEGRALS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ∫ xⁿ dx           = xⁿ⁺¹/(n+1) + C   (n≠−1)
+  ∫ 1/x dx          = ln|x| + C
+  ∫ eˣ dx           = eˣ + C
+  ∫ aˣ dx           = aˣ/ln(a) + C
+  ∫ sin x dx        = −cos x + C
+  ∫ cos x dx        = sin x + C
+  ∫ sec²x dx        = tan x + C
+  ∫ 1/(1+x²) dx     = tan⁻¹x + C
+  ∫ 1/√(1−x²) dx   = sin⁻¹x + C
+
+  TECHNIQUES:
+  Parts:        ∫ u dv = uv − ∫ v du
+  Substitution: ∫ f(g(x))g'(x)dx = ∫ f(u)du
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TAYLOR/MACLAURIN SERIES
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  eˣ      = 1 + x + x²/2! + x³/3! + ...
+  sin(x)  = x − x³/3! + x⁵/5! − ...
+  cos(x)  = 1 − x²/2! + x⁴/4! − ...
+  ln(1+x) = x − x²/2 + x³/3 − ...     |x|<1
+  (1+x)^k = 1 + kx + k(k−1)x²/2! + ...
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MULTIVARIABLE
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ∇f          = <∂f/∂x, ∂f/∂y, ∂f/∂z>
+  Dᵤf         = ∇f · û
+  Chain Rule  : dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
+  Tangent Plane: z−f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VECTOR CALCULUS
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  curl F     = ∇ × F
+  div F      = ∇ · F
+  Green's:    ∮_C F·dr = ∬_D curl F dA
+  Stokes':    ∮_C F·dr = ∬_S curl F · dS
+  Divergence: ∬_S F·dS = ∭_E div F dV
+```

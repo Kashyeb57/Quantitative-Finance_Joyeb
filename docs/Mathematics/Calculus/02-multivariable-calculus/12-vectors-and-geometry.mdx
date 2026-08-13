@@ -1,0 +1,124 @@
+---
+title: "Chapter 12: Vectors and the Geometry of Space"
+sidebar_position: 12
+---
+
+import CalcPlot from '@site/src/components/CalcPlot';
+
+### 12.1 Three-Dimensional Coordinate System
+
+```
+         z
+         |
+         |
+         |          . P(x,y,z)
+         |       . /|
+         |    .  / |
+         | .    /  |
+         +────/───────> y
+        /|  /
+       / | /
+      /  |/
+     x   +
+
+  Distance: d = √((x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²)
+  Sphere: (x−a)² + (y−b)² + (z−c)² = r²
+```
+
+<CalcPlot name="3d-coordinates" />
+
+
+---
+
+### 12.2 Vectors
+
+```
+  A vector has MAGNITUDE and DIRECTION
+
+       B
+  →   /  ←── arrow head
+  a  /
+    /
+   A  ←── tail
+
+  a = <a₁, a₂, a₃>
+
+  |a| = √(a₁² + a₂² + a₃²)   ← magnitude
+
+  Unit vector: û = a/|a|     (magnitude = 1)
+
+  Vector addition (tip-to-tail):
+
+      b         a + b
+      ↗        ↗
+  a → + → b   ↗
+             ↗
+```
+
+---
+
+### 12.3 The Dot Product
+
+```
+  a · b = a₁b₁ + a₂b₂ + a₃b₃ = |a||b|cos(θ)
+
+  θ = angle between vectors
+
+  GEOMETRIC MEANING:
+  a · b > 0  →  θ < 90°  (acute — same direction)
+  a · b = 0  →  θ = 90°  (perpendicular/orthogonal)
+  a · b < 0  →  θ > 90°  (obtuse — opposite directions)
+
+      b                    b
+      |      a · b = |a||b|cosθ
+      |θ
+  ────+────────> a
+
+  Projection of b onto a:
+  proj_a(b) = (a·b/|a|²)·a
+```
+
+---
+
+### 12.4 The Cross Product
+
+```
+  a × b = <a₂b₃−a₃b₂, a₃b₁−a₁b₃, a₁b₂−a₂b₁>
+
+  KEY PROPERTY: a × b is PERPENDICULAR to both a and b
+
+       z  a × b
+       |↑
+       |/
+  ─────+──────> a
+      /|
+     / |
+    b  |y
+
+  |a × b| = |a||b|sin(θ) = area of parallelogram
+
+  Right-hand rule: curl fingers from a to b, thumb points to a×b
+  a × b = −(b × a)  (anti-commutative)
+```
+
+---
+
+### 12.5 Lines and Planes
+
+```
+  LINE through P₀(x₀,y₀,z₀) with direction v=<a,b,c>:
+  Vector form:     r = r₀ + tv
+  Parametric:      x = x₀+at, y = y₀+bt, z = z₀+ct
+
+  PLANE through P₀ with normal n=<a,b,c>:
+  Scalar equation: a(x−x₀) + b(y−y₀) + c(z−z₀) = 0
+  General:         ax + by + cz = d
+
+         z
+         |   n ↑ (normal vector)
+         |   |
+         |   |
+         +───────────────> y    ← plane (flat surface)
+        /
+       x
+```
