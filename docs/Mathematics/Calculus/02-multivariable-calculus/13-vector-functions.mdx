@@ -4,6 +4,7 @@ sidebar_position: 13
 ---
 
 import CalcPlot from '@site/src/components/CalcPlot';
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 13.1–13.2 Vector Functions and Derivatives
 
@@ -57,23 +58,35 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 13.4 Velocity and Acceleration
 
-```
-  r(t) = position
-  v(t) = r'(t) = velocity
-  a(t) = v'(t) = r''(t) = acceleration
+$$
+\mathbf{r}(t) = \text{position}, \qquad
+\mathbf{v}(t) = \mathbf{r}'(t) = \text{velocity}, \qquad
+\mathbf{a}(t) = \mathbf{v}'(t) = \mathbf{r}''(t) = \text{acceleration}
+$$
 
-  Speed = |v(t)|
+$$
+\text{Speed} = |\mathbf{v}(t)|
+$$
 
-  Projectile motion:
-  r(t) = <v₀cos(α)·t, v₀sin(α)·t − ½gt²>
+**Projectile motion:**
 
-  y         *  ← maximum height
-  |        * *
-  |       *   *
-  |      *     *
-  |     *       *
-  |    *         *
-  |   *           *
-  +──────────────────> x
-  launch              landing
-```
+$$
+\mathbf{r}(t) = \left\langle\, v_0\cos(\alpha)\,t,\ \; v_0\sin(\alpha)\,t - \tfrac{1}{2}g t^2 \,\right\rangle
+$$
+
+The trajectory is a downward parabola: it rises to a maximum height, then falls symmetrically back to the ground.
+
+<HandPlot
+  title="Projectile trajectory"
+  xLabel="x" yLabel="y"
+  domain={[0, 6]}
+  range={[0, 10]}
+  curves={[
+    { f: (x) => 9 - (x - 3) * (x - 3), color: 'ink', label: 'y(x): projectile path' },
+  ]}
+  points={[
+    { x: 0, y: 0, label: 'launch', color: 'green' },
+    { x: 3, y: 9, label: 'maximum height', color: 'red' },
+    { x: 6, y: 0, label: 'landing', color: 'blue' },
+  ]}
+/>

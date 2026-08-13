@@ -3,53 +3,71 @@ title: "Chapter 11: Infinite Sequences and Series"
 sidebar_position: 11
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 11.1 Sequences
 
-```
-  A sequence {aₙ} is a list: a₁, a₂, a₃, ...
+A sequence $\{a_n\}$ is a list: $a_1, a_2, a_3, \ldots$
 
-  CONVERGENT:                DIVERGENT:
+A **convergent** sequence settles toward a limit $L$; a **divergent** sequence has no finite limit (here it grows without bound).
 
-  aₙ  •                     aₙ           •
-  |    •                    |         •
-  |     •                   |    •
-  |      ••                 | •
-  L ─ ─ ─ •••───           |•──────────────
-  |                         +──────────> n
-  +──────────> n
-  aₙ → L  as n→∞            aₙ → ∞ (no limit)
+$$
+\lim_{n\to\infty} a_n = L \quad\text{(converges)} \qquad\text{OR}\qquad \text{limit DNE (diverges)}
+$$
 
-  lim aₙ = L  (converges)  OR  limit DNE (diverges)
-  n→∞
-```
+<HandPlot
+  title="Convergent: aₙ → L"
+  xLabel="n" yLabel="aₙ"
+  domain={[0.5, 10]}
+  range={[0, 4]}
+  curves={[{ f: (n) => 1 + 3 / n, color: 'blue', label: 'aₙ = 1 + 3/n' }]}
+  marks={[{ y: 1, label: 'L', color: 'red' }]}
+/>
+
+<HandPlot
+  title="Divergent: aₙ → ∞ (no limit)"
+  xLabel="n" yLabel="aₙ"
+  domain={[0.5, 10]}
+  range={[0, 6]}
+  curves={[{ f: (n) => Math.sqrt(2 * n), color: 'ink', label: 'aₙ = √(2n)' }]}
+/>
 
 ---
 
 ### 11.2 Series
 
-```
-  Series = sum of sequence terms:
-  S = a₁ + a₂ + a₃ + ... = Σ aₙ
+A **series** is the sum of sequence terms:
 
-  Partial sums: Sₙ = a₁ + a₂ + ... + aₙ
+$$
+S = a_1 + a_2 + a_3 + \cdots = \sum a_n
+$$
 
-  Series CONVERGES if lim Sₙ = S (finite)
-                       n→∞
+with **partial sums** $S_n = a_1 + a_2 + \cdots + a_n$. The series **converges** if $\displaystyle\lim_{n\to\infty} S_n = S$ (finite).
 
-  GEOMETRIC SERIES:
-  Σ arⁿ = a/(1−r)    for |r| < 1
+**Geometric series:**
 
-  |r|<1: converges          |r|≥1: diverges
-  Sₙ                        Sₙ
-  |      ─────────── S      |            •
-  |  •••• ─ ─ ─              |         •
-  |••                        |      •
-  |                          |   •
-  +──────────> n             +──────────> n
+$$
+\sum a r^{\,n} = \frac{a}{1-r} \qquad\text{for } |r| < 1
+$$
 
-  TEST FOR DIVERGENCE:
-  If lim aₙ ≠ 0, then Σaₙ DIVERGES (necessary condition!)
-```
+<HandPlot
+  title="|r| < 1: partial sums converge to S"
+  xLabel="n" yLabel="Sₙ"
+  domain={[0, 10]}
+  range={[0, 2.5]}
+  curves={[{ f: (n) => 2 * (1 - Math.pow(0.5, n)), color: 'blue', label: 'Sₙ → S' }]}
+  marks={[{ y: 2, label: 'S', color: 'red' }]}
+/>
+
+<HandPlot
+  title="|r| ≥ 1: partial sums diverge"
+  xLabel="n" yLabel="Sₙ"
+  domain={[0, 8]}
+  range={[0, 8]}
+  curves={[{ f: (n) => Math.pow(1.3, n) - 1, color: 'ink', label: 'Sₙ → ∞' }]}
+/>
+
+**Test for divergence:** if $\displaystyle\lim_{n\to\infty} a_n \neq 0$, then $\sum a_n$ **diverges** (a necessary condition!).
 
 ---
 
@@ -143,16 +161,22 @@ sidebar_position: 11
   │  ln(1+x)= x − x²/2 + x³/3 − x⁴/4 + ...  (|x|<1)   │
   │  1/(1−x)= 1 + x + x² + x³ + ...          (|x|<1)   │
   └──────────────────────────────────────────────────────┘
-
-  Visual: approximating sin(x) with Taylor polynomials
-
-  y  *    T₁=x       T₃=x−x³/6    T₅=x−x³/6+x⁵/120
-  | * *
-  |*   *───────      → better and better approximation
-  |    *
-  |     *       *
-  +─────────────────> x
-  0    π         2π
 ```
+
+**Visual: approximating $\sin(x)$ with Taylor polynomials** — each higher-degree polynomial ($T_1 = x$, then $T_3 = x - x^3/6$, then $T_5 = x - x^3/6 + x^5/120$) hugs the true curve over a wider interval:
+
+<HandPlot
+  title="Taylor polynomials of sin(x)"
+  xLabel="x" yLabel="y"
+  domain={[-1, 6.5]}
+  range={[-2, 2]}
+  curves={[
+    { f: (x) => Math.sin(x), color: 'ink', label: 'sin(x)' },
+    { f: (x) => x, color: 'pencil', dash: true, label: 'T₁ = x' },
+    { f: (x) => x - Math.pow(x, 3) / 6, color: 'blue', dash: true, label: 'T₃' },
+    { f: (x) => x - Math.pow(x, 3) / 6 + Math.pow(x, 5) / 120, color: 'green', dash: true, label: 'T₅' },
+  ]}
+  marks={[{ x: Math.PI, label: 'π' }]}
+/>
 
 > **Quant Finance:** Taylor expansion of option price gives delta-gamma approximation; Taylor series of e^(iσ) used in characteristic functions.

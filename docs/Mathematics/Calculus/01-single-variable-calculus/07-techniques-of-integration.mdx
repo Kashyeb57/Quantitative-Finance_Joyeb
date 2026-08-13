@@ -3,6 +3,8 @@ title: "Chapter 7: Techniques of Integration"
 sidebar_position: 7
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 7.1 Integration by Parts
 
 ```
@@ -126,32 +128,45 @@ Decompose rational functions into simpler fractions:
 ### 7.8 Improper Integrals
 
 **Type 1: Infinite limits**
-```
-  ∫_a^∞ f(x) dx = lim  ∫_a^t f(x) dx
-                   t→∞
 
-  y    *                   Example:
-  |   * *   Total area     ∫_1^∞ 1/x² dx
-  |  *   *  might be       = lim [−1/x]_1^t
-  | *     * FINITE!        = lim (−1/t+1)
-  |*       ****──────      = 1    ← converges!
-  +──1──────────> x
+$$
+\int_a^\infty f(x)\,dx = \lim_{t\to\infty} \int_a^t f(x)\,dx
+$$
 
-  But ∫_1^∞ 1/x dx = ∞  (diverges — "just barely")
-```
+<HandPlot
+  title="Infinite domain, finite area"
+  xLabel="x" yLabel="y"
+  domain={[1, 8]}
+  range={[0, 1.1]}
+  curves={[
+    { f: (x) => 1 / (x * x), color: 'ink', label: 'f(x) = 1/x²' },
+  ]}
+  marks={[{ x: 1, label: 'x = 1' }]}
+/>
+
+Even though the region stretches out to infinity, its **total area can be finite**:
+
+$$
+\int_1^\infty \frac{1}{x^2}\,dx = \lim_{t\to\infty}\Big[-\tfrac{1}{x}\Big]_1^t = \lim_{t\to\infty}\Big(-\tfrac{1}{t}+1\Big) = 1 \quad \Longleftarrow \text{ converges!}
+$$
+
+But $\displaystyle\int_1^\infty \frac{1}{x}\,dx = \infty$ — this one **diverges**, "just barely."
 
 **Type 2: Discontinuous integrands**
-```
-  ∫_a^b f(x) dx  where f blows up at a:
 
-  = lim  ∫_t^b f(x) dx
-    t→a⁺
+For $\displaystyle\int_a^b f(x)\,dx$ where $f$ blows up at $a$:
 
-  y     |← discontinuity
-  |     |
-  |     |*
-  |     | *
-  |     |  *
-  |     |   ***
-  +─────a──────b──> x
-```
+$$
+\int_a^b f(x)\,dx = \lim_{t\to a^+} \int_t^b f(x)\,dx
+$$
+
+<HandPlot
+  title="Vertical asymptote at x = a"
+  xLabel="x" yLabel="y"
+  domain={[1, 5]}
+  range={[0, 6]}
+  curves={[
+    { f: (x) => 1 / (x - 1), color: 'ink', label: 'f(x) → ∞ as x → a⁺' },
+  ]}
+  marks={[{ x: 1, label: 'a (discontinuity)', color: 'red' }, { x: 5, label: 'b' }]}
+/>

@@ -4,6 +4,7 @@ sidebar_position: 0
 ---
 
 import CalcPlot from '@site/src/components/CalcPlot';
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 0.1 The Two Central Problems of Calculus
 
@@ -15,21 +16,18 @@ Calculus is built on two problems: **finding areas** and **finding slopes of cur
 
 We want the exact area under a curve. Since we can't compute curved areas directly, we approximate with rectangles and take a limit.
 
-```
-  y
-  |
-6 |        *****
-5 |      **     **
-4 |    **    ░░░  **
-3 |   *   ░░░░░░░░  *
-2 |  *  ░░░░░░░░░░░░ *
-1 | * ░░░░░░░░░░░░░░░░*
-  +----+----+----+----+-> x
-  a                   b
+<HandPlot
+  title="Area under a curve"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[0, 7]}
+  curves={[
+    { f: (x) => 6 * Math.exp(-x * x / 2.2), color: 'ink', label: 'f(x)' },
+  ]}
+  marks={[{ x: -1.6, label: 'a' }, { x: 1.6, label: 'b' }]}
+/>
 
-  ░ = area we want to compute
-  * = the curve f(x)
-```
+The shaded region between $a$ and $b$ is the area we want to compute under the curve $f(x)$.
 
 **Riemann Sum approach** — divide [a,b] into n rectangles:
 
@@ -62,38 +60,42 @@ A = lim     Σ f(xᵢ*)·Δx     where Δx = (b-a)/n
 
 Given a curve, find the slope of the line that just "touches" it at one point.
 
-```
-  y
-  |              / ← tangent line (what we want)
-  |          __/
-  |       __/ ← curve y = f(x)
-  |    __/
-  |   /
-  | P(a, f(a))
-  +-------------------> x
-       a
-```
+<HandPlot
+  title="The tangent line at a point"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 9]}
+  curves={[
+    { f: (x) => x * x * 0.5, color: 'ink', label: 'y = f(x)' },
+    { f: (x) => 2 * x - 2, color: 'blue', label: 'tangent at P' },
+  ]}
+  points={[{ x: 2, y: 2, label: 'P(a, f(a))', color: 'red' }]}
+/>
+
+The tangent line is the line that just "touches" the curve $y = f(x)$ at the point $P(a, f(a))$ — its slope is what we want.
 
 **Secant line approach** — take two points and slide Q → P:
 
-```
-  y
-  |           Q(x, f(x))
-  |         o
-  |       / ← secant line
-  |     /
-  |   o ← P(a, f(a))
-  |
-  +-------------------> x
+<HandPlot
+  title="Secant line through P and Q"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 9]}
+  curves={[
+    { f: (x) => x * x * 0.5, color: 'ink', label: 'y = f(x)' },
+    { f: (x) => 2.5 * x - 3, color: 'blue', label: 'secant PQ' },
+  ]}
+  points={[
+    { x: 2, y: 2, label: 'P(a, f(a))', color: 'red' },
+    { x: 3.2, y: 5.12, label: 'Q(x, f(x))', color: 'red' },
+  ]}
+/>
 
-  slope of PQ = [f(x) - f(a)] / (x - a)
+$$\text{slope of } PQ = \frac{f(x) - f(a)}{x - a}$$
 
-  As x → a, secant → tangent:
+As $x \to a$, the secant line approaches the tangent line:
 
-  m = lim   [f(x) - f(a)]
-      x→a   ─────────────
-                x - a
-```
+$$m = \lim_{x \to a} \frac{f(x) - f(a)}{x - a}$$
 
 > **Quant Finance:** Delta (Δ) is the tangent slope of an option price curve vs. underlying price — the hedge ratio.
 
@@ -101,17 +103,17 @@ Given a curve, find the slope of the line that just "touches" it at one point.
 
 #### The Velocity Problem
 
-```
-  Position
-  s(t)
-  |          *
-  |        *
-  |      *         Average velocity = Δs/Δt = [s(b)-s(a)]/(b-a)
-  |    *
-  |  *
-  +-----------> time t
-  a         b
+<HandPlot
+  title="Position vs. time"
+  xLabel="t" yLabel="s(t)"
+  domain={[0, 4]}
+  range={[0, 9]}
+  curves={[
+    { f: (x) => x * x * 0.5, color: 'ink', label: 's(t)' },
+  ]}
+  marks={[{ x: 1, label: 'a' }, { x: 3, label: 'b' }]}
+/>
 
-  Instantaneous velocity = lim  [s(t) - s(a)] / (t - a)
-                           t→a
-```
+$$\text{Average velocity} = \frac{\Delta s}{\Delta t} = \frac{s(b) - s(a)}{b - a}$$
+
+$$\text{Instantaneous velocity} = \lim_{t \to a} \frac{s(t) - s(a)}{t - a}$$

@@ -3,6 +3,8 @@ title: "Chapter 3: Differentiation Rules"
 sidebar_position: 3
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 3.1 Basic Differentiation Rules
 
 ```
@@ -20,18 +22,17 @@ sidebar_position: 3
 ```
 
 **Visual: Power Rule**
-```
-  f(x) = x³         f'(x) = 3x²
 
-  y      *           y        *    *
-  |     *            |       *      *
-  |    *             |      *        *
-  |   *              |     *
-  |  *               |────*────────── 0
-  | *                |  *
-  +──────> x         +──────> x
-  cubic              parabola (always ≥ 0)
-```
+<HandPlot
+  title="Power Rule: f(x) = x³ and f'(x) = 3x²"
+  xLabel="x" yLabel="y"
+  domain={[-2, 2]}
+  range={[-6, 8]}
+  curves={[
+    { f: (x) => x*x*x, color: 'ink', label: 'f(x) = x³ (cubic)' },
+    { f: (x) => 3*x*x, color: 'blue', dash: true, label: "f'(x) = 3x² (≥ 0)" },
+  ]}
+/>
 
 ---
 
@@ -75,22 +76,21 @@ sidebar_position: 3
 ```
 
 **Visual: sin and its derivative cos**
-```
-  sin(x):                    cos(x) = [sin(x)]':
 
-  y  1 ─ *   *              y  1 ─ *           *
-  |      * * *              |    ** *         * *
-  |   *       *             |  **    *       *   *
-  |  *         *            | *       *     *     *
-  |──*───────────*──── 0    |*─────────*───*────────0
-  |               *  *      |           * *
-  −1 ─               *      −1 ─         *
-  +──0──π──2π────> x        +──0──π──2π────> x
+<HandPlot
+  title="sin(x) and its derivative cos(x)"
+  xLabel="x" yLabel="y"
+  domain={[0, 6.283185307]}
+  range={[-1.4, 1.4]}
+  curves={[
+    { f: (x) => Math.sin(x), color: 'ink', label: 'sin(x)' },
+    { f: (x) => Math.cos(x), color: 'blue', dash: true, label: "cos(x) = [sin(x)]'" },
+  ]}
+/>
 
-  Where sin rises → cos is positive (slope is positive)
-  Where sin falls → cos is negative (slope is negative)
-  Where sin peaks → cos = 0 (slope = zero)
-```
+- Where sin **rises** → cos is positive (slope is positive)
+- Where sin **falls** → cos is negative (slope is negative)
+- Where sin **peaks** → cos $= 0$ (slope $= 0$)
 
 ---
 
@@ -134,23 +134,27 @@ sidebar_position: 3
 
 Sometimes y is not solved explicitly for x. Differentiate both sides and treat y as y(x):
 
-```
-  Example: x² + y² = 25  (circle of radius 5)
+**Example:** $x^2 + y^2 = 25$ (circle of radius 5)
 
-  y
-  5─   *****
-  |  **     **
-  | *         *
-  |*           *         Differentiate:
-  |             *        2x + 2y·(dy/dx) = 0
-  |*           *
-  | *         *          dy/dx = −x/y
-  |  **     **
-  −5─   *****
-  +──−5────5────> x
+<HandPlot
+  title="Implicit curve: x² + y² = 25"
+  xLabel="x" yLabel="y"
+  domain={[-5, 5]}
+  range={[-5.5, 5.5]}
+  curves={[
+    { f: (x) => Math.sqrt(25 - x*x), color: 'ink', label: 'upper: y = +√(25−x²)' },
+    { f: (x) => -Math.sqrt(25 - x*x), color: 'ink', label: 'lower: y = −√(25−x²)' },
+  ]}
+  points={[{ x: 3, y: 4, label: 'P (3,4), slope −3/4', color: 'red' }]}
+/>
 
-  At point (3,4): slope = −3/4
-```
+Differentiate both sides:
+
+$$
+2x + 2y\,\frac{dy}{dx} = 0 \quad\Longrightarrow\quad \frac{dy}{dx} = -\frac{x}{y}
+$$
+
+At point $(3,4)$: slope $= -\tfrac{3}{4}$.
 
 > **Quant Finance:** Extracting implied volatility from option prices; yield curve bootstrapping.
 
@@ -162,18 +166,21 @@ Sometimes y is not solved explicitly for x. Differentiate both sides and treat y
   d/dx[ln(x)]      = 1/x        (x > 0)
   d/dx[ln|x|]      = 1/x        (x ≠ 0)
   d/dx[log_b(x)]   = 1/(x·ln b)
-
-  Visual: d/dx[ln(x)] = 1/x
-
-  y     ln(x)            y  1/x
-  |         ****         |*
-  |      ***             | *
-  |   ***                |  *
-  |***                   |   *
-  +─────────────> x      |    **
-  (0,1) zero crossing    |      ****
-                         +─────────────> x
 ```
+
+**Visual:** $\frac{d}{dx}[\ln(x)] = \frac{1}{x}$
+
+<HandPlot
+  title="ln(x) and its derivative 1/x"
+  xLabel="x" yLabel="y"
+  domain={[0.05, 6]}
+  range={[-2, 4]}
+  curves={[
+    { f: (x) => Math.log(x), color: 'ink', label: 'ln(x) — crosses at (1,0)' },
+    { f: (x) => 1/x, color: 'blue', dash: true, label: "1/x = [ln(x)]'" },
+  ]}
+  marks={[{ x: 1, label: 'x=1' }]}
+/>
 
 **Logarithmic Differentiation** — take ln of both sides first:
 ```
@@ -188,18 +195,20 @@ Sometimes y is not solved explicitly for x. Differentiate both sides and treat y
 ### 3.7–3.8 Rates of Change and Exponential Growth
 
 **Economics Applications:**
-```
-  C(x) = total cost to produce x units
-  C'(x) = marginal cost (cost of one more unit)
 
-  y  C(x)                 C'(x)
-  |       *               |       *
-  |      *                |     **
-  |    **                 |   **
-  |  **                   | **
-  | *                     |*
-  +──────────> x          +──────────> x
-```
+- $C(x)$ = total cost to produce $x$ units
+- $C'(x)$ = marginal cost (cost of one more unit)
+
+<HandPlot
+  title="Cost C(x) and marginal cost C'(x)"
+  xLabel="x (units)" yLabel="cost"
+  domain={[0, 6]}
+  range={[0, 20]}
+  curves={[
+    { f: (x) => 0.5*x*x + x, color: 'ink', label: 'C(x) — total cost' },
+    { f: (x) => x + 1, color: 'blue', dash: true, label: "C'(x) — marginal cost" },
+  ]}
+/>
 
 **Natural Growth/Decay:**
 ```
@@ -236,21 +245,25 @@ Variables that all change with time — use chain rule w.r.t. t:
 ### 3.10 Linearization and Differentials
 
 **Linear approximation (tangent line approximation):**
-```
-  L(x) = f(a) + f'(a)(x − a)
 
-  y       *
-  |      * ← curve f(x)
-  |     *  ← linear approx L(x)
-  |    * /
-  |   */
-  |  *  (a, f(a))
-  | */
-  +─────────────> x
-        a
+$$
+L(x) = f(a) + f'(a)(x - a)
+$$
 
-  L(x) ≈ f(x) near x = a
-```
+<HandPlot
+  title="Linearization: L(x) tangent to f(x) at x = a"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 8]}
+  curves={[
+    { f: (x) => x*x*0.5, color: 'ink', label: 'curve f(x)' },
+    { f: (x) => 2*(x - 2) + 2, color: 'blue', dash: true, label: 'linear approx L(x)' },
+  ]}
+  points={[{ x: 2, y: 2, label: '(a, f(a))', color: 'red' }]}
+  marks={[{ x: 2, label: 'a' }]}
+/>
+
+$L(x) \approx f(x)$ near $x = a$.
 
 **Differential:**
 ```
@@ -263,20 +276,31 @@ Variables that all change with time — use chain rule w.r.t. t:
 
 ### 3.11 Hyperbolic Functions
 
-```
-  sinh(x) = (eˣ − e⁻ˣ)/2
-  cosh(x) = (eˣ + e⁻ˣ)/2
-  tanh(x) = sinh(x)/cosh(x)
+$$
+\sinh(x) = \frac{e^{x} - e^{-x}}{2}, \qquad
+\cosh(x) = \frac{e^{x} + e^{-x}}{2}, \qquad
+\tanh(x) = \frac{\sinh(x)}{\cosh(x)}
+$$
 
-  y   cosh(x)          y   tanh(x)
-  |     *              | 1─────────*****
-  |    * *             |       ****
-  |   *   *            |   ****
-  |  *     *           |***
-  | *       *          +──────────────> x
-  +──────────> x       |       (bounded −1 to 1)
-  (catenary shape)
+<HandPlot
+  title="cosh(x) — the catenary shape"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[0, 10]}
+  curves={[
+    { f: (x) => Math.cosh(x), color: 'ink', label: 'cosh(x)' },
+  ]}
+/>
 
-  Identity: cosh²(x) − sinh²(x) = 1
-  (analogous to cos²+sin²=1 for trig)
-```
+<HandPlot
+  title="tanh(x) — bounded between −1 and 1"
+  xLabel="x" yLabel="y"
+  domain={[-4, 4]}
+  range={[-1.4, 1.4]}
+  curves={[
+    { f: (x) => Math.tanh(x), color: 'blue', label: 'tanh(x)' },
+  ]}
+  marks={[{ y: 1, label: 'y = 1' }, { y: -1, label: 'y = −1' }]}
+/>
+
+**Identity:** $\cosh^2(x) - \sinh^2(x) = 1$ (analogous to $\cos^2 + \sin^2 = 1$ for trig).

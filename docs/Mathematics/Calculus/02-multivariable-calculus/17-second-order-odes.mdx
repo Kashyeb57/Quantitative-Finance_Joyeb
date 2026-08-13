@@ -3,6 +3,8 @@ title: "Chapter 17: Second-Order Differential Equations"
 sidebar_position: 17
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 17.1 Second-Order Linear Equations
 
 ```
@@ -20,15 +22,25 @@ sidebar_position: 17
 
   Case 3: Complex roots r = α ± βi
   y = e^(αx)(C₁cos(βx) + C₂sin(βx))
-
-  Case 3 gives oscillations:
-
-  y      ← envelope e^(αx)
-  |   *   *   *
-  |  * * * * * * *          α < 0: decaying oscillation
-  | *   *   *   *   *       α = 0: sustained oscillation
-  +──────────────────> x    α > 0: growing oscillation
 ```
+
+Case 3 gives oscillations whose amplitude is shaped by the envelope $e^{\alpha x}$:
+
+- $\alpha < 0$: **decaying** oscillation (amplitude shrinks to $0$)
+- $\alpha = 0$: **sustained** oscillation (constant amplitude)
+- $\alpha > 0$: **growing** oscillation (amplitude blows up)
+
+<HandPlot
+  title="Complex roots (α < 0): decaying oscillation"
+  xLabel="x" yLabel="y"
+  domain={[0, 8]}
+  range={[-1.1, 1.1]}
+  curves={[
+    { f: (x) => Math.exp(-0.35 * x) * Math.cos(3.2 * x), color: 'ink', label: 'y = e^(αx)cos(βx)' },
+    { f: (x) => Math.exp(-0.35 * x), color: 'pencil', dash: true, label: 'envelope +e^(αx)' },
+    { f: (x) => -Math.exp(-0.35 * x), color: 'pencil', dash: true, label: 'envelope −e^(αx)' },
+  ]}
+/>
 
 ---
 
@@ -66,23 +78,34 @@ sidebar_position: 17
   Undamped free oscillation (c=0, F=0):
   x'' + ω₀²x = 0     ω₀ = √(k/m)
   x(t) = A cos(ω₀t) + B sin(ω₀t)   (pure oscillation)
-
-  x
-  |  *   *   *   *   *        ← sustained oscillation
-  | * * * * * * * * * *
-  +──────────────────────> t
-  |* * * * * * * * * *
-  |  *   *   *   *   *
-
-  Damped oscillation (c > 0):
-  x
-  |  *                         ← amplitude decays
-  | * *   *
-  |*   * * *   *
-  +────────────────────────> t  ← approaches 0
-  |         *   *
-  |           ***
 ```
+
+**Undamped free oscillation** ($c = 0$): the mass swings forever with constant amplitude — a pure sinusoid $x(t) = A\cos(\omega_0 t) + B\sin(\omega_0 t)$.
+
+<HandPlot
+  title="Undamped free oscillation: sustained"
+  xLabel="t" yLabel="x"
+  domain={[0, 8]}
+  range={[-1.2, 1.2]}
+  curves={[
+    { f: (t) => Math.cos(2.4 * t), color: 'blue', label: 'x(t) = A cos(ω₀t)' },
+  ]}
+/>
+
+**Damped oscillation** ($c > 0$): the amplitude decays and the motion approaches $0$.
+
+<HandPlot
+  title="Damped oscillation (c > 0): amplitude → 0"
+  xLabel="t" yLabel="x"
+  domain={[0, 8]}
+  range={[-1.1, 1.1]}
+  curves={[
+    { f: (t) => Math.exp(-0.45 * t) * Math.cos(3 * t), color: 'red', label: 'x(t) = e^(−ct/2m)cos(ωt)' },
+    { f: (t) => Math.exp(-0.45 * t), color: 'pencil', dash: true },
+    { f: (t) => -Math.exp(-0.45 * t), color: 'pencil', dash: true },
+  ]}
+  marks={[{ y: 0, label: 'approaches 0' }]}
+/>
 
 ---
 

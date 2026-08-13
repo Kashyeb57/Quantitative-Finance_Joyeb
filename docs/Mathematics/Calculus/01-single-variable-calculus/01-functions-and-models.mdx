@@ -48,25 +48,15 @@ A function f assigns **exactly one output** to each input.
 
 #### Linear Functions: f(x) = mx + b
 
-```
-  y
-  |       /  slope m > 0
-  |      /
-  |     /  ← f(x) = 2x + 1
-  |    /
-  |   / b = y-intercept
-  |  /
-  | /
-  +-----------> x
-
-  y
-  |  \  slope m < 0
-  |   \
-  |    \ ← f(x) = -x + 3
-  |     \
-  |      \
-  +-----------> x
-```
+<HandPlot
+  title="Linear functions: f(x) = mx + b"
+  xLabel="x" yLabel="y" domain={[-3, 3]} range={[-4, 7]}
+  curves={[
+    { f: (x) => 2 * x + 1, color: 'ink', label: 'f(x) = 2x + 1  (m > 0)' },
+    { f: (x) => -x + 3, color: 'blue', label: 'f(x) = −x + 3  (m < 0)' },
+  ]}
+  points={[{ x: 0, y: 1, label: 'b', color: 'red' }]}
+/>
 
 > **Quant Finance:** Duration approximation for bond prices; linear regression factor models.
 
@@ -74,44 +64,43 @@ A function f assigns **exactly one output** to each input.
 
 #### Polynomial Functions
 
-```
-  Degree 2 (parabola):        Degree 3 (cubic):
-
-  y    *   *                  y         *
-  |   * * * *                 |        *
-  |  *   *   *                |       *
-  |      ↑                    |      *
-  |   vertex                  |   * *
-  +-----------> x             +-----------> x
-                                 inflection pt
-```
+<HandPlot
+  title="Polynomials: degree 2 vs degree 3"
+  xLabel="x" yLabel="y" domain={[-2.4, 2.4]} range={[-6, 6]}
+  curves={[
+    { f: (x) => x * x, color: 'ink', label: 'degree 2:  f(x) = x²' },
+    { f: (x) => x * x * x, color: 'blue', label: 'degree 3:  f(x) = x³' },
+  ]}
+  points={[
+    { x: 0, y: 0, label: 'vertex / inflection', color: 'red' },
+  ]}
+/>
 
 #### Power Functions: f(x) = xᵃ
 
-```
-  a=1: y=x (line)    a=2: y=x² (parabola)   a=1/2: y=√x
-
-  y  /               y    *                  y     *****
-  | /                |   * *                 |   **
-  |/                 |  *   *                |  *
-  |                  | *     *               | *
-  +--> x             *---------> x           *---------> x
-```
+<HandPlot
+  title="Power functions: f(x) = xᵃ"
+  xLabel="x" yLabel="y" domain={[0, 3]} range={[0, 3]}
+  curves={[
+    { f: (x) => x, color: 'ink', label: 'a = 1:  y = x' },
+    { f: (x) => x * x, color: 'blue', label: 'a = 2:  y = x²' },
+    { f: (x) => Math.sqrt(x), color: 'green', label: 'a = ½:  y = √x' },
+  ]}
+/>
 
 #### Exponential Functions: f(x) = bˣ
 
-```
-  b > 1 (growth):        0 < b < 1 (decay):
+<HandPlot
+  title="Exponential functions: f(x) = bˣ"
+  xLabel="x" yLabel="y" domain={[-3, 3]} range={[0, 8]}
+  curves={[
+    { f: (x) => Math.pow(2, x), color: 'ink', label: 'b > 1:  growth' },
+    { f: (x) => Math.pow(0.5, x), color: 'blue', label: '0 < b < 1:  decay' },
+  ]}
+  points={[{ x: 0, y: 1, label: '(0, 1)', color: 'red' }]}
+/>
 
-  y        *             y *
-  |       *              | *
-  |      *               |  *
-  |     *                |   *
-  |    *                 |    *
-  | **                   |     ****
-  +-----------> x        +-----------> x
-  Always passes through (0, 1)
-```
+Every $b^x$ **passes through $(0, 1)$**.
 
 **Laws of Exponents:**
 ```
@@ -127,43 +116,41 @@ A function f assigns **exactly one output** to each input.
 
 #### The Number e
 
-```
-  e = lim (1 + 1/n)ⁿ  ≈  2.71828...
-      n→∞
+$$
+e = \lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n \approx 2.71828\ldots
+= 1 + 1 + \frac{1}{2!} + \frac{1}{3!} + \frac{1}{4!} + \cdots
+$$
 
-  e = 1 + 1 + 1/2! + 1/3! + 1/4! + ...
+**Key property:** the slope of $y = e^x$ at $x = 0$ is exactly $1$ — the tangent line there is $y = x + 1$.
 
-  Key property: slope of y = eˣ at x=0 is exactly 1
-
-  y    eˣ     /← slope=1 at (0,1)
-  |    *     /
-  |   *    /
-  |  *   /
-  | *  / ← tangent at (0,1)
-  |* /
-  +-----------> x
-     0
-```
+<HandPlot
+  title="y = eˣ and its tangent at (0, 1)"
+  xLabel="x" yLabel="y" domain={[-2, 2]} range={[0, 6]}
+  curves={[
+    { f: (x) => Math.exp(x), color: 'ink', label: 'f(x) = eˣ' },
+    { f: (x) => x + 1, color: 'blue', dash: true, label: 'tangent  y = x + 1  (slope 1)' },
+  ]}
+  points={[{ x: 0, y: 1, label: '(0, 1)', color: 'red' }]}
+/>
 
 ---
 
 #### Logarithmic Functions: f(x) = log_b(x)
 
-```
-  y = ln(x) is the inverse of y = eˣ
+$y = \ln(x)$ is the **inverse** of $y = e^x$ — each is the reflection of the other across the diagonal $y = x$.
 
-  y        |   eˣ (above diagonal)
-  |  *     |  *
-  |   *    | *
-  |    *   |* ← both meet at (1,0) and reflect
-  |-----*--+-----------> x
-  |      * | ← y = x diagonal
-  |       *|
-            * ← ln(x) (below diagonal)
+<HandPlot
+  title="ln(x) and eˣ reflect across y = x"
+  xLabel="x" yLabel="y" domain={[-2, 4]} range={[-2, 4]}
+  curves={[
+    { f: (x) => Math.exp(x), color: 'ink', label: 'y = eˣ' },
+    { f: (x) => Math.log(x), color: 'green', label: 'y = ln(x)' },
+    { f: (x) => x, color: 'pencil', dash: true, label: 'y = x' },
+  ]}
+/>
 
-  Domain of ln(x): x > 0
-  Range: all real numbers
-```
+- **Domain** of $\ln(x)$: $x > 0$
+- **Range**: all real numbers
 
 **Laws of Logarithms:**
 ```
@@ -207,19 +194,20 @@ $$
 
 ### 1.5 Inverse Functions
 
-```
-  f and f⁻¹ are mirror images across y = x
+<HandPlot
+  title="f and f⁻¹ are mirror images across y = x"
+  xLabel="x" yLabel="y" domain={[-1, 4]} range={[-1, 4]}
+  curves={[
+    { f: (x) => x * x, color: 'ink', label: 'f(x) = x²' },
+    { f: (x) => Math.sqrt(x), color: 'blue', label: 'f⁻¹(x) = √x' },
+    { f: (x) => x, color: 'pencil', dash: true, label: 'y = x' },
+  ]}
+/>
 
-  y    /  ← y=x
-  |   / *  ← f(x)
-  |  /*
-  | /*
-  |/* ← f⁻¹(x)
-  +-----------> x
-
-  f(f⁻¹(x)) = x     for all x in domain of f⁻¹
-  f⁻¹(f(x)) = x     for all x in domain of f
-```
+$$
+f\bigl(f^{-1}(x)\bigr) = x \quad \text{for all } x \text{ in the domain of } f^{-1}, \qquad
+f^{-1}\bigl(f(x)\bigr) = x \quad \text{for all } x \text{ in the domain of } f
+$$
 
 **Horizontal Line Test** — f is one-to-one (invertible) if no horizontal line hits graph twice.
 
@@ -230,14 +218,16 @@ $$
   sin⁻¹(x)    [−1, 1]     [−π/2, π/2]
   cos⁻¹(x)    [−1, 1]     [0, π]
   tan⁻¹(x)    (−∞, ∞)     (−π/2, π/2)
-
-  tan⁻¹(x) graph:
-
-  y   π/2 ─────────────────── ← asymptote
-  |           *****
-  |       ****
-  |  *****
-  |
-  −π/2 ─────────────────────── ← asymptote
-  +-----------> x
 ```
+
+<HandPlot
+  title="tan⁻¹(x) with horizontal asymptotes ±π/2"
+  xLabel="x" yLabel="y" domain={[-8, 8]} range={[-2, 2]}
+  curves={[
+    { f: (x) => Math.atan(x), color: 'ink', label: 'y = tan⁻¹(x)' },
+  ]}
+  marks={[
+    { y: Math.PI / 2, label: 'y = π/2' },
+    { y: -Math.PI / 2, label: 'y = −π/2' },
+  ]}
+/>

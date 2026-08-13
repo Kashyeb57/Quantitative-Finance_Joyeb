@@ -3,19 +3,23 @@ title: "Chapter 4: Applications of Differentiation"
 sidebar_position: 4
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 4.1 Maximum and Minimum Values
 
-```
-  y           absolute max
-  |           ●
-  |         *   *     local max ●
-  |        *     *            *   *
-  |       *  local *         *     *
-  |      *    min   *       *
-  |     *      ●    *     *   absolute min
-  |    *              *  *    ●
-  +──────────────────────────────> x
-```
+<HandPlot
+  title="Extrema of a function on [a, b]"
+  xLabel="x" yLabel="y"
+  domain={[0, 10]}
+  curves={[
+    { f: (x) => 2 + 2.4 * Math.sin(0.95 * x - 0.6) + 0.18 * x, color: 'ink', label: 'f(x)' },
+  ]}
+  points={[
+    { x: 8.98, y: 2 + 2.4 * Math.sin(0.95 * 8.98 - 0.6) + 0.18 * 8.98, label: 'abs max', color: 'green' },
+    { x: 2.37, y: 2 + 2.4 * Math.sin(0.95 * 2.37 - 0.6) + 0.18 * 2.37, label: 'local max', color: 'blue' },
+    { x: 5.51, y: 2 + 2.4 * Math.sin(0.95 * 5.51 - 0.6) + 0.18 * 5.51, label: 'abs min', color: 'red' },
+  ]}
+/>
 
 **Finding extrema:**
 ```
@@ -31,32 +35,48 @@ sidebar_position: 4
 
 ### 4.2 The Mean Value Theorem
 
-**Rolle's Theorem:**
-```
-  If f(a) = f(b) and f is continuous/differentiable,
-  then ∃ c where f'(c) = 0
+**Rolle's Theorem:** If $f(a) = f(b)$ and $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, then $\exists\, c \in (a,b)$ where $f'(c) = 0$.
 
-  y   *─────────*       ← f(a)=f(b)
-  |  * *       * *
-  | *   *     *   *
-  |*     *   *
-  |       *** ← f'(c)=0 here
-  +──a──────────b──> x
-```
+<HandPlot
+  title="Rolle's Theorem"
+  xLabel="x" yLabel="y"
+  domain={[1, 5]}
+  range={[-1.6, 1]}
+  curves={[
+    { f: (x) => 0.3 * (x - 3) * (x - 3) - 1.2, color: 'ink', label: 'f(x)' },
+  ]}
+  points={[
+    { x: 1, y: 0, label: 'f(a)', color: 'blue' },
+    { x: 5, y: 0, label: 'f(b)', color: 'blue' },
+    { x: 3, y: -1.2, label: "f'(c)=0", color: 'red' },
+  ]}
+  marks={[{ x: 3, label: 'c' }]}
+/>
 
-**Mean Value Theorem (MVT):**
-```
-  ∃ c in (a,b) where f'(c) = [f(b)−f(a)] / (b−a)
+**Mean Value Theorem (MVT):** $\exists\, c \in (a,b)$ where
 
-  y         *  ← f(b)
-  |       */ |  ← secant line slope = avg rate of change
-  |      *   |
-  |     *    |
-  |    /     |  ← tangent at c has same slope!
-  |   /      |
-  | *  ← f(a)|
-  +─a───c────b──> x
-```
+$$
+f'(c) = \frac{f(b) - f(a)}{b - a}
+$$
+
+The tangent at $c$ is **parallel** to the secant line joining $\bigl(a, f(a)\bigr)$ and $\bigl(b, f(b)\bigr)$ — its slope equals the average rate of change.
+
+<HandPlot
+  title="Mean Value Theorem"
+  xLabel="x" yLabel="y"
+  domain={[0.5, 5.5]}
+  range={[0, 4]}
+  curves={[
+    { f: (x) => 0.9 * Math.sqrt(x + 0.5) + 0.35, color: 'ink', label: 'f(x)' },
+    { f: (x) => 0.2521 * (x - 1) + 1.4522, color: 'blue', dash: true, label: 'secant (avg rate)' },
+    { f: (x) => 0.2521 * (x - 2.686) + (0.9 * Math.sqrt(2.686 + 0.5) + 0.35), color: 'red', label: "tangent at c (same slope)" },
+  ]}
+  points={[
+    { x: 1, y: 0.9 * Math.sqrt(1.5) + 0.35, label: 'f(a)', color: 'green' },
+    { x: 5, y: 0.9 * Math.sqrt(5.5) + 0.35, label: 'f(b)', color: 'green' },
+  ]}
+  marks={[{ x: 2.686, label: 'c' }]}
+/>
 
 ---
 
@@ -70,21 +90,28 @@ sidebar_position: 4
   f''(x) > 0  →  f is CONCAVE UP    ∪
   f''(x) < 0  →  f is CONCAVE DOWN  ∩
   f''(x) = 0  →  possible INFLECTION POINT
-
-  Full picture:
-
-  y             local max          inflection pt
-  |               ●                     ×
-  |         *   *   *           *   *   *   *
-  |        * ↗   ↘   *         * ↗   ↘   ↗   *
-  |       *     ↓      *      *             *
-  |      *    local      *  *
-  |     *     min ●       **
-  +────────────────────────────────────> x
-        [f'>0] [f'<0]   [f'<0][f'>0]
-        [f''>0]         [f''<0] [f''>0]
-         ∪                  ∩     ∪
 ```
+
+**Full picture** — a curve carrying a local max, a local min, and an inflection point where concavity flips:
+
+<HandPlot
+  title="How f' and f'' shape the graph"
+  xLabel="x" yLabel="y"
+  domain={[-2.6, 2.6]}
+  curves={[
+    { f: (x) => 0.5 * x * x * x * x - 2 * x * x + 0.4 * x, color: 'ink', label: 'f(x)' },
+  ]}
+  points={[
+    { x: -1.461, y: 0.5 * Math.pow(-1.461, 4) - 2 * 1.461 * 1.461 + 0.4 * -1.461, label: 'local min', color: 'red' },
+    { x: 0.101, y: 0.5 * Math.pow(0.101, 4) - 2 * 0.101 * 0.101 + 0.4 * 0.101, label: 'local max', color: 'blue' },
+    { x: 1.361, y: 0.5 * Math.pow(1.361, 4) - 2 * 1.361 * 1.361 + 0.4 * 1.361, label: 'local min', color: 'red' },
+  ]}
+  marks={[
+    { x: -0.816, label: 'inflection (∪→∩)', color: 'green' },
+    { x: 0.816, label: 'inflection (∩→∪)', color: 'green' },
+  ]}
+  caption="f'>0 rising ↗, f'<0 falling ↘; f''>0 concave up ∪, f''<0 concave down ∩"
+/>
 
 **Second Derivative Test:**
 ```
@@ -169,24 +196,29 @@ For **0/0** or **∞/∞** indeterminate forms:
 
 ### 4.8 Newton's Method
 
-Iterative root-finding using tangent lines:
+Iterative root-finding using tangent lines. From a guess $x_1$, follow the tangent down to the $x$-axis to get a better guess $x_2$:
 
-```
-  y            *← curve f(x)
-  |           *
-  |          *
-  |─────────*────────────> x
-  |        *|  ↑
-  |       * |  x₂ = x₁ − f(x₁)/f'(x₁)
-  |      *  |
-  |     *   x₁ (initial guess)
-  |    *
-  |
+$$
+x_2 = x_1 - \frac{f(x_1)}{f'(x_1)}, \qquad x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
+$$
 
-  Iteration: xₙ₊₁ = xₙ − f(xₙ)/f'(xₙ)
+<HandPlot
+  title="Newton's Method"
+  xLabel="x" yLabel="y"
+  domain={[0.4, 3.2]}
+  range={[-1.5, 4]}
+  curves={[
+    { f: (x) => x * x - 2, color: 'ink', label: 'f(x)' },
+    { f: (x) => 6 * (x - 3) + 7, color: 'red', label: "tangent at x₁" },
+  ]}
+  points={[
+    { x: 3, y: 7, label: 'x₁ (guess)', color: 'blue' },
+    { x: 3 - 7 / 6, y: 0, label: 'x₂', color: 'green' },
+    { x: Math.SQRT2, y: 0, label: 'root √2', color: 'amber' },
+  ]}
+/>
 
-  Each step gives a BETTER approximation of the root.
-```
+Each step gives a **better** approximation of the root.
 
 ---
 

@@ -5,6 +5,7 @@ sidebar_position: 2
 
 import SecantTangent from '@site/src/components/CalcLab/SecantTangent';
 import EpsilonDelta from '@site/src/components/CalcLab/EpsilonDelta';
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 2.1 The Tangent and Velocity Problems
 
@@ -28,37 +29,53 @@ $$
 
 ### 2.2 The Limit of a Function
 
-```
-  lim f(x) = L
-  x→a
+$$
+\lim_{x \to a} f(x) = L
+$$
 
-  Meaning: f(x) gets arbitrarily close to L
-           as x approaches a (from either side)
+**Meaning:** $f(x)$ gets arbitrarily close to $L$ as $x$ approaches $a$ (from either side). The value $f(a)$ might not exist — the limit can still equal $L$.
 
-  y
-  |             ○ ← hole: f(a) might not exist
-  |           * | *         but limit still = L!
-  |         *   |   *
-  | ───────*────────*────── L
-  |       *           *
-  |
-  +──────────a──────────> x
+<HandPlot
+  title="lim f(x) = L as x → a"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[-1, 3]}
+  curves={[
+    { f: (x) => 2 - 0.3 * x * x, color: 'ink', label: 'f(x)' },
+  ]}
+  points={[{ x: 0, y: 2, label: 'hole: f(a) undefined', color: 'red' }]}
+  marks={[{ y: 2, label: 'L' }, { x: 0, label: 'x = a' }]}
+/>
 
-  LEFT side → L    AND    RIGHT side → L
-  ∴ limit exists and equals L
-```
+Left side $\to L$ **and** right side $\to L$, so the limit exists and equals $L$.
 
 **When limits do NOT exist:**
-```
-  Case 1: Jump              Case 2: Oscillation
 
-  y    *                    y   *  *  *  *
-  |    *    ○               |  * *  * *  *
-  |    *    *               |          ...
-  |    ●                    |
-  +────a───────> x          +────────────> x
-  Left ≠ Right limit        sin(1/x) as x→0
-```
+**Case 1 — Jump:** the left and right limits disagree, so no single limit exists.
+
+<HandPlot
+  title="Jump discontinuity — left ≠ right limit"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[-2, 2]}
+  curves={[
+    { f: (x) => (x < 0 ? -1 : 1), color: 'ink', label: 'f(x)' },
+  ]}
+  marks={[{ x: 0, label: 'x = a' }]}
+/>
+
+**Case 2 — Oscillation:** $\sin(1/x)$ swings infinitely fast as $x \to 0$, never settling on a value.
+
+<HandPlot
+  title="Oscillation — sin(1/x) as x → 0"
+  xLabel="x" yLabel="y"
+  domain={[-1, 1]}
+  range={[-1.4, 1.4]}
+  curves={[
+    { f: (x) => Math.sin(1 / x), color: 'blue', label: 'sin(1/x)' },
+  ]}
+  marks={[{ x: 0, label: 'x = 0' }]}
+/>
 
 ---
 
@@ -79,20 +96,27 @@ If lim f(x) = L and lim g(x) = M (as x→a), then:
 ```
 
 **The Squeeze Theorem:**
-```
-  If f(x) ≤ g(x) ≤ h(x)  near x=a
-  and  lim f(x) = lim h(x) = L
-  then lim g(x) = L
 
-  y          h(x) ─ ─ ─ ─ ─ ─
-  |              g(x) ~~~~~~       All three
-  |          f(x) ─ ─ ─ ─ ─ ─     squeeze to L
-  | L ━━━━━━━━━━━━━━━━━━━━━━━━
-  +──────────a──────────> x
+$$
+\text{If } f(x) \le g(x) \le h(x) \text{ near } x = a \quad\text{and}\quad \lim_{x \to a} f(x) = \lim_{x \to a} h(x) = L, \quad\text{then } \lim_{x \to a} g(x) = L.
+$$
 
-  KEY RESULT:  lim sin(x)/x = 1
-               x→0
-```
+<HandPlot
+  title="Squeeze Theorem — f ≤ g ≤ h all → L"
+  xLabel="x" yLabel="y"
+  domain={[-2, 2]}
+  range={[-0.5, 2]}
+  curves={[
+    { f: (x) => 1 + 0.5 * x * x, color: 'blue', label: 'h(x)' },
+    { f: (x) => 1 + 0.3 * x * x * Math.cos(4 * x), color: 'ink', label: 'g(x)' },
+    { f: (x) => 1 - 0.5 * x * x, color: 'green', label: 'f(x)' },
+  ]}
+  marks={[{ y: 1, label: 'L' }, { x: 0, label: 'x = a' }]}
+/>
+
+$$
+\textbf{Key result:}\quad \lim_{x \to 0} \frac{\sin x}{x} = 1.
+$$
 
 ---
 
@@ -116,31 +140,52 @@ A function f is **continuous at a** if all three hold:
      x→a
   ③ lim f(x) = f(a)
      x→a
-
-  CONTINUOUS:        DISCONTINUITIES:
-
-  y    *             Removable:      Jump:        Infinite:
-  |   * *            y   ○           y   *        y     |
-  |  *   *           |  *            |   *        |    /|
-  | *     *          | * ← hole      |   *        |   / |
-  +-------> x        +-----> x       | * ← gap    |  /  |
-                                     +-----> x    +--/--+-> x
 ```
+
+**Continuous:** a smooth, unbroken curve — you can draw it without lifting your pen.
+
+<HandPlot
+  title="Continuous function"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[-1, 3]}
+  curves={[
+    { f: (x) => 2 - 0.25 * x * x, color: 'ink', label: 'f(x)' },
+  ]}
+/>
+
+**Discontinuities** come in three flavours — *removable* (a single hole), *jump* (a step gap where left ≠ right), and *infinite* (the curve blows up at a vertical asymptote):
+
+<HandPlot
+  title="Infinite discontinuity — blows up at x = 0"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[-6, 6]}
+  curves={[
+    { f: (x) => 1 / x, color: 'red', label: 'f(x) = 1/x' },
+  ]}
+  marks={[{ x: 0, label: 'x = 0' }]}
+/>
 
 **Intermediate Value Theorem:**
-```
-  If f is continuous on [a,b] and N is between f(a) and f(b),
-  then ∃ c in (a,b) where f(c) = N.
 
-  y
-  f(b)─ ─ ─ ─ ─ ─*
-  |              *
-  N  ─ ─ ─ ─ ─*── ← guaranteed crossing!
-  |           *
-  f(a)── ─ ─*
-  |         *
-  +──a───c───b───> x
-```
+$$
+\text{If } f \text{ is continuous on } [a,b] \text{ and } N \text{ lies between } f(a) \text{ and } f(b), \text{ then } \exists\, c \in (a,b) \text{ with } f(c) = N.
+$$
+
+<HandPlot
+  title="Intermediate Value Theorem"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 4]}
+  curves={[
+    { f: (x) => 0.6 + 0.7 * x + 0.15 * x * x, color: 'ink', label: 'f(x)' },
+  ]}
+  points={[{ x: 2, y: 0.6 + 1.4 + 0.6, label: 'c: f(c) = N', color: 'red' }]}
+  marks={[{ y: 2.6, label: 'N' }, { x: 0, label: 'a' }, { x: 4, label: 'b' }]}
+/>
+
+The continuous curve cannot skip level $N$ — it is guaranteed to cross it at some $c$ in $(a,b)$.
 
 > **Quant Finance:** Guarantees a yield exists for bond pricing; root-finding for implied volatility.
 
@@ -148,27 +193,31 @@ A function f is **continuous at a** if all three hold:
 
 ### 2.6 Limits at Infinity and Asymptotes
 
-```
-  Horizontal asymptote y = L:
+**Horizontal asymptote $y = L$:** $f(x) \to L$ as $x \to \infty$.
 
-  y        *****──────────── L  ← f(x) → L as x → ∞
-  |      **
-  |    **
-  |  **
-  | *
-  +──────────────────────> x
+<HandPlot
+  title="Horizontal asymptote — f(x) → L"
+  xLabel="x" yLabel="y"
+  domain={[0, 8]}
+  range={[0, 3]}
+  curves={[
+    { f: (x) => 2 - 2 * Math.exp(-0.7 * x), color: 'ink', label: 'f(x)' },
+  ]}
+  marks={[{ y: 2, label: 'y = L' }]}
+/>
 
-  Vertical asymptote x = a:
+**Vertical asymptote $x = a$:** $f(x) \to \infty$ as $x \to a$.
 
-  y   |
-  |   |  *
-  | * |
-  |  *|
-  |   *
-  |   |*
-  +───a──────────────> x
-  f(x) → ∞ as x → a
-```
+<HandPlot
+  title="Vertical asymptote — f(x) → ∞"
+  xLabel="x" yLabel="y"
+  domain={[0.15, 5]}
+  range={[0, 8]}
+  curves={[
+    { f: (x) => 1 / x, color: 'blue', label: 'f(x)' },
+  ]}
+  marks={[{ x: 0, label: 'x = a' }]}
+/>
 
 **Important limits:**
 ```
@@ -188,25 +237,26 @@ A function f is **continuous at a** if all three hold:
 
 The **derivative** is the slope of the tangent line = instantaneous rate of change.
 
-```
-  DEFINITION:
+$$
+f'(a) = \lim_{h \to 0} \frac{f(a+h) - f(a)}{h}.
+$$
 
-        f(a+h) − f(a)
-  f'(a) = lim ─────────────
-           h→0       h
+Visually, the secant through $P\big(a, f(a)\big)$ and $Q\big(a+h, f(a+h)\big)$ has slope $\Delta f / h$; as $h \to 0$, $Q$ slides into $P$ and the secant becomes the tangent.
 
-  Visually:
-
-  y         f(a+h)─────o Q
-  |                   /
-  |                  /  ← secant (slope = Δf/h)
-  |         f(a)────o P
-  |                /
-  |               / ← tangent as h→0
-  +────────a──a+h────> x
-                 ↑
-                 h
-```
+<HandPlot
+  title="Derivative — secant → tangent as h → 0"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 5]}
+  curves={[
+    { f: (x) => 0.35 * x * x, color: 'ink', label: 'y = f(x)' },
+    { f: (x) => 0.35 * 1 + 0.7 * (x - 1), color: 'blue', dash: true, label: "tangent at P" },
+  ]}
+  points={[
+    { x: 1, y: 0.35, label: 'P', color: 'red' },
+    { x: 3, y: 0.35 * 9, label: 'Q', color: 'green' },
+  ]}
+/>
 
 **Three interpretations:**
 ```
@@ -221,24 +271,22 @@ The **derivative** is the slope of the tangent line = instantaneous rate of chan
 
 ### 2.8 The Derivative as a Function
 
-```
-  f'(x) = lim  [f(x+h) − f(x)] / h
-           h→0
+$$
+f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}.
+$$
 
-  From the original function, we derive a NEW function f'(x):
+From the original function we derive a **new** function $f'(x)$. For $f(x) = x^2$ (a parabola), the derivative $f'(x) = 2x$ is a straight line:
 
-  f(x) = x²             f'(x) = 2x
-
-  y   *       *         y         *
-  |    *     *          |        *
-  |     *   *           |       *
-  |      * *            |      *
-  |       *             |─────*──────── 0
-  +──────────> x        |   *
-                        |  *
-                        +──────────> x
-  Parabola              Straight line (2x)
-```
+<HandPlot
+  title="f(x) = x²  and its derivative  f'(x) = 2x"
+  xLabel="x" yLabel="y"
+  domain={[-3, 3]}
+  range={[-6, 9]}
+  curves={[
+    { f: (x) => x * x, color: 'ink', label: 'f(x) = x²' },
+    { f: (x) => 2 * x, color: 'blue', dash: true, label: "f'(x) = 2x" },
+  ]}
+/>
 
 **Notations for derivative:**
 ```

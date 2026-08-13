@@ -4,26 +4,40 @@ sidebar_position: 8
 ---
 
 import CalcPlot from '@site/src/components/CalcPlot';
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 8.1 Arc Length
 
-```
-  Length of curve y=f(x) from a to b:
+Length of the curve $y=f(x)$ from $a$ to $b$:
 
-  L = ∫_a^b √(1 + [f'(x)]²) dx
+$$
+L = \int_a^b \sqrt{1 + [f'(x)]^2}\, dx
+$$
 
-  Derivation: each tiny piece of arc has length:
-  ds = √(dx² + dy²) = √(1 + (dy/dx)²) dx
+**Derivation.** Each tiny piece of arc has length
 
-  y        *
-  |       * *
-  |      *   *  ← ds = tiny arc element
-  |     *     *
-  |    *       *
-  +────a────────b──> x
+$$
+ds = \sqrt{dx^2 + dy^2} = \sqrt{1 + \left(\tfrac{dy}{dx}\right)^2}\, dx,
+\qquad
+L = \int ds
+$$
 
-  L = ∫ ds   (sum of all tiny arc elements)
-```
+(the sum of all tiny arc elements $ds$ along the curve).
+
+<HandPlot
+  title="Arc length: summing tiny arc elements ds"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 4.5]}
+  curves={[
+    { f: (x) => 0.35 * x * x, color: 'ink', label: 'y = f(x)' },
+  ]}
+  points={[
+    { x: 1, y: 0.35, label: 'a', color: 'blue' },
+    { x: 3, y: 3.15, label: 'b', color: 'blue' },
+  ]}
+  marks={[{ x: 1 }, { x: 3, label: 'ds spans a → b' }]}
+/>
 
 ---
 
@@ -51,26 +65,31 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 8.5 Probability
 
-```
-  Probability Density Function f(x):
-  1. f(x) ≥ 0  for all x
-  2. ∫_{-∞}^{∞} f(x) dx = 1   (total probability = 1)
-  3. P(a ≤ X ≤ b) = ∫_a^b f(x) dx
+A **probability density function** $f(x)$ satisfies:
 
-  y  normal distribution
-  |        *
-  |      ** **
-  |     *     *
-  |    *       *
-  |   *         *
-  |**               **
-  +─────────────────────> x
-  |←─────── area = 1 ───────→|
+1. $f(x) \ge 0$ for all $x$
+2. $\displaystyle\int_{-\infty}^{\infty} f(x)\, dx = 1$ (total probability $= 1$)
+3. $\displaystyle P(a \le X \le b) = \int_a^b f(x)\, dx$ (the area under the curve between $a$ and $b$)
 
-  P(a≤X≤b) = shaded area between a and b
+$$
+\mu = \int x\,f(x)\, dx
+\qquad
+\sigma^2 = \int (x-\mu)^2\,f(x)\, dx
+$$
 
-  Mean:     μ = ∫ x·f(x) dx
-  Variance: σ² = ∫ (x−μ)²·f(x) dx
+The **normal PDF** is the classic bell curve:
 
-  Normal PDF: f(x) = (1/σ√2π)·e^(−(x−μ)²/2σ²)
-```
+$$
+f(x) = \frac{1}{\sigma\sqrt{2\pi}}\, e^{-(x-\mu)^2 / 2\sigma^2}
+$$
+
+<HandPlot
+  title="Normal distribution — total area = 1"
+  xLabel="x" yLabel="f(x)"
+  domain={[-4, 4]}
+  range={[0, 0.45]}
+  curves={[
+    { f: (x) => Math.exp(-x * x / 2) / Math.sqrt(2 * Math.PI), color: 'ink', label: 'f(x) = bell curve' },
+  ]}
+  marks={[{ x: 0, label: 'μ' }]}
+/>

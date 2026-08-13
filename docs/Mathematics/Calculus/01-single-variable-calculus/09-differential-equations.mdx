@@ -3,6 +3,8 @@ title: "Chapter 9: Differential Equations"
 sidebar_position: 9
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 9.1 What is a Differential Equation?
 
 ```
@@ -39,21 +41,25 @@ sidebar_position: 9
 ```
 
 **Euler's Method** — numerical approximation:
-```
-  yₙ₊₁ = yₙ + h·F(xₙ, yₙ)
 
-  Start at (x₀, y₀), take steps of size h:
+$$
+y_{n+1} = y_n + h \cdot F(x_n, y_n)
+$$
 
-  y         *  ← exact solution
-  |       * ↑ error grows
-  |      /  *
-  |    */  *
-  |   /*  * ← Euler steps
-  |  /*  *
-  | /* *
-  +────────────> x
-  x₀  x₁  x₂
-```
+Start at $(x_0, y_0)$ and take steps of size $h$. Each step follows the local tangent slope, so the straight-line Euler path drifts below the true (curving) solution — error grows with each step.
+
+<HandPlot
+  title="Euler's method vs. the exact solution"
+  xLabel="x" yLabel="y"
+  domain={[0, 2]}
+  range={[0, 8]}
+  curves={[
+    { f: (x) => Math.exp(x), color: 'ink', label: 'exact  y = eˣ' },
+    { f: (x) => { const h = 0.5; let y = 1; for (let k = 0; k < Math.floor(x / h + 1e-9); k++) y += h * y; const x0 = Math.floor(x / h + 1e-9) * h; return y + (x - x0) * y; }, color: 'blue', label: 'Euler steps (h = 0.5)' },
+  ]}
+  points={[{ x: 0, y: 1, label: '(x₀, y₀)', color: 'red' }]}
+  caption="The straight Euler segments fall below the curving true solution — error grows."
+/>
 
 ---
 
@@ -80,27 +86,23 @@ sidebar_position: 9
 
 ### 9.4 Logistic Growth
 
-```
-  dP/dt = kP(1 − P/M)
+$$
+\frac{dP}{dt} = kP\left(1 - \frac{P}{M}\right), \qquad P(t) = \frac{M}{1 + A\,e^{-kt}}
+$$
 
-  M = carrying capacity (maximum population)
+where $M$ is the **carrying capacity** (maximum sustainable population). Growth is fastest at the inflection point $P = M/2$ and slows to zero as $P$ approaches the asymptote $M$.
 
-  Solution: P(t) = M / (1 + A·e^(−kt))
-
-  P
-  M ─────────────────── ← carrying capacity (asymptote)
-  |              *****
-  |          ****
-  |        ***
-  M/2 ─ ─**** ← inflection point (fastest growth)
-  |      *
-  |    **
-  |  **
-  | *
-  +──────────────────> t
-
-  Growth slows as population approaches M
-```
+<HandPlot
+  title="Logistic growth — the S-curve"
+  xLabel="t" yLabel="P"
+  domain={[0, 12]}
+  range={[0, 11]}
+  curves={[
+    { f: (t) => 10 / (1 + 12 * Math.exp(-0.8 * t)), color: 'green', label: 'P(t) = M / (1 + A·e⁻ᵏᵗ)' },
+  ]}
+  marks={[{ y: 10, label: 'M — carrying capacity', color: 'red' }, { y: 5, label: 'M/2 — inflection (fastest growth)', color: 'pencil' }]}
+  caption="Growth slows as the population approaches the carrying capacity M."
+/>
 
 > **Quant Finance:** Logistic model for market saturation, adoption curves.
 
@@ -127,21 +129,21 @@ sidebar_position: 9
 
 ### 9.6 Predator-Prey Systems (Lotka-Volterra)
 
-```
-  dx/dt = ax − bxy     (prey — grows alone, dies with predator)
-  dy/dt = −cy + dxy    (predator — dies alone, grows with prey)
+$$
+\begin{aligned}
+\frac{dx}{dt} &= ax - bxy && \text{(prey — grows alone, dies with predator)} \\
+\frac{dy}{dt} &= -cy + dxy && \text{(predator — dies alone, grows with prey)}
+\end{aligned}
+$$
 
-  Population cycles:
-
-  Population
-  |    prey      predator
-  |   *    *    *    *
-  |  * *  * *  * *  * *
-  | *   **   **   **   *
-  |*                     *
-  +──────────────────────> t
-
-  When prey peaks → predator grows
-  When predator peaks → prey declines
-  → oscillating cycle!
-```
+<HandPlot
+  title="Predator–prey population cycles"
+  xLabel="t" yLabel="population"
+  domain={[0, 12]}
+  range={[0, 3]}
+  curves={[
+    { f: (t) => 1.5 + Math.sin(t), color: 'green', label: 'prey  x(t)' },
+    { f: (t) => 1.5 + Math.sin(t - 1.4), color: 'red', label: 'predator  y(t)' },
+  ]}
+  caption="When prey peaks the predator grows; when predator peaks prey declines — a lagging oscillation."
+/>

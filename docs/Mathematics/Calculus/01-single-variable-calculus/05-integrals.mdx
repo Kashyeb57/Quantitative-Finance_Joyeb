@@ -3,56 +3,73 @@ title: "Chapter 5: Integrals"
 sidebar_position: 5
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 5.1 Areas and Distances
 
-```
-  GOAL: Area under f(x) from a to b
+**GOAL:** Area under $f(x)$ from $a$ to $b$.
 
-  STEP 1: Divide into n rectangles
+**Step 1 — Divide $[a, b]$ into $n$ rectangles.** We slice the region into strips of equal width and sum their areas. The tops of the rectangles trace out the curve $f$; the partition points are $x_0 = a, x_1, x_2, \dots, x_n = b$.
 
-  y        ████░░░▒▒▒▓▓▓
-  |    ████████░░░▒▒▒▓▓▓
-  |    ████████░░░▒▒▒▓▓▓▓
-  |    ████████░░░░░▒▒▒▓▓▓▓▓
-  +────┼───┼───┼───┼──────> x
-       x₀  x₁  x₂  x₃  x₄=b
-       a
+<HandPlot
+  title="Approximating area with rectangles"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]}
+  range={[0, 4.5]}
+  curves={[
+    { f: (x) => 0.5 + 0.9 * x + 0.12 * x * x, color: 'ink', label: 'f(x)' },
+  ]}
+  marks={[
+    { x: 0.5, label: 'x₀=a' },
+    { x: 1.5, label: 'x₁' },
+    { x: 2.5, label: 'x₂' },
+    { x: 3.5, label: 'x₄=b' },
+  ]}
+  caption="Rᵢ = f(xᵢ)·Δx — the strips fill the region under f"
+/>
 
-  Width of each: Δx = (b−a)/n
-  Rₙ = f(x₁)Δx + f(x₂)Δx + ... + f(xₙ)Δx
+Width of each strip:
 
-  STEP 2: Take n → ∞
+$$
+\Delta x = \frac{b - a}{n}, \qquad R_n = f(x_1)\,\Delta x + f(x_2)\,\Delta x + \cdots + f(x_n)\,\Delta x
+$$
 
-  As n increases, approximation improves:
+**Step 2 — Take $n \to \infty$.** As $n$ increases, the staircase of rectangles hugs the curve more tightly and the approximation improves:
 
-  n=4:  ████████    n=8: ██░░██░░   n=∞: perfect
-        ████████         ██░░██░░
-```
+- $n = 4$: a coarse staircase, visible gaps and overshoots.
+- $n = 8$: gaps roughly halved.
+- $n \to \infty$: the error vanishes and $R_n$ converges to the exact area.
 
 ---
 
 ### 5.2 The Definite Integral
 
-```
-  DEFINITION:
+**Definition:**
 
-  ∫_a^b f(x)dx = lim  Σ f(xᵢ*)Δx
-                  n→∞ i=1
+$$
+\int_a^b f(x)\,dx = \lim_{n \to \infty} \sum_{i=1}^{n} f(x_i^*)\,\Delta x
+$$
 
-  GEOMETRIC INTERPRETATION:
+**Geometric interpretation:**
 
-  f(x) ≥ 0:  ∫_a^b f dx = area above x-axis
-  f(x) ≤ 0:  ∫_a^b f dx = −(area below x-axis)
-  Mixed:      ∫_a^b f dx = net signed area
+- $f(x) \ge 0$:  $\displaystyle\int_a^b f\,dx$ = area **above** the $x$-axis.
+- $f(x) \le 0$:  $\displaystyle\int_a^b f\,dx$ = $-(\text{area below the }x\text{-axis})$.
+- Mixed:  $\displaystyle\int_a^b f\,dx$ = **net signed area**.
 
-  y     *
-  |   * + *  ← positive area
-  |  *       *
-  +──a────────b──> x
-  |            *
-  |   negative ─ area
-  |              *
-```
+<HandPlot
+  title="Net signed area"
+  xLabel="x" yLabel="y"
+  domain={[0, 6]}
+  range={[-1.6, 1.6]}
+  curves={[
+    { f: (x) => Math.sin((x) * Math.PI / 3), color: 'ink', label: 'f(x)' },
+  ]}
+  marks={[
+    { x: 0.5, label: 'a' },
+    { x: 5.5, label: 'b' },
+  ]}
+  caption="Area above the axis counts +, area below counts − → net signed area"
+/>
 
 **Properties:**
 ```
@@ -70,41 +87,54 @@ sidebar_position: 5
 **THE most important theorem in calculus — links differentiation and integration.**
 
 **FTC Part 1:**
-```
-  g(x) = ∫_a^x f(t) dt     →     g'(x) = f(x)
 
-  Differentiating an integral gives back the integrand.
+$$
+g(x) = \int_a^x f(t)\,dt \quad\Longrightarrow\quad g'(x) = f(x)
+$$
 
-  Visualize: g(x) = accumulated area from a to x
+Differentiating an integral gives back the integrand. Visualize $g(x)$ as the **accumulated area** from $a$ up to $x$: the shaded region under $f$ grows as the right edge $x$ slides rightward. Its rate of growth, $g'(x)$, equals the current height of the curve, $f(x)$.
 
-  y
-  |    ░░░░░░░░░
-  |    ░░░░░░░░░░░░
-  |    ░░░░░░░░░░░░░
-  +────a────────x──> x
-       └─ g(x) = shaded area ─┘
-
-  g'(x) = rate area grows = f(x)  ← height of curve
-```
+<HandPlot
+  title="Accumulated area function g(x) = ∫ₐˣ f(t) dt"
+  xLabel="x" yLabel="y"
+  domain={[0, 6]}
+  range={[0, 3]}
+  curves={[
+    { f: (x) => 1 + 0.7 * Math.sin(x * 0.7), color: 'ink', label: 'f(t)' },
+  ]}
+  marks={[
+    { x: 0.6, label: 'a' },
+    { x: 4, label: 'x' },
+  ]}
+  caption="g(x) = shaded area from a to x;  g′(x) = f(x) = height of the curve"
+/>
 
 **FTC Part 2 (Evaluation Theorem):**
-```
-  ∫_a^b f(x) dx = F(b) − F(a)     where F' = f
 
-  This lets us compute areas exactly!
+$$
+\int_a^b f(x)\,dx = F(b) - F(a) \qquad \text{where } F' = f
+$$
 
-  Example: ∫_0^1 x² dx
-    F(x) = x³/3
-    = F(1) − F(0) = 1/3 − 0 = 1/3
+This lets us compute areas exactly!
 
-  y  x²
-  |    *
-  |   *
-  |  *  ← area = 1/3
-  | *
-  |* ← shaded region
-  +──0──1──> x
-```
+**Example:**
+
+$$
+\int_0^1 x^2\,dx, \quad F(x) = \frac{x^3}{3}, \quad = F(1) - F(0) = \frac{1}{3} - 0 = \frac{1}{3}
+$$
+
+<HandPlot
+  title="Area under x² on [0, 1] equals 1/3"
+  xLabel="x" yLabel="y"
+  domain={[0, 1.2]}
+  range={[0, 1.3]}
+  curves={[
+    { f: (x) => x * x, color: 'ink', label: 'f(x) = x²' },
+  ]}
+  points={[{ x: 1, y: 1, label: '(1, 1)', color: 'red' }]}
+  marks={[{ x: 1, label: 'x=1' }]}
+  caption="Shaded region under the parabola from 0 to 1 has area 1/3"
+/>
 
 > **Quant Finance:** FTC connects PDEs to integral formulas; basis of Green's functions in option pricing.
 
