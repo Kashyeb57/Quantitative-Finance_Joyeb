@@ -3,29 +3,26 @@ title: "Chapter 2: Limits and Derivatives"
 sidebar_position: 2
 ---
 
+import SecantTangent from '@site/src/components/CalcLab/SecantTangent';
+import EpsilonDelta from '@site/src/components/CalcLab/EpsilonDelta';
+
 ### 2.1 The Tangent and Velocity Problems
 
-```
-  Secant line → Tangent line as Q → P
+The **tangent** line at a point P is the limit of **secant** lines through P and a nearby point Q as Q slides toward P. Drag Q toward P:
 
-  y         Q(x, f(x))
-  |           o
-  |          /|
-  |         / |
-  |        /  |
-  |       /   |
-  |      / ↑  |
-  |     /  secant
-  |    o P(a, f(a))
-  |
-  +--a--x---------> x
+<SecantTangent />
 
-  slope_PQ = [f(x)−f(a)] / (x−a)
+The secant through $P(a, f(a))$ and $Q(x, f(x))$ has slope
 
-  As x → a:
-  slope_tangent = lim  [f(x)−f(a)] / (x−a)
-                  x→a
-```
+$$
+m_{PQ} = \frac{f(x) - f(a)}{x - a}.
+$$
+
+As $x \to a$ the secant becomes the tangent, whose slope is the **derivative**:
+
+$$
+m_{\tan} = \lim_{x \to a} \frac{f(x) - f(a)}{x - a}.
+$$
 
 ---
 
@@ -101,25 +98,11 @@ If lim f(x) = L and lim g(x) = M (as x→a), then:
 
 ### 2.4 The Precise Definition (ε-δ)
 
-```
-  lim f(x) = L  means:
-  x→a
+$$
+\lim_{x \to a} f(x) = L \quad\text{means:}\quad \text{for every } \varepsilon > 0 \text{ there is a } \delta > 0 \text{ with } 0 < |x - a| < \delta \;\implies\; |f(x) - L| < \varepsilon.
+$$
 
-  For every ε > 0, ∃ δ > 0 such that:
-  if 0 < |x − a| < δ  then  |f(x) − L| < ε
-
-  y
-  | L+ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─    ← ε-band
-  |        * within ε of L
-  | L  ━━━━━━━━━━━━━━━━━━━━━
-  |       *
-  | L−ε ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
-  |
-  +──a−δ──a──a+δ──────> x
-         ↑
-    all x within δ of a
-    produce f(x) within ε of L
-```
+<EpsilonDelta />
 
 ---
 
