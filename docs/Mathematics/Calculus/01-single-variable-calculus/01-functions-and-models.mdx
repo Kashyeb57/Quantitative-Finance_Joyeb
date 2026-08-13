@@ -4,6 +4,7 @@ sidebar_position: 1
 ---
 
 import FunctionTransform from '@site/src/components/CalcLab/FunctionTransform';
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 1.1 Four Ways to Represent a Function
 
@@ -185,24 +186,22 @@ Every transformation is one small change to $f(x)$. Drag the sliders and flip th
 
 ### 1.4 Exponential Growth and Decay
 
-```
-  MODEL: P(t) = P₀ · e^(kt)
+$$
+P(t) = P_0\, e^{kt}
+$$
 
-  k > 0: GROWTH               k < 0: DECAY
+<HandPlot
+  title="Exponential growth vs decay"
+  xLabel="t" yLabel="P" domain={[0, 4]} range={[0, 8]}
+  curves={[
+    { f: (t) => Math.exp(0.7 * t), color: 'ink', label: 'k > 0  growth' },
+    { f: (t) => 6 * Math.exp(-0.7 * t), color: 'blue', dash: true, label: 'k < 0  decay' },
+  ]}
+  points={[{ x: 0, y: 1, label: 'P₀' }]}
+/>
 
-  P                            P
-  |          *                 | *
-  |        *                   |  *
-  |       *                    |    *
-  |     *                      |       *
-  |   *                        |            *
-  | *                          |                 *
-  +-----------> t              +-----------> t
-  P₀                           P₀
-
-  Doubling time: t_d = ln(2)/k
-  Half-life:     t_h = ln(2)/|k|
-```
+- **Doubling time:** $t_d = \ln 2 / k$
+- **Half-life:** $t_h = \ln 2 / |k|$
 
 ---
 
