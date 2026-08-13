@@ -3,26 +3,27 @@ title: "Chapter 16: Vector Calculus"
 sidebar_position: 16
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 16.1 Vector Fields
 
-```
-  F(x,y) = P(x,y)i + Q(x,y)j
+**Vector Field:**
+$$
+\mathbf{F}(x,y) = P(x,y)\mathbf{i} + Q(x,y)\mathbf{j}
+$$
+> Assigns a VECTOR to each point in space.
 
-  Assigns a VECTOR to each point in space.
-
-  Examples:
-  Gravitational field:     Wind velocity field:
-
-  y                        y
-  |  ↓ ↓ ↓ ↓              |  → → ↗ ↑
-  |  ↓ ↓ ↓ ↓              |  → → → ↑
-  |  ↓ ↓ ↓ ↓              |  → → → →
-  +──────────> x           +──────────> x
-
-  All arrows point down    Arrows vary by location
-```
+<HandPlot
+  title="Vector Field (Examples)"
+  xLabel="x" yLabel="y" domain={[-2, 2]} range={[-2, 2]}
+  marks={[
+    { x: -1, y: 1, color: 'blue', label: 'Gravitational' },
+    { x: 1, y: 1, color: 'red', label: 'Wind Velocity' }
+  ]}
+  caption="A vector field assigns a vector (magnitude and direction) to every point in space."
+  height={300}
+/>
 
 <CalcPlot name="vector-field-3d" />
 
@@ -31,150 +32,153 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 16.2 Line Integrals
 
-```
-  ∫_C F·dr = work done by F along curve C
+$$
+\int_C \mathbf{F} \cdot d\mathbf{r} = \text{work done by } \mathbf{F} \text{ along curve } C
+$$
+*(Think: Force dotted with tiny displacement, summed along the path).*
 
-  Think: Force dotted with tiny displacement, summed along path
+<HandPlot
+  title="Line Integral"
+  xLabel="x" yLabel="y" domain={[0, 4]} range={[0, 4]}
+  functions={[
+    { fn: "x*x/4", color: "blue", label: "Curve C" }
+  ]}
+  marks={[
+    { x: 2, y: 1, color: 'red', label: 'F(x,y)' }
+  ]}
+  caption="Work done by the force field F pushing along the curve C."
+  height={200}
+/>
 
-  y       F(x,y)
-  |    ↗↗↗/← force vectors
-  |   ↗ / ← curve C
-  |  ↗/
-  | ↗/
-  |/
-  +──────────> x
+**Evaluating Line Integrals:**
+$$
+\int_C \mathbf{F} \cdot d\mathbf{r} = \int_C P \, dx + Q \, dy
+$$
 
-  ∫_C F·dr = ∫_C P dx + Q dy
-
-  Parametrize C as r(t) = <x(t), y(t)>:
-  = ∫_a^b F(r(t)) · r'(t) dt
-```
+Parametrize $C$ as $\mathbf{r}(t) = \langle x(t), y(t) \rangle$:
+$$
+= \int_a^b \mathbf{F}(\mathbf{r}(t)) \cdot \mathbf{r}'(t) \, dt
+$$
 
 ---
 
 ### 16.3 Fundamental Theorem for Line Integrals
 
-```
-  If F = ∇f (conservative field), then:
+If $\mathbf{F} = \nabla f$ (the field is conservative, meaning it's the gradient of some scalar potential function $f$), then:
 
-  ∫_C F·dr = f(r(b)) − f(r(a))
+$$
+\int_C \mathbf{F} \cdot d\mathbf{r} = f(\mathbf{r}(b)) - f(\mathbf{r}(a))
+$$
 
-  KEY CONSEQUENCE:
-  For conservative fields:
-  - Integral depends only on ENDPOINTS, not path
-  - ∮_C F·dr = 0  (closed curve integral = 0)
+> **KEY CONSEQUENCES:**
+> For conservative fields:
+> 1. The integral depends **only on ENDPOINTS**, not the path taken (Path Independence).
+> 2. $\oint_C \mathbf{F} \cdot d\mathbf{r} = 0$ (The integral around any closed loop is zero).
 
-  Path 1:                 Path 2:
-  y    ___                y
-  |   /   \               |   _____
-  |  /     \              |  /     |
-  | A       B             | A      B
-  +──────────> x          +──────────> x
-
-  Both give same answer if F is conservative!
-```
+<HandPlot
+  title="Path Independence"
+  xLabel="x" yLabel="y" domain={[0, 4]} range={[0, 3]}
+  polygons={[
+    { points: [[1,1], [2,2.5], [3,1]], color: 'green' },
+    { points: [[1,1], [1,0.5], [3,0.5], [3,1]], color: 'blue' }
+  ]}
+  marks={[
+    { x: 1, y: 1, color: 'black', label: 'A' },
+    { x: 3, y: 1, color: 'black', label: 'B' }
+  ]}
+  caption="Both Path 1 (green) and Path 2 (blue) give the same integral if the field is conservative."
+  height={250}
+/>
 
 ---
 
 ### 16.4 Green's Theorem
 
-```
-  ∮_C P dx + Q dy = ∬_D (∂Q/∂x − ∂P/∂y) dA
+$$
+\oint_C P \, dx + Q \, dy = \iint_D \left( \frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y} \right) dA
+$$
 
-  Converts LINE integral (boundary) to DOUBLE integral (region)
+> Converts a LINE integral on a closed boundary curve $C$ to a DOUBLE integral over the enclosed region $D$. (Assumes $C$ is traversed counterclockwise).
 
-  y
-  |    ┌──────┐
-  |    │      │ ← D (region)
-  |    │      │
-  |    └──────┘
-  |      ↑ C (boundary, counterclockwise)
-  +────────────────> x
+<HandPlot
+  title="Green's Theorem Region"
+  xLabel="x" yLabel="y" domain={[0, 4]} range={[0, 4]}
+  polygons={[
+    { points: [[1,1], [3,1], [3,3], [1,3], [1,1]], color: 'green' }
+  ]}
+  caption="Boundary C (counterclockwise) encloses Region D."
+  height={200}
+/>
 
-  Great for computing areas:
-  A = (1/2) ∮_C (x dy − y dx)
-```
+**Great for computing areas:**
+$$
+A = \frac{1}{2} \oint_C (x \, dy - y \, dx)
+$$
 
 ---
 
 ### 16.5 Curl and Divergence
 
+**CURL:** $\text{curl } \mathbf{F} = \nabla \times \mathbf{F}$
+
+> Measures the **ROTATION** or "spin" of a vector field at a point.
+
+- $\text{curl } \mathbf{F} > 0$: counterclockwise rotation
+- $\text{curl } \mathbf{F} < 0$: clockwise rotation
+- $\text{curl } \mathbf{F} = 0$: irrotational (often implies the field is conservative)
+
+```text
+  Curl F > 0   Curl F < 0
+    (ccw)        (cw)
+    ↖ ↑ ↗        ↗ ↑ ↖
+    ← · →        → · ←
+    ↙ ↓ ↘        ↘ ↓ ↙
 ```
-  CURL: curl F = ∇ × F
 
-  Measures ROTATION in a vector field
+**DIVERGENCE:** $\text{div } \mathbf{F} = \nabla \cdot \mathbf{F} = \frac{\partial P}{\partial x} + \frac{\partial Q}{\partial y} + \frac{\partial R}{\partial z}$
 
-  curl F > 0: counterclockwise rotation
-  curl F < 0: clockwise rotation
-  curl F = 0: irrotational (conservative?)
+> Measures the **OUTWARD FLOW** from a point.
 
-  y                        y
-  |   ↙ ↓ ↘              |   → → →
-  |   ← · →  ← rotation  |   → → →  ← no rotation
-  |   ↖ ↑ ↗              |   → → →
-  +──────────> x           +──────────> x
-  curl F ≠ 0               curl F = 0
+- $\text{div } \mathbf{F} > 0$: **Source** (flow out)
+- $\text{div } \mathbf{F} < 0$: **Sink** (flow in)
 
-  DIVERGENCE: div F = ∇ · F = ∂P/∂x + ∂Q/∂y + ∂R/∂z
-
-  div F > 0: source (flow out)     div F < 0: sink (flow in)
-  y   ↗ ↑ ↖                       y   ↘ ↓ ↙
-  |   ← · →                       |   → · ←
-  |   ↙ ↓ ↘                       |   ↗ ↑ ↖
-  +──────────> x                   +──────────> x
+```text
+   Div F > 0      Div F < 0
+    (Source)       (Sink)
+    ↖ ↑ ↗          ↘ ↓ ↙
+    ← · →          → · ←
+    ↙ ↓ ↘          ↗ ↑ ↖
 ```
 
 ---
 
 ### 16.7 Surface Integrals (Flux)
 
-```
-  ∬_S F·dS = ∬_S F·n dS  =  flux through surface S
+$$
+\iint_S \mathbf{F} \cdot d\mathbf{S} = \iint_S \mathbf{F} \cdot \mathbf{n} \, dS = \text{flux through surface } S
+$$
 
-  Measures how much of F "flows through" S
-
-        n ↑ (outward normal)
-        |
-  ──────┼──────  ← surface S
-  F →→→ | →→→→→
-  →→→→→ | →→→→→  F flowing through S
-  ──────┼──────
-        |
-```
+> Measures how much of the field $\mathbf{F}$ "flows through" the surface $S$ (using the outward normal vector $\mathbf{n}$).
 
 ---
 
 ### 16.8 Stokes' Theorem
 
-```
-  ∮_C F·dr = ∬_S curl F · dS
+$$
+\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_S \text{curl } \mathbf{F} \cdot d\mathbf{S}
+$$
 
-  Relates LINE integral on boundary to SURFACE integral
-
-         ↑ n
-        /|  S (surface)
-       / |
-      /  |
-   C─────  ← boundary curve (counterclockwise)
-
-  Generalizes Green's Theorem to 3D surfaces.
-```
+> Relates the **LINE** integral around a closed boundary curve $C$ to a **SURFACE** integral over any surface $S$ that has $C$ as its boundary. (Generalizes Green's Theorem to 3D surfaces).
 
 ---
 
 ### 16.9 The Divergence Theorem
 
-```
-  ∬_S F·dS = ∭_E div F dV
+$$
+\iint_S \mathbf{F} \cdot d\mathbf{S} = \iiint_E \text{div } \mathbf{F} \, dV
+$$
 
-  Flux through CLOSED SURFACE = integral of divergence over VOLUME
+> **Flux through CLOSED SURFACE = integral of divergence over the Enclosed VOLUME.**
 
-       ↑ outward normals all around
-      ↗ ↑ ↖
-  ←  [  E  ]  →   ← closed surface S
-      ↙ ↓ ↘
-
-  "What flows out of the surface = what is created inside"
-
-  Generalizes FTC to 3D — unifies all major theorems!
-```
+*"What flows out of the surface is equal to what is created inside."*
+*(This generalizes the Fundamental Theorem of Calculus to 3D and unifies all the major theorems).*

@@ -3,28 +3,21 @@ title: "Chapter 15: Multiple Integrals"
 sidebar_position: 15
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 15.1–15.2 Double Integrals
 
-```
-  ∬_R f(x,y) dA  =  volume under surface z=f(x,y)
+$$
+\iint_R f(x,y) \, dA = \text{volume under surface } z=f(x,y) \text{ over region } R
+$$
 
-         z
-         |  surface z = f(x,y)
-         |    ___
-         |   /   \
-         |  /  V  \  ← volume we integrate
-         | /________\
-         +────────────> y
-        /
-       x    R = region in xy-plane
+**FUBINI'S THEOREM** (iterate the integral):
+$$
+\iint_R f(x,y) \, dA = \int_a^b \int_c^d f(x,y) \, dy \, dx = \int_c^d \int_a^b f(x,y) \, dx \, dy
+$$
 
-  FUBINI'S THEOREM (iterate the integral):
-  ∬_R f dA = ∫_a^b ∫_c^d f(x,y) dy dx = ∫_c^d ∫_a^b f(x,y) dx dy
-
-  Evaluate inner integral first, then outer.
-```
+> Evaluate inner integral first, then outer.
 
 <CalcPlot name="double-integral" />
 
@@ -33,64 +26,61 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 15.3 Polar Coordinates for Double Integrals
 
-```
-  dA = r dr dθ  (area element in polar)
+**Area element in polar:** $dA = r \, dr \, d\theta$
 
-  ∬_R f(x,y) dA = ∫∫ f(r·cosθ, r·sinθ)·r dr dθ
+$$
+\iint_R f(x,y) \, dA = \iint f(r\cos\theta, r\sin\theta) \, r \, dr \, d\theta
+$$
 
-  Why r? — Annular ring at radius r:
-  Area of ring ≈ (2πr)(dr)  →  each bit = r dr dθ
+> **Why $r$?** Consider an annular ring at radius $r$. The circumference is $2\pi r$, and thickness is $dr$. The area of this tiny ring is $(2\pi r)(dr)$, meaning the area element scales with $r$.
 
-  y
-  |    ╭────╮   ← outer boundary r=b
-  |  ╭─╯ ░░ ╰─╮
-  | ╭╯  ░░░░  ╰╮ ← shaded annulus
-  | |  ░░░░░░  |
-  |  ╰╮░░░░╭╯
-  |    ╰────╯   ← inner boundary r=a
-  +────────────> x
-
-  Useful for circles, rings, sectors!
-```
+<HandPlot
+  title="Polar Annulus"
+  xLabel="x" yLabel="y" domain={[-3, 3]} range={[-3, 3]}
+  polygons={[
+    { points: [[1,0], [1.4,1.4], [0,2], [-1.4,1.4], [-2,0], [-1.4,-1.4], [0,-2], [1.4,-1.4], [1,0]], color: 'green' },
+    { points: [[0.5,0], [0.7,0.7], [0,1], [-0.7,0.7], [-1,0], [-0.7,-0.7], [0,-1], [0.7,-0.7], [0.5,0]], color: 'white' }
+  ]}
+  caption="An annulus region defined by inner radius a and outer radius b. Useful for circles, rings, and sectors!"
+  height={300}
+/>
 
 ---
 
 ### 15.6–15.8 Triple Integrals and Coordinate Systems
 
-```
-  ∭_E f(x,y,z) dV
+Triple integral over a volume $E$:
+$$
+\iiint_E f(x,y,z) \, dV
+$$
 
-  CYLINDRICAL (r, θ, z):
-  x = r cosθ,  y = r sinθ,  z = z
-  dV = r dz dr dθ
+**CYLINDRICAL $(r, \theta, z)$:**
+$$
+x = r \cos\theta, \quad y = r \sin\theta, \quad z = z
+$$
+$$
+dV = r \, dz \, dr \, d\theta
+$$
+*(Useful for cylinders, cones, and rotationally symmetric objects around the z-axis).*
 
-         z
-         |        ← cylinder of height h, radius a
-         |   ─────
-         |  /     \
-         | |   +   |  ← center at origin
-         |  \     /
-         |   ─────
-         +────────────> y
-        /
-       x
+**SPHERICAL $(\rho, \phi, \theta)$:**
+$$
+x = \rho \sin\phi \cos\theta
+$$
+$$
+y = \rho \sin\phi \sin\theta
+$$
+$$
+z = \rho \cos\phi
+$$
+$$
+dV = \rho^2 \sin\phi \, d\rho \, d\phi \, d\theta
+$$
 
-  SPHERICAL (ρ, φ, θ):
-  x = ρ sinφ cosθ
-  y = ρ sinφ sinθ
-  z = ρ cosφ
-  dV = ρ² sinφ dρ dφ dθ
-
-         z
-         |   ρ = distance from origin
-         | . ← P(ρ,φ,θ)
-         |/ φ ← polar angle from z-axis
-         +──────────> y
-        / θ ← azimuthal angle
-       x
-
-  Use spherical for spheres, cones, balls.
-```
+- $\rho = \text{distance from origin}$
+- $\phi = \text{polar angle from positive z-axis}$
+- $\theta = \text{azimuthal angle (same as polar } \theta \text{)}$
+*(Use spherical coordinates for spheres and balls).*
 
 <CalcPlot name="coordinate-systems" />
 
@@ -99,15 +89,17 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 15.9 Change of Variables (Jacobian)
 
-```
-  ∬_R f(x,y) dA = ∬_S f(x(u,v), y(u,v)) · |J| du dv
+$$
+\iint_R f(x,y) \, dA = \iint_S f(x(u,v), y(u,v)) \cdot |J| \, du \, dv
+$$
 
-  Jacobian: J = ∂(x,y)/∂(u,v) = |∂x/∂u  ∂x/∂v|
-                                  |∂y/∂u  ∂y/∂v|
+**Jacobian Determinant:**
+$$
+J = \frac{\partial(x,y)}{\partial(u,v)} = \begin{vmatrix} \frac{\partial x}{\partial u} & \frac{\partial x}{\partial v} \\ \frac{\partial y}{\partial u} & \frac{\partial y}{\partial v} \end{vmatrix}
+$$
 
-  |J| is the "stretch factor" of the transformation.
+> $|J|$ is the "stretch factor" of the transformation.
 
-  Example: Polar coordinates
-  x = r cosθ,  y = r sinθ
-  J = r  →  dA = r dr dθ  ✓
-```
+**Example: Polar coordinates**
+$x = r \cos\theta, \quad y = r \sin\theta$
+$J = r \implies dA = r \, dr \, d\theta$

@@ -7,72 +7,70 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 7.1 Integration by Parts
 
-```
-  ∫ u dv = uv − ∫ v du
+$$
+\int u \, dv = uv - \int v \, du
+$$
+*(Derived from product rule: $d(uv) = u \, dv + v \, du$)*
 
-  Derived from product rule: d(uv) = u dv + v du
+**CHOOSING u and dv — use "LIATE" priority for u:**
+- **L** $\to$ Logarithms
+- **I** $\to$ Inverse trig
+- **A** $\to$ Algebraic (polynomials)
+- **T** $\to$ Trigonometric
+- **E** $\to$ Exponential
 
-  CHOOSING u and dv — use "LIATE" priority for u:
-  L → Logarithms
-  I → Inverse trig
-  A → Algebraic (polynomials)
-  T → Trigonometric
-  E → Exponential
-
-  Example: ∫ x·eˣ dx
-    u = x     →  du = dx
-    dv = eˣdx →  v = eˣ
-
-    = x·eˣ − ∫ eˣ dx
-    = x·eˣ − eˣ + C
-    = eˣ(x − 1) + C
-```
+**Example:** $\int x \cdot e^x \, dx$
+$$
+\begin{aligned}
+u &= x \implies du = dx \\
+dv &= e^x \, dx \implies v = e^x \\
+&= x \cdot e^x - \int e^x \, dx \\
+&= x \cdot e^x - e^x + C \\
+&= e^x(x - 1) + C
+\end{aligned}
+$$
 
 ---
 
 ### 7.2 Trigonometric Integrals
 
-```
-  ∫ sinᵐ(x) cosⁿ(x) dx
+For integrals of the form $\int \sin^m(x) \cos^n(x) \, dx$:
 
-  Strategy:
-  ┌──────────────────────────────────────────────────┐
-  │ m ODD:  save one sin, convert rest using         │
-  │         sin²=1−cos², substitute u=cos(x)         │
-  │                                                  │
-  │ n ODD:  save one cos, convert rest using         │
-  │         cos²=1−sin², substitute u=sin(x)         │
-  │                                                  │
-  │ BOTH EVEN: use half-angle formulas               │
-  │   sin²(x) = (1−cos2x)/2                         │
-  │   cos²(x) = (1+cos2x)/2                         │
-  └──────────────────────────────────────────────────┘
-```
+| Condition | Strategy |
+|---|---|
+| **$m$ ODD** | Save one $\sin(x)$, convert rest using $\sin^2(x)=1-\cos^2(x)$, substitute $u=\cos(x)$ |
+| **$n$ ODD** | Save one $\cos(x)$, convert rest using $\cos^2(x)=1-\sin^2(x)$, substitute $u=\sin(x)$ |
+| **BOTH EVEN** | Use half-angle formulas: $\sin^2(x) = \frac{1-\cos(2x)}{2}$, $\cos^2(x) = \frac{1+\cos(2x)}{2}$ |
 
 ---
 
 ### 7.3 Trigonometric Substitution
 
-```
-  Expression          Substitution         Identity used
-  ─────────────────────────────────────────────────────
-  √(a²−x²)          x = a·sin(θ)         1−sin²=cos²
-  √(a²+x²)          x = a·tan(θ)         1+tan²=sec²
-  √(x²−a²)          x = a·sec(θ)         sec²−1=tan²
+| Expression | Substitution | Identity Used |
+|---|---|---|
+| $\sqrt{a^2-x^2}$ | $x = a \sin(\theta)$ | $1 - \sin^2(\theta) = \cos^2(\theta)$ |
+| $\sqrt{a^2+x^2}$ | $x = a \tan(\theta)$ | $1 + \tan^2(\theta) = \sec^2(\theta)$ |
+| $\sqrt{x^2-a^2}$ | $x = a \sec(\theta)$ | $\sec^2(\theta) - 1 = \tan^2(\theta)$ |
 
-  Visual: x = a·sin(θ) substitution for √(a²−x²)
+**Visual: $x = a \sin(\theta)$ substitution for $\sqrt{a^2-x^2}$**
 
-                  a
-               /|
-              / |
-        hyp  /  | √(a²−x²)
-            /   |
-           / θ  |
-          /─────|
-              x
-
-  When x = a·sin(θ): √(a²−x²) = a·cos(θ)  ✓
-```
+<HandPlot
+  title="Trig Substitution Triangle"
+  xLabel="" yLabel=""
+  domain={[0, 4]} range={[0, 4]}
+  polygons={[
+    { points: [[0,0], [3,0], [3,3]], color: 'gray' },
+    { points: [[0,0], [3,0], [3,3], [0,0]], color: 'black' }
+  ]}
+  marks={[
+    { x: 1.5, y: 2, color: 'pencil', label: 'a (hypotenuse)' },
+    { x: 3.2, y: 1.5, color: 'pencil', label: 'x (opposite)' },
+    { x: 1.5, y: -0.3, color: 'pencil', label: '√(a²−x²) (adjacent)' },
+    { x: 0.6, y: 0.25, color: 'pencil', label: 'θ' }
+  ]}
+  caption="When x = a sin(θ): √(a²−x²) = a cos(θ) ✓"
+  height={300}
+/>
 
 ---
 
@@ -80,48 +78,82 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 Decompose rational functions into simpler fractions:
 
-```
-  P(x)/Q(x)  where deg(P) < deg(Q)
+For rational functions $\frac{P(x)}{Q(x)}$ where $\text{deg}(P) < \text{deg}(Q)$:
 
-  CASE 1: Q has distinct linear factors
-  ─────────────────────────────────────
-  1/[(x−1)(x+2)] = A/(x−1) + B/(x+2)
+**CASE 1: $Q(x)$ has distinct linear factors**
+$$
+\frac{1}{(x-1)(x+2)} = \frac{A}{x-1} + \frac{B}{x+2}
+$$
+*(Multiply both sides by denominator, solve for A and B)*
 
-  Multiply both sides by denominator, solve for A,B
+**CASE 2: $Q(x)$ has repeated linear factors**
+$$
+\frac{1}{(x-1)^2} = \frac{A}{x-1} + \frac{B}{(x-1)^2}
+$$
 
-  CASE 2: Q has repeated linear factors
-  ──────────────────────────────────────
-  1/(x−1)² = A/(x−1) + B/(x−1)²
-
-  CASE 3: Q has irreducible quadratic factors
-  ────────────────────────────────────────────
-  1/[(x²+1)(x−1)] = (Ax+B)/(x²+1) + C/(x−1)
-```
+**CASE 3: $Q(x)$ has irreducible quadratic factors**
+$$
+\frac{1}{(x^2+1)(x-1)} = \frac{Ax+B}{x^2+1} + \frac{C}{x-1}
+$$
 
 ---
 
 ### 7.7 Approximate Integration
 
-```
-  MIDPOINT RULE (rectangles at midpoints):
-  ∫_a^b f dx ≈ Δx[f(x̄₁) + f(x̄₂) + ... + f(x̄ₙ)]
+**MIDPOINT RULE (rectangles at midpoints):**
+$$
+\int_a^b f(x) dx \approx \Delta x [\bar{f}(x_1) + \bar{f}(x_2) + \dots + \bar{f}(x_n)]
+$$
 
-  TRAPEZOIDAL RULE (trapezoids):
-  ∫_a^b f dx ≈ (Δx/2)[f(x₀) + 2f(x₁) + ... + 2f(xₙ₋₁) + f(xₙ)]
+**TRAPEZOIDAL RULE (trapezoids):**
+$$
+\int_a^b f(x) dx \approx \frac{\Delta x}{2} [f(x_0) + 2f(x_1) + \dots + 2f(x_{n-1}) + f(x_n)]
+$$
 
-  SIMPSON'S RULE (parabolas — most accurate):
-  ∫_a^b f dx ≈ (Δx/3)[f(x₀) + 4f(x₁) + 2f(x₂) + 4f(x₃) + ... + f(xₙ)]
+**SIMPSON'S RULE (parabolas — most accurate):**
+$$
+\int_a^b f(x) dx \approx \frac{\Delta x}{3} [f(x_0) + 4f(x_1) + 2f(x_2) + 4f(x_3) + \dots + f(x_n)]
+$$
 
-  Visual comparison:
+**Visual Comparison:**
 
-  Midpoint:       Trapezoid:       Simpson's:
-  y  ─┬─┬─┬─     y  /\/\/\        y   parabola
-  |  █│█│█│       |  / \ / \      |   fit per
-  |  █│█│█│       | /   X   \     |   3 points
-  +──────────     +──────────     +──────────
+<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+  <div style={{ flex: '1 1 200px' }}>
+    <HandPlot
+      title="Midpoint"
+      xLabel="x" yLabel="y" domain={[0, 3]} range={[0, 3]}
+      curves={[{ f: (x) => Math.sin(x) + 1, color: 'blue' }]}
+      polygons={[
+        { points: [[0, 0], [0, 1.48], [1, 1.48], [1, 0]], color: 'green' },
+        { points: [[1, 0], [1, 2], [2, 2], [2, 0]], color: 'green' }
+      ]}
+      height={250}
+    />
+  </div>
+  <div style={{ flex: '1 1 200px' }}>
+    <HandPlot
+      title="Trapezoid"
+      xLabel="x" yLabel="y" domain={[0, 3]} range={[0, 3]}
+      curves={[{ f: (x) => Math.sin(x) + 1, color: 'blue' }]}
+      polygons={[
+        { points: [[0, 0], [0, 1], [1, 1.84], [1, 0]], color: 'orange' },
+        { points: [[1, 0], [1, 1.84], [2, 1.91], [2, 0]], color: 'orange' }
+      ]}
+      height={250}
+    />
+  </div>
+  <div style={{ flex: '1 1 200px' }}>
+    <HandPlot
+      title="Simpson's"
+      xLabel="x" yLabel="y" domain={[0, 3]} range={[0, 3]}
+      curves={[{ f: (x) => Math.sin(x) + 1, color: 'blue' }]}
+      marks={[{ x: 1.5, y: 2.2, color: 'pencil', label: 'Parabola fit per 3 pts' }]}
+      height={250}
+    />
+  </div>
+</div>
 
-  Accuracy:  Midpoint ≈ Trapezoid  <<  Simpson's
-```
+> **Accuracy:** Midpoint ≈ Trapezoid ≪ Simpson's
 
 ---
 

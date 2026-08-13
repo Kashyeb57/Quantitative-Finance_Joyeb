@@ -83,17 +83,15 @@ Left side $\to L$ **and** right side $\to L$, so the limit exists and equals $L$
 
 If lim f(x) = L and lim g(x) = M (as x→a), then:
 
-```
-  ┌─────────────────────────────────────────┐
-  │ Sum:      lim [f+g] = L + M             │
-  │ Difference: lim [f−g] = L − M           │
-  │ Constant: lim [c·f] = c·L              │
-  │ Product:  lim [f·g] = L·M              │
-  │ Quotient: lim [f/g] = L/M  (M ≠ 0)    │
-  │ Power:    lim [f]ⁿ = Lⁿ               │
-  │ Root:     lim ⁿ√f = ⁿ√L              │
-  └─────────────────────────────────────────┘
-```
+| Law | Formula |
+|-----|---------|
+| **Sum** | $\lim_{x \to a} [f(x) + g(x)] = L + M$ |
+| **Difference** | $\lim_{x \to a} [f(x) - g(x)] = L - M$ |
+| **Constant** | $\lim_{x \to a} [c \cdot f(x)] = c \cdot L$ |
+| **Product** | $\lim_{x \to a} [f(x) \cdot g(x)] = L \cdot M$ |
+| **Quotient** | $\lim_{x \to a} \left[\frac{f(x)}{g(x)}\right] = \frac{L}{M}$ (if $M \neq 0$) |
+| **Power** | $\lim_{x \to a} [f(x)]^n = L^n$ |
+| **Root** | $\lim_{x \to a} \sqrt[n]{f(x)} = \sqrt[n]{L}$ |
 
 **The Squeeze Theorem:**
 
@@ -134,13 +132,9 @@ $$
 
 A function f is **continuous at a** if all three hold:
 
-```
-  ① f(a) is defined
-  ② lim f(x) exists
-     x→a
-  ③ lim f(x) = f(a)
-     x→a
-```
+1. $f(a)$ is defined
+2. $\lim_{x \to a} f(x)$ exists
+3. $\lim_{x \to a} f(x) = f(a)$
 
 **Continuous:** a smooth, unbroken curve — you can draw it without lifting your pen.
 
@@ -220,16 +214,13 @@ The continuous curve cannot skip level $N$ — it is guaranteed to cross it at s
 />
 
 **Important limits:**
-```
-  lim  xⁿ = ∞   (n>0)       lim  1/xⁿ = 0
-  x→∞                        x→∞
-
-  lim  eˣ = ∞                lim  eˣ = 0
-  x→∞                        x→−∞
-
-  lim  ln(x) = ∞
-  x→∞
-```
+$$
+\begin{aligned}
+\lim_{x \to \infty} x^n &= \infty \quad (n>0) & \lim_{x \to \infty} \frac{1}{x^n} &= 0 \\
+\lim_{x \to \infty} e^x &= \infty & \lim_{x \to -\infty} e^x &= 0 \\
+\lim_{x \to \infty} \ln(x) &= \infty & & 
+\end{aligned}
+$$
 
 ---
 
@@ -259,11 +250,9 @@ Visually, the secant through $P\big(a, f(a)\big)$ and $Q\big(a+h, f(a+h)\big)$ h
 />
 
 **Three interpretations:**
-```
-  ① Geometric:  slope of tangent line to y=f(x) at x=a
-  ② Physical:   instantaneous rate of change
-  ③ Kinematic:  velocity if f is a position function
-```
+1. **Geometric:** slope of tangent line to $y=f(x)$ at $x=a$
+2. **Physical:** instantaneous rate of change
+3. **Kinematic:** velocity if $f$ is a position function
 
 > **Quant Finance:** Delta = ∂V/∂S (option price sensitivity to underlying); DV01 = ∂P/∂y (bond price sensitivity to yield)
 
@@ -289,21 +278,23 @@ From the original function we derive a **new** function $f'(x)$. For $f(x) = x^2
 />
 
 **Notations for derivative:**
-```
-  f'(x)   (Lagrange)
-  df/dx   (Leibniz)
-  Df(x)   (Euler)
-  ẋ       (Newton, time derivative)
-```
+| Notation | Name | Usage |
+|----------|------|-------|
+| $f'(x)$ | Lagrange | Most common in calculus |
+| $\frac{df}{dx}$ | Leibniz | Highlights the ratio of differentials |
+| $Df(x)$ | Euler | Operator notation |
+| $\dot{x}$ | Newton | Time derivative, common in physics |
 
 **Higher Derivatives:**
-```
-  f(x)   → position
-  f'(x)  → velocity   (1st derivative)
-  f''(x) → acceleration (2nd derivative)
-  f'''(x)→ jerk        (3rd derivative)
+| Order | Function | Interpretation |
+|---|---|---|
+| $0$ | $f(x)$ | Position |
+| $1$ | $f'(x)$ | Velocity (1st derivative) |
+| $2$ | $f''(x)$ | Acceleration (2nd derivative) |
+| $3$ | $f'''(x)$ | Jerk (3rd derivative) |
 
-  f''(x) = [f'(x)]' = d²f/dx²
-```
+$$
+f''(x) = [f'(x)]' = \frac{d^2f}{dx^2}
+$$
 
 > **Quant Finance:** Gamma = ∂²V/∂S² (rate of change of Delta); Convexity = ∂²P/∂y² for bonds.

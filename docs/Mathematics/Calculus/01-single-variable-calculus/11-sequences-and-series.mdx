@@ -37,15 +37,17 @@ $$
 ### 11.2 Series
 
 A **series** is the sum of sequence terms:
-
 $$
-S = a_1 + a_2 + a_3 + \cdots = \sum a_n
+\sum_{n=1}^\infty a_n = a_1 + a_2 + a_3 + \dots
 $$
 
-with **partial sums** $S_n = a_1 + a_2 + \cdots + a_n$. The series **converges** if $\displaystyle\lim_{n\to\infty} S_n = S$ (finite).
+**Sum is defined as limit of partial sums ($S_n$):**
+$$
+S_n = a_1 + a_2 + \dots + a_n
+$$
+If $\lim_{n \to \infty} S_n = S$, then the series converges to $S$.
 
 **Geometric series:**
-
 $$
 \sum a r^{\,n} = \frac{a}{1-r} \qquad\text{for } |r| < 1
 $$
@@ -67,103 +69,97 @@ $$
   curves={[{ f: (n) => Math.pow(1.3, n) - 1, color: 'ink', label: 'Sₙ → ∞' }]}
 />
 
-**Test for divergence:** if $\displaystyle\lim_{n\to\infty} a_n \neq 0$, then $\sum a_n$ **diverges** (a necessary condition!).
+**Test for Divergence:**
+If $\lim_{n \to \infty} a_n \neq 0$, then $\sum a_n$ **DIVERGES**.
 
 ---
 
 ### 11.3 The Integral Test
 
-```
-  If f(n) = aₙ and f is continuous, positive, DECREASING:
+**Integral Test:**
+If $f(x)$ is continuous, positive, decreasing, and $a_n = f(n)$:
+$$
+\sum_{n=1}^\infty a_n \quad \text{and} \quad \int_1^\infty f(x) \, dx
+$$
+both converge or both diverge.
 
-  Σaₙ converges  ⟺  ∫_1^∞ f(x)dx converges
+<HandPlot
+  title="Integral Test (Series sum ≈ Area under curve)"
+  xLabel="n" yLabel="aₙ"
+  domain={[1, 5]} range={[0, 1.2]}
+  curves={[{ f: (x) => 1/(x), color: 'blue', label: 'f(x) = 1/x' }]}
+  polygons={[
+    { points: [[1, 0], [1, 1], [2, 1], [2, 0]], color: 'green' },
+    { points: [[2, 0], [2, 0.5], [3, 0.5], [3, 0]], color: 'green' },
+    { points: [[3, 0], [3, 1/3], [4, 1/3], [4, 0]], color: 'green' },
+    { points: [[4, 0], [4, 1/4], [5, 1/4], [5, 0]], color: 'green' }
+  ]}
+  marks={[
+    { x: 1, label: '1' },
+    { x: 2, label: '2' },
+    { x: 3, label: '3' },
+    { x: 4, label: '4' }
+  ]}
+  caption="Area under f(x) (integral) bounds the sum of the rectangles (series)."
+  height={300}
+/>
 
-  y  a₁            Series sum ≈ integral (area)
-  |  ████
-  |  ████ a₂        Integral: shaded
-  |  ████ ████      Series:   rectangles
-  |  ████ ████ ████
-  +──1────2────3────> n
+**$p$-series:** $\sum \frac{1}{n^p}$ converges if $p > 1$, diverges if $p \le 1$.
 
-  p-SERIES: Σ 1/nᵖ
-  converges if p > 1
-  diverges  if p ≤ 1
-```
+**Alternating Series:**
+$$
+\sum_{n=1}^\infty (-1)^n b_n \quad \text{where } b_n > 0
+$$
+Converges if $b_{n+1} \le b_n$ and $\lim_{n \to \infty} b_n = 0$.
 
 ---
 
 ### 11.4–11.6 Convergence Tests Summary
 
-```
-  ┌─────────────────────────────────────────────────────────────┐
-  │ TEST              WHEN TO USE          RESULT               │
-  ├─────────────────────────────────────────────────────────────┤
-  │ Divergence Test   Always try first     aₙ↛0 → diverges     │
-  │ Geometric Series  Σarⁿ form           |r|<1 conv, |r|≥1 div│
-  │ p-Series          Σ1/nᵖ form          p>1 conv, p≤1 div    │
-  │ Integral Test     f(n)=aₙ, decreasing ∫ converges ↔ Σ conv │
-  │ Comparison Test   Compare to known    squeeze argument      │
-  │ Limit Comparison  aₙ~bₙ similar form  lim(aₙ/bₙ)=L>0      │
-  │ Alternating Series (-1)ⁿaₙ, aₙ↘0     converges!           │
-  │ Ratio Test        factorials/powers   L=lim|aₙ₊₁/aₙ|<1→cv │
-  │ Root Test         nᵗʰ powers          L=lim|aₙ|^(1/n)<1→cv│
-  └─────────────────────────────────────────────────────────────┘
-```
-
-**Ratio Test visual:**
-```
-  L = lim |aₙ₊₁/aₙ|
-      n→∞
-
-  L < 1  →  CONVERGES absolutely
-  L > 1  →  DIVERGES
-  L = 1  →  INCONCLUSIVE (try another test)
-```
+- **Divergence Test:** $\lim_{n \to \infty} a_n \neq 0 \implies$ Diverges
+- **Geometric Series:** $\sum ar^n \implies |r|<1$ converges
+- **p-Series:** $\sum \frac{1}{n^p} \implies p>1$ converges
+- **Integral Test:** $\int f(x)dx$ converges $\iff \sum a_n$ converges
+- **Ratio Test:** For $L = \lim_{n \to \infty} \left| \frac{a_{n+1}}{a_n} \right|$:
+  - $L < 1 \implies$ **CONVERGES** absolutely
+  - $L > 1 \implies$ **DIVERGES**
+  - $L = 1 \implies$ **INCONCLUSIVE** (try another test)
+- **Root Test:** $\lim_{n \to \infty} |a_n|^{1/n} < 1 \implies$ Converges absolutely
 
 ---
 
 ### 11.8–11.9 Power Series
 
-```
-  Σ cₙ(x−a)ⁿ = c₀ + c₁(x−a) + c₂(x−a)² + ...
+$$
+\sum_{n=0}^\infty c_n (x - a)^n = c_0 + c_1(x-a) + c_2(x-a)^2 + \dots
+$$
 
-  RADIUS OF CONVERGENCE R:
-  - Series converges for |x−a| < R
-  - Series diverges  for |x−a| > R
-  - Endpoints: check separately!
+**Radius of convergence $R$:**
+- Converges for $|x-a| < R$
+- Diverges for $|x-a| > R$
+- Endpoints must be checked separately.
 
-  Number line:
-  ───────[────────────────────]───────>
-         a−R        a       a+R
-         ↑                   ↑
-     might converge       might converge
-         or diverge       or diverge
-
-  Find R using Ratio Test: R = lim |cₙ/cₙ₊₁|
-
-  Key example:
-  1/(1−x) = Σ xⁿ = 1 + x + x² + x³ + ...  for |x| < 1
-```
+Find $R$ using the **Ratio Test**: $\lim_{n \to \infty} \left| \frac{a_{n+1}}{a_n} \right| < 1$.
 
 ---
 
 ### 11.10 Taylor and Maclaurin Series
 
-```
-  f(x) = Σ f⁽ⁿ⁾(a)/n! · (x−a)ⁿ    (Taylor series centered at a)
+**Taylor Series centered at $a$:**
+$$
+f(x) = \sum_{n=0}^\infty \frac{f^{(n)}(a)}{n!} (x - a)^n
+$$
 
-  When a = 0: MACLAURIN SERIES
+**Maclaurin Series (centered at $0$):**
+$$
+f(x) = \sum_{n=0}^\infty \frac{f^{(n)}(0)}{n!} x^n
+$$
 
-  ┌──────────────────────────────────────────────────────┐
-  │  eˣ   = 1 + x + x²/2! + x³/3! + x⁴/4! + ...        │
-  │  sin(x)= x − x³/3! + x⁵/5! − x⁷/7! + ...           │
-  │  cos(x)= 1 − x²/2! + x⁴/4! − x⁶/6! + ...           │
-  │  ln(1+x)= x − x²/2 + x³/3 − x⁴/4 + ...  (|x|<1)   │
-  │  1/(1−x)= 1 + x + x² + x³ + ...          (|x|<1)   │
-  └──────────────────────────────────────────────────────┘
-```
-
-**Visual: approximating $\sin(x)$ with Taylor polynomials** — each higher-degree polynomial ($T_1 = x$, then $T_3 = x - x^3/6$, then $T_5 = x - x^3/6 + x^5/120$) hugs the true curve over a wider interval:
+**Key Maclaurin Series:**
+- $e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \dots$
+- $\sin(x) = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!} + \dots$
+- $\cos(x) = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \frac{x^6}{6!} + \dots$
+- $\frac{1}{1-x} = 1 + x + x^2 + x^3 + \dots \quad (|x| < 1)$
 
 <HandPlot
   title="Taylor polynomials of sin(x)"

@@ -7,19 +7,15 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 3.1 Basic Differentiation Rules
 
-```
-  ┌────────────────────────────────────────────┐
-  │  RULE              FORMULA                 │
-  ├────────────────────────────────────────────┤
-  │  Constant          d/dx[c] = 0             │
-  │  Power             d/dx[xⁿ] = nxⁿ⁻¹       │
-  │  Constant Multiple d/dx[cf] = c·f'         │
-  │  Sum               d/dx[f+g] = f'+g'       │
-  │  Difference        d/dx[f−g] = f'−g'       │
-  │  Exponential       d/dx[eˣ] = eˣ           │
-  │  General Exp       d/dx[bˣ] = bˣ·ln(b)     │
-  └────────────────────────────────────────────┘
-```
+| Rule | Formula |
+|---|---|
+| **Constant** | $\frac{d}{dx}[c] = 0$ |
+| **Power** | $\frac{d}{dx}[x^n] = nx^{n-1}$ |
+| **Constant Multiple** | $\frac{d}{dx}[c \cdot f(x)] = c \cdot f'(x)$ |
+| **Sum** | $\frac{d}{dx}[f(x) + g(x)] = f'(x) + g'(x)$ |
+| **Difference** | $\frac{d}{dx}[f(x) - g(x)] = f'(x) - g'(x)$ |
+| **Exponential** | $\frac{d}{dx}[e^x] = e^x$ |
+| **General Exp** | $\frac{d}{dx}[b^x] = b^x \cdot \ln(b)$ |
 
 **Visual: Power Rule**
 
@@ -39,41 +35,38 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 ### 3.2 Product and Quotient Rules
 
 **Product Rule:**
-```
-  d/dx[f·g] = f'·g + f·g'
+$$
+\frac{d}{dx}[f(x) \cdot g(x)] = f'(x) \cdot g(x) + f(x) \cdot g'(x)
+$$
 
-  Think: "first times derivative of second
-         plus second times derivative of first"
+> **Memory Trick**: "first times derivative of second plus second times derivative of first"
 
-  Example: d/dx[x²·sin(x)]
-         = 2x·sin(x) + x²·cos(x)
-```
+**Example:**
+$$
+\frac{d}{dx}[x^2 \cdot \sin(x)] = 2x \cdot \sin(x) + x^2 \cdot \cos(x)
+$$
 
 **Quotient Rule:**
-```
-  d/dx[f/g] = (f'·g − f·g') / g²
+$$
+\frac{d}{dx}\left[\frac{f(x)}{g(x)}\right] = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{[g(x)]^2}
+$$
 
-  Memory trick: "low d-high minus high d-low, over low squared"
+> **Memory Trick**: "low d-high minus high d-low, over low squared"
 
-  Example: d/dx[sin(x)/x]
-         = (cos(x)·x − sin(x)·1) / x²
-         = (x·cos(x) − sin(x)) / x²
-```
+**Example:**
+$$
+\frac{d}{dx}\left[\frac{\sin(x)}{x}\right] = \frac{\cos(x) \cdot x - \sin(x) \cdot 1}{x^2} = \frac{x \cos(x) - \sin(x)}{x^2}
+$$
 
 ---
 
 ### 3.3 Derivatives of Trigonometric Functions
 
-```
-  ┌───────────────────────────────────────┐
-  │  d/dx[sin(x)]  =  cos(x)             │
-  │  d/dx[cos(x)]  = −sin(x)             │
-  │  d/dx[tan(x)]  =  sec²(x)            │
-  │  d/dx[cot(x)]  = −csc²(x)            │
-  │  d/dx[sec(x)]  =  sec(x)tan(x)       │
-  │  d/dx[csc(x)]  = −csc(x)cot(x)       │
-  └───────────────────────────────────────┘
-```
+| Function | Derivative | Function | Derivative |
+|---|---|---|---|
+| $\sin(x)$ | $\cos(x)$ | $\cot(x)$ | $-\csc^2(x)$ |
+| $\cos(x)$ | $-\sin(x)$ | $\sec(x)$ | $\sec(x)\tan(x)$ |
+| $\tan(x)$ | $\sec^2(x)$ | $\csc(x)$ | $-\csc(x)\cot(x)$ |
 
 **Visual: sin and its derivative cos**
 
@@ -98,33 +91,28 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 **The most important rule in calculus.**
 
-```
-  If y = f(u) and u = g(x), then:
-  dy/dx = dy/du · du/dx = f'(g(x)) · g'(x)
+If $y = f(u)$ and $u = g(x)$, then:
+$$
+\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = f'(g(x)) \cdot g'(x)
+$$
 
-  VISUAL — think of it as gears:
-
-  x ──[g]──> u ──[f]──> y
-
-  Rate of change of y w.r.t. x
-    = (rate y changes per u) × (rate u changes per x)
-```
+**VISUAL — think of it as gears:**
+$$ x \xrightarrow{g} u \xrightarrow{f} y $$
+> Rate of change of $y$ w.r.t $x$ = (rate $y$ changes per $u$) $\times$ (rate $u$ changes per $x$)
 
 **Examples:**
-```
-  d/dx[sin(x²)]  = cos(x²) · 2x
-                    ↑outer      ↑inner derivative
-
-  d/dx[e^(3x)]   = e^(3x) · 3
-
-  d/dx[(x²+1)⁵]  = 5(x²+1)⁴ · 2x
-```
+$$
+\begin{aligned}
+\frac{d}{dx}[\sin(x^2)] &= \cos(x^2) \cdot 2x \\
+\frac{d}{dx}[e^{3x}] &= e^{3x} \cdot 3 \\
+\frac{d}{dx}[(x^2+1)^5] &= 5(x^2+1)^4 \cdot 2x
+\end{aligned}
+$$
 
 **Nested chain rule:**
-```
-  d/dx[sin(e^(x²))] = cos(e^(x²)) · e^(x²) · 2x
-                        ↑outer      ↑middle    ↑inner
-```
+$$
+\frac{d}{dx}[\sin(e^{x^2})] = \cos(e^{x^2}) \cdot e^{x^2} \cdot 2x
+$$
 
 > **Quant Finance:** Chain rule is THE fundamental tool in derivatives pricing. Itô's lemma (stochastic chain rule) derives Black-Scholes PDE.
 
@@ -162,11 +150,13 @@ At point $(3,4)$: slope $= -\tfrac{3}{4}$.
 
 ### 3.6 Derivatives of Logarithmic Functions
 
-```
-  d/dx[ln(x)]      = 1/x        (x > 0)
-  d/dx[ln|x|]      = 1/x        (x ≠ 0)
-  d/dx[log_b(x)]   = 1/(x·ln b)
-```
+$$
+\begin{aligned}
+\frac{d}{dx}[\ln(x)] &= \frac{1}{x} \quad &(x > 0) \\
+\frac{d}{dx}[\ln|x|] &= \frac{1}{x} \quad &(x \neq 0) \\
+\frac{d}{dx}[\log_b(x)] &= \frac{1}{x \cdot \ln(b)} &
+\end{aligned}
+$$
 
 **Visual:** $\frac{d}{dx}[\ln(x)] = \frac{1}{x}$
 
@@ -183,12 +173,14 @@ At point $(3,4)$: slope $= -\tfrac{3}{4}$.
 />
 
 **Logarithmic Differentiation** — take ln of both sides first:
-```
-  y = xˣ
-  ln(y) = x·ln(x)
-  y'/y = ln(x) + 1
-  y' = xˣ(ln(x) + 1)
-```
+$$
+\begin{aligned}
+y &= x^x \\
+\ln(y) &= x \cdot \ln(x) \\
+\frac{y'}{y} &= \ln(x) + 1 \\
+y' &= x^x(\ln(x) + 1)
+\end{aligned}
+$$
 
 ---
 
@@ -211,12 +203,11 @@ At point $(3,4)$: slope $= -\tfrac{3}{4}$.
 />
 
 **Natural Growth/Decay:**
-```
-  dy/dt = ky     →     y(t) = y₀·e^(kt)
+$$
+\frac{dy}{dt} = ky \quad \implies \quad y(t) = y_0 \cdot e^{kt}
+$$
 
-  This ODE says: "rate of change is proportional to current value"
-  — bacteria, compound interest, radioactive decay, ...
-```
+> This ODE says: "rate of change is proportional to current value" — bacteria, compound interest, radioactive decay, etc.
 
 ---
 
@@ -224,21 +215,31 @@ At point $(3,4)$: slope $= -\tfrac{3}{4}$.
 
 Variables that all change with time — use chain rule w.r.t. t:
 
-```
-  Classic: Ladder sliding down wall
+**Classic: Ladder sliding down wall**
 
-  y
-  |\ ← ladder of length L
-  | \
-  | h\      h² + x² = L²
-  |   \
-  |    \
-  +─x───\──> x
+<HandPlot
+  title="Ladder Sliding Down Wall"
+  xLabel="x (floor)" yLabel="h (wall)"
+  domain={[-1, 6]} range={[-1, 6]}
+  polygons={[
+    { points: [[0,0], [0,4], [3,0]], color: 'gray' },
+    { points: [[0,0], [0,6], [0,0]], color: 'black' },
+    { points: [[0,0], [6,0], [0,0]], color: 'black' }
+  ]}
+  curves={[
+    { f: (x) => -4/3 * x + 4, color: 'red', label: 'Ladder L=5' }
+  ]}
+  marks={[
+    { x: 1.5, y: 2, color: 'pencil', label: 'h² + x² = L²' }
+  ]}
+  caption="Ladder of length L leaning against a wall."
+  height={300}
+/>
 
-  Differentiate w.r.t. t:
-  2h(dh/dt) + 2x(dx/dt) = 0
-  → find dh/dt given dx/dt
-```
+Differentiate $h^2 + x^2 = L^2$ w.r.t. $t$:
+$$
+2h\frac{dh}{dt} + 2x\frac{dx}{dt} = 0 \quad \implies \quad \text{find } \frac{dh}{dt} \text{ given } \frac{dx}{dt}
+$$
 
 ---
 
@@ -266,11 +267,11 @@ $$
 $L(x) \approx f(x)$ near $x = a$.
 
 **Differential:**
-```
-  dy = f'(x) dx
+$$
+dy = f'(x) dx
+$$
 
-  When x changes by dx, y changes by approximately dy.
-```
+> When $x$ changes by $dx$, $y$ changes by approximately $dy$.
 
 ---
 

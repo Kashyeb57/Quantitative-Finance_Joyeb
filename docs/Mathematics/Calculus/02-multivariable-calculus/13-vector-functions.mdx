@@ -8,29 +8,32 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 13.1–13.2 Vector Functions and Derivatives
 
-```
-  r(t) = <f(t), g(t), h(t)>     (space curve)
+**Vector Function (space curve):**
+$$
+\mathbf{r}(t) = \langle f(t), g(t), h(t) \rangle
+$$
 
-  Example: Helix
-  r(t) = <cos(t), sin(t), t>
+**Example: Helix**
+$$
+\mathbf{r}(t) = \langle \cos(t), \sin(t), t \rangle
+$$
 
-       z
-       |        ← helix spiraling up
-       |      *
-       |    *
-       |   *
-       |  *      *
-       | *     *
-       |      *
-       +──────────> y
-      /  *  *
-     x
+<HandPlot
+  title="Helix (2D Projection)"
+  xLabel="x" yLabel="y" domain={[-1.5, 1.5]} range={[-1.5, 1.5]}
+  functions={[
+    { fn: "Math.sin(x*5)", color: "blue", label: "helix projection" }
+  ]}
+  caption="A 2D representation of a spiraling helix. In 3D, it spirals upwards along the z-axis."
+  height={300}
+/>
 
-  Derivative (tangent vector):
-  r'(t) = <f'(t), g'(t), h'(t)>
+**Derivative (tangent vector):**
+$$
+\mathbf{r}'(t) = \langle f'(t), g'(t), h'(t) \rangle
+$$
 
-  r'(t) is TANGENT to the curve at each point.
-```
+> $\mathbf{r}'(t)$ is **TANGENT** to the curve at each point.
 
 <CalcPlot name="helix-tangent" />
 
@@ -39,20 +42,20 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 13.3 Arc Length and Curvature
 
-```
-  Arc Length: L = ∫_a^b |r'(t)| dt
+**Arc Length:**
+$$
+L = \int_a^b |\mathbf{r}'(t)| dt
+$$
 
-  Curvature κ measures how sharply a curve bends:
-  κ = |r'(t) × r''(t)| / |r'(t)|³
+**Curvature ($\kappa$) measures how sharply a curve bends:**
+$$
+\kappa = \frac{|\mathbf{r}'(t) \times \mathbf{r}''(t)|}{|\mathbf{r}'(t)|^3}
+$$
 
-  Low κ:              High κ:
-  (gentle curve)      (sharp curve)
-        ────           )(
-  almost straight    tight spiral
-
-  κ = 0:  straight line
-  κ = 1/r: circle of radius r
-```
+- **Low $\kappa$:** Gentle curve (almost straight)
+- **High $\kappa$:** Sharp curve (tight spiral)
+- **$\kappa = 0$:** Straight line
+- **$\kappa = 1/r$:** Circle of radius $r$
 
 ---
 

@@ -29,18 +29,31 @@ A function f assigns **exactly one output** to each input.
 | **Algebraic** | f(x) = e^(−x²/2) / √(2π) |
 
 **Vertical Line Test:**
-```
-  ✓ IS a function        ✗ NOT a function
-
-  y |    *               y |  *   *
-    |   * *                |  * * *
-    |  *   *               |   ***
-    |                      |
-    +---------> x          +---------> x
-
-  No vertical line        Vertical line hits
-  hits curve twice        curve twice
-```
+<div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+  <div style={{ flex: '1 1 300px' }}>
+    <HandPlot
+      title="✓ IS a function"
+      xLabel="x" yLabel="y" domain={[-2, 2]} range={[-1, 4]}
+      curves={[{ f: (x) => x * x, color: 'green', label: 'y = x²' }]}
+      marks={[{ x: 1, color: 'pencil', label: 'hits once' }]}
+      caption="No vertical line hits curve twice."
+      height={280}
+    />
+  </div>
+  <div style={{ flex: '1 1 300px' }}>
+    <HandPlot
+      title="✗ NOT a function"
+      xLabel="x" yLabel="y" domain={[-1, 4]} range={[-2, 2]}
+      curves={[
+        { f: (x) => Math.sqrt(x), color: 'red' },
+        { f: (x) => -Math.sqrt(x), color: 'red', label: 'x = y²' }
+      ]}
+      marks={[{ x: 2, color: 'pencil', label: 'hits twice' }]}
+      caption="Vertical line hits curve twice."
+      height={280}
+    />
+  </div>
+</div>
 
 ---
 
@@ -103,12 +116,14 @@ A function f assigns **exactly one output** to each input.
 Every $b^x$ **passes through $(0, 1)$**.
 
 **Laws of Exponents:**
-```
-  b^(x+y) = bˣ · bʸ
-  b^(x-y) = bˣ / bʸ
-  (bˣ)ʸ  = b^(xy)
-  (ab)ˣ  = aˣ · bˣ
-```
+$$
+\begin{aligned}
+b^{x+y} &= b^x \cdot b^y \\
+b^{x-y} &= \frac{b^x}{b^y} \\
+(b^x)^y &= b^{xy} \\
+(ab)^x &= a^x \cdot b^x
+\end{aligned}
+$$
 
 > **Quant Finance:** Continuous compounding A = Pe^(rt); GBM: S(t) = S₀·exp((μ−σ²/2)t + σW(t))
 
@@ -153,11 +168,13 @@ $y = \ln(x)$ is the **inverse** of $y = e^x$ — each is the reflection of the o
 - **Range**: all real numbers
 
 **Laws of Logarithms:**
-```
-  ln(xy) = ln(x) + ln(y)
-  ln(x/y) = ln(x) − ln(y)
-  ln(xʳ) = r·ln(x)
-```
+$$
+\begin{aligned}
+\ln(xy) &= \ln(x) + \ln(y) \\
+\ln\left(\frac{x}{y}\right) &= \ln(x) - \ln(y) \\
+\ln(x^r) &= r\ln(x)
+\end{aligned}
+$$
 
 > **Quant Finance:** Log returns r = ln(S_t / S_\{t−1\}); time to double: t = ln(2)/r
 
@@ -212,13 +229,11 @@ $$
 **Horizontal Line Test** — f is one-to-one (invertible) if no horizontal line hits graph twice.
 
 **Inverse Trig Functions:**
-```
-  Function     Domain       Range
-  ─────────────────────────────────────
-  sin⁻¹(x)    [−1, 1]     [−π/2, π/2]
-  cos⁻¹(x)    [−1, 1]     [0, π]
-  tan⁻¹(x)    (−∞, ∞)     (−π/2, π/2)
-```
+| Function | Domain | Range |
+|----------|--------|-------|
+| $\sin^{-1}(x)$ | $[-1, 1]$ | $[-\pi/2, \pi/2]$ |
+| $\cos^{-1}(x)$ | $[-1, 1]$ | $[0, \pi]$ |
+| $\tan^{-1}(x)$ | $(-\infty, \infty)$ | $(-\pi/2, \pi/2)$ |
 
 <HandPlot
   title="tan⁻¹(x) with horizontal asymptotes ±π/2"

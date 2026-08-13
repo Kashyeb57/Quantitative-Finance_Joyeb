@@ -28,52 +28,62 @@ $$
 
 ### 6.2 Volumes (Disk Method)
 
-```
-  Rotate f(x) around x-axis → solid of revolution
+Rotate $f(x)$ around x-axis $\implies$ solid of revolution.
+$$
+V = \pi \int_a^b [f(x)]^2 \, dx
+$$
 
-  V = π·∫_a^b [f(x)]² dx
-
-  Cross-section is a DISK with radius f(x):
-
-      ┌────────────────────────────────┐
-      │ f(x)     .─────.              │
-  ────│────── .-'   ┊   '-.          │
-      │      |   r=f(x)┊  |   → disk │
-  ────│────── '-.   ┊   .-'          │
-      │          '─────'              │
-      └────────────────────────────────┘
-  x-axis
-
-  Volume = sum of infinitely thin disk areas
-```
+<HandPlot
+  title="Solid of Revolution (Disk Method)"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]} range={[-3, 3]}
+  curves={[
+    { f: (x) => Math.sqrt(x), color: 'blue', label: 'y = √x' },
+    { f: (x) => -Math.sqrt(x), color: 'gray' }
+  ]}
+  polygons={[
+    { points: [[2, -Math.sqrt(2)], [2, Math.sqrt(2)], [2.2, Math.sqrt(2)], [2.2, -Math.sqrt(2)]], color: 'red' }
+  ]}
+  marks={[
+    { x: 2, y: Math.sqrt(2)/2, color: 'pencil', label: 'radius r = f(x)' },
+    { x: 2.1, y: -0.5, color: 'pencil', label: 'dx' }
+  ]}
+  caption="Cross-section is a DISK with radius f(x) and thickness dx. Volume = sum of infinitely thin disk areas."
+  height={300}
+/>
 
 **Washer Method** (hole in the middle):
-```
-  V = π·∫_a^b ([f(x)]² − [g(x)]²) dx
-
-       Outer²        Inner²
-```
+$$
+V = \pi \int_a^b \left( [f(x)]^2 - [g(x)]^2 \right) \, dx
+$$
+*(Outer radius squared minus Inner radius squared)*
 
 ---
 
 ### 6.3 Shell Method
 
-```
-  V = ∫ 2π·(radius)·(height)·(thickness)
+$$
+V = \int 2\pi \cdot (\text{radius}) \cdot (\text{height}) \cdot (\text{thickness})
+$$
 
-  Imagine cylindrical shells like tree rings:
-
-  y
-  |    ┌───────────┐
-  |    │ ┌───────┐ │
-  |    │ │ ┌───┐ │ │
-  |    │ │ │   │ │ │  shells stacked
-  |    │ │ │   │ │ │
-  |    │ │ └───┘ │ │
-  |    │ └───────┘ │
-  |    └───────────┘
-  +────────────────────> x
-```
+<HandPlot
+  title="Cylindrical Shells"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]} range={[0, 4]}
+  curves={[
+    { f: (x) => 4 - x, color: 'blue', label: 'y = 4-x' }
+  ]}
+  polygons={[
+    { points: [[1, 0], [1, 3], [1.2, 3], [1.2, 0]], color: 'green' },
+    { points: [[2, 0], [2, 2], [2.2, 2], [2.2, 0]], color: 'green' }
+  ]}
+  marks={[
+    { x: 1.1, y: 1.5, color: 'pencil', label: 'height' },
+    { x: 0.5, y: 0.2, color: 'pencil', label: 'radius x' }
+  ]}
+  caption="Imagine cylindrical shells like tree rings. Rotate around y-axis."
+  height={300}
+/>
 
 ---
 

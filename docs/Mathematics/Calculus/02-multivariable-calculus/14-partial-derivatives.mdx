@@ -3,34 +3,25 @@ title: "Chapter 14: Partial Derivatives"
 sidebar_position: 14
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
 import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.1–14.2 Functions of Several Variables
 
-```
-  z = f(x,y)   → surface in 3D space
+$z = f(x,y) \implies \text{surface in 3D space}$
 
-         z
-         |     surface z=f(x,y)
-         |    .─────────.
-         |  .'           '.
-         | /      *        \
-         |/      * *        \
-         +────────────────> y
-        /   level curves
-       x
+**Level curves:** $f(x,y) = c$ (slices at constant height)
 
-  Level curves: f(x,y) = c  (slices at constant height)
-
-  Topographic map:
-  y
-  4 ──────────────────
-  3    (···)           ← level curves
-  2   (·····)
-  1    (···)
-  0 ──────────────────
-  +──0──1──2──3──> x
-```
+<HandPlot
+  title="Topographic Map (Level Curves)"
+  xLabel="x" yLabel="y" domain={[-3, 3]} range={[-3, 3]}
+  polygons={[
+    { points: [[0, 2], [1.5, 1.5], [2, 0], [1.5, -1.5], [0, -2], [-1.5, -1.5], [-2, 0], [-1.5, 1.5]], color: 'green' },
+    { points: [[0, 1], [0.7, 0.7], [1, 0], [0.7, -0.7], [0, -1], [-0.7, -0.7], [-1, 0], [-0.7, 0.7]], color: 'blue' }
+  ]}
+  caption="Level curves represent slices of a 3D surface at constant heights, like a topographic map."
+  height={300}
+/>
 
 <CalcPlot name="multivariable-surface" />
 
@@ -39,35 +30,31 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.3 Partial Derivatives
 
-```
-  ∂f/∂x = rate of change in x-direction (holding y constant)
-  ∂f/∂y = rate of change in y-direction (holding x constant)
+- **$\frac{\partial f}{\partial x}$** = rate of change in x-direction (holding y constant)
+- **$\frac{\partial f}{\partial y}$** = rate of change in y-direction (holding x constant)
 
-  GEOMETRIC:
+> **Geometric Meaning:** $\frac{\partial f}{\partial x}$ is the slope of the curve formed by intersecting the surface with the plane $y=b$.
 
-         z
-         |        ∂f/∂x = slope of this curve
-         |        (cut surface with plane y=b)
-         |      ─────────────
-         |     /  surface z=f(x,y)
-         |    /──────────────
-         +────────────────> y
-        /
-       x   ← fix y=b, vary x
-
-  CALCULATION:
-  f(x,y) = x²y + sin(y)
-  ∂f/∂x = 2xy          (treat y as constant)
-  ∂f/∂y = x² + cos(y)  (treat x as constant)
-```
+**CALCULATION EXAMPLE:**
+$$
+f(x,y) = x^2y + \sin(y)
+$$
+$$
+\frac{\partial f}{\partial x} = 2xy \quad \text{(treat } y \text{ as constant)}
+$$
+$$
+\frac{\partial f}{\partial y} = x^2 + \cos(y) \quad \text{(treat } x \text{ as constant)}
+$$
 
 **Higher partial derivatives:**
-```
-  fₓₓ = ∂²f/∂x²          fᵧᵧ = ∂²f/∂y²
-  fₓᵧ = ∂²f/∂y∂x         fᵧₓ = ∂²f/∂x∂y
+$$
+f_{xx} = \frac{\partial^2 f}{\partial x^2}, \quad f_{yy} = \frac{\partial^2 f}{\partial y^2}
+$$
+$$
+f_{xy} = \frac{\partial^2 f}{\partial y \partial x}, \quad f_{yx} = \frac{\partial^2 f}{\partial x \partial y}
+$$
 
-  Clairaut's Theorem: fₓᵧ = fᵧₓ  (if both continuous)
-```
+> **Clairaut's Theorem:** $f_{xy} = f_{yx}$ (if both are continuous)
 
 <CalcPlot name="partial-derivatives" />
 
@@ -76,23 +63,15 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.4 Tangent Planes
 
-```
-  Tangent plane to z=f(x,y) at (a,b,f(a,b)):
+**Tangent plane to $z=f(x,y)$ at $(a,b,f(a,b))$:**
+$$
+z - f(a,b) = f_x(a,b)(x - a) + f_y(a,b)(y - b)
+$$
 
-  z − f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
-
-         z
-         |      /   tangent plane (flat)
-         |     /── ─ ─ ─ ─
-         |    /  surface z=f(x,y)
-         |   / (a,b,f(a,b)) ← point of tangency
-         +────────────────> y
-        /
-       x
-
-  Linear Approximation (the tangent plane itself):
-  f(x,y) ≈ f(a,b) + fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
-```
+**Linear Approximation** (using the tangent plane itself):
+$$
+f(x,y) \approx f(a,b) + f_x(a,b)(x - a) + f_y(a,b)(y - b)
+$$
 
 <CalcPlot name="tangent-plane" />
 
@@ -101,55 +80,49 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.5 The Chain Rule (Multivariable)
 
-```
-  z = f(x,y), where x=x(t), y=y(t):
+Let $z = f(x,y)$, where $x=x(t)$ and $y=y(t)$:
+$$
+\frac{dz}{dt} = \frac{\partial z}{\partial x}\frac{dx}{dt} + \frac{\partial z}{\partial y}\frac{dy}{dt}
+$$
 
-  dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
+**Tree Diagram for $w = f(x, y)$ where $x = x(s, t)$ and $y = y(s, t)$:**
+- **w**
+  - $\frac{\partial w}{\partial x}$ ➔ **x**
+    - $\frac{\partial x}{\partial s}$ ➔ **s**
+    - $\frac{\partial x}{\partial t}$ ➔ **t**
+  - $\frac{\partial w}{\partial y}$ ➔ **y**
+    - $\frac{\partial y}{\partial s}$ ➔ **s**
+    - $\frac{\partial y}{\partial t}$ ➔ **t**
+*(Each path contributes a product of derivatives. Add all paths to get the total derivative).*
 
-  TREE DIAGRAM (helps remember):
-
-         z
-        / \
-       x   y
-       |   |
-       t   t
-
-  Each path contributes: (∂z/∂x)(dx/dt) and (∂z/∂y)(dy/dt)
-  ADD all paths to get dz/dt.
-
-  TWO independent variables (x=x(s,t), y=y(s,t)):
-  ∂z/∂s = (∂z/∂x)(∂x/∂s) + (∂z/∂y)(∂y/∂s)
-  ∂z/∂t = (∂z/∂x)(∂x/∂t) + (∂z/∂y)(∂y/∂t)
-```
+**TWO independent variables** ($x=x(s,t), y=y(s,t)$):
+$$
+\frac{\partial z}{\partial s} = \frac{\partial z}{\partial x}\frac{\partial x}{\partial s} + \frac{\partial z}{\partial y}\frac{\partial y}{\partial s}
+$$
+$$
+\frac{\partial z}{\partial t} = \frac{\partial z}{\partial x}\frac{\partial x}{\partial t} + \frac{\partial z}{\partial y}\frac{\partial y}{\partial t}
+$$
 
 ---
 
 ### 14.6 Directional Derivatives and the Gradient
 
-```
-  Directional derivative in direction u = <a,b>:
-  Dᵤf = ∇f · u     (dot product of gradient with unit vector)
+**Directional derivative** in the direction of unit vector $\mathbf{u} = \langle a,b \rangle$:
+$$
+D_{\mathbf{u}}f = \nabla f \cdot \mathbf{u} \quad \text{(dot product of gradient with unit vector)}
+$$
 
-  Gradient:  ∇f = <∂f/∂x, ∂f/∂y>
+**Gradient:**
+$$
+\nabla f = \left\langle \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y} \right\rangle
+$$
 
-  ∇f ALWAYS points in direction of STEEPEST ASCENT
+> $\nabla f$ **ALWAYS** points in the direction of **STEEPEST ASCENT**.
 
-  Level curves with gradient:
-
-  y
-  |   level curve f=3
-  |   ────────────────
-  |    ↑↑↑↑↑↑↑↑↑↑↑↑   ← ∇f (perpendicular to level curves)
-  |   ────────────────
-  |    f=2
-  |   ────────────────
-  |    f=1
-  +───────────────────> x
-
-  Max rate of increase: |∇f|  (in direction of ∇f)
-  Min rate of increase: −|∇f| (opposite direction)
-  Zero rate of change:   perpendicular to ∇f (along level curve)
-```
+**Properties of the Gradient:**
+- **Max rate of increase:** $|\nabla f|$ (occurs in direction of $\nabla f$)
+- **Min rate of increase:** $-|\nabla f|$ (occurs in opposite direction)
+- **Zero rate of change:** occurs in any direction perpendicular to $\nabla f$ (along a level curve)
 
 <CalcPlot name="gradient-vectors" />
 
@@ -158,28 +131,15 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.7 Optimization in Several Variables
 
-```
-  CRITICAL POINT: (a,b) where fₓ=0 and fᵧ=0
+**CRITICAL POINT:** A point $(a,b)$ where $f_x = 0$ and $f_y = 0$.
 
-  SECOND DERIVATIVE TEST:
-  D = fₓₓ·fᵧᵧ − (fₓᵧ)²
+**SECOND DERIVATIVE TEST:**
+Let $D = f_{xx} f_{yy} - (f_{xy})^2$.
 
-  D > 0, fₓₓ > 0  →  local MINIMUM  (bowl up)
-  D > 0, fₓₓ < 0  →  local MAXIMUM  (bowl down)
-  D < 0            →  SADDLE POINT
-  D = 0            →  inconclusive
-
-  Saddle point (D<0):       Local min (D>0, fxx>0):
-
-       z                         z
-       |     surface              |         *
-       |   / ─ ─ ─               |        * *
-       |  /  high                |       *   *
-       | *    one way            |      *  ↑  *
-       |  \ low                  |     *  min  *
-       |   \ another way         |
-       +──────────> y            +──────────> y
-```
+- $D > 0, f_{xx} > 0 \implies$ **Local MINIMUM** (bowl up)
+- $D > 0, f_{xx} < 0 \implies$ **Local MAXIMUM** (bowl down)
+- $D < 0 \implies$ **SADDLE POINT**
+- $D = 0 \implies$ Inconclusive
 
 <CalcPlot name="critical-points" />
 
@@ -188,22 +148,12 @@ import CalcPlot from '@site/src/components/CalcPlot';
 
 ### 14.8 Lagrange Multipliers
 
-```
-  Optimize f(x,y) SUBJECT TO constraint g(x,y) = k
+Optimize $f(x,y)$ **SUBJECT TO** constraint $g(x,y) = k$
 
-  METHOD: Solve ∇f = λ·∇g  and  g(x,y) = k
+**METHOD:** Solve the system of equations:
+$$
+\nabla f = \lambda \nabla g \quad \text{and} \quad g(x,y) = k
+$$
 
-  Geometric interpretation:
-
-  y
-  |   constraint g=k
-  |     ─────────────────
-  |    level curves of f:  f=5
-  |    ─────────────────   f=4 ← solution: where f's
-  |     ─────────────────  f=3   level curve TOUCHES
-  |    ─────────────────         constraint g=k
-  +───────────────────────> x
-
-  At solution: ∇f ∥ ∇g  (gradients are parallel)
-  → λ is the multiplier (Lagrange multiplier)
-```
+**Geometric interpretation:**
+At the solution, the level curves of $f$ just barely touch the constraint curve $g=k$. At this point of tangency, their normal vectors (gradients) are parallel, meaning $\nabla f \parallel \nabla g$. Therefore, $\nabla f = \lambda \nabla g$, where $\lambda$ is the Lagrange multiplier.

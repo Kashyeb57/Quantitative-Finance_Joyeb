@@ -3,75 +3,77 @@ title: "Formula Master-Sheet"
 sidebar_position: 3
 ---
 
-```
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  LIMITS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  lim sin(x)/x = 1              (x→0)
-  lim (1−cos x)/x = 0           (x→0)
-  lim (1+1/x)^x = e             (x→∞)
-  lim (eˣ−1)/x = 1              (x→0)
-  lim ln(1+x)/x = 1             (x→0)
+### Limits
+$$ \lim_{x \to 0} \frac{\sin x}{x} = 1 $$
+$$ \lim_{x \to 0} \frac{1 - \cos x}{x} = 0 $$
+$$ \lim_{x \to \infty} \left(1 + \frac{1}{x}\right)^x = e $$
+$$ \lim_{x \to 0} \frac{e^x - 1}{x} = 1 $$
+$$ \lim_{x \to 0} \frac{\ln(1+x)}{x} = 1 $$
 
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  DERIVATIVES
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  d/dx[xⁿ]        = nxⁿ⁻¹
-  d/dx[eˣ]        = eˣ
-  d/dx[aˣ]        = aˣ ln(a)
-  d/dx[ln x]      = 1/x
-  d/dx[log_a x]   = 1/(x ln a)
-  d/dx[sin x]     = cos x
-  d/dx[cos x]     = −sin x
-  d/dx[tan x]     = sec²x
-  d/dx[sin⁻¹x]   = 1/√(1−x²)
-  d/dx[tan⁻¹x]   = 1/(1+x²)
+---
 
-  RULES:
-  (fg)'    = f'g + fg'
-  (f/g)'   = (f'g − fg')/g²
-  [f(g(x))]' = f'(g(x))·g'(x)
+### Derivatives
+**Basic Forms:**
+$$ \frac{d}{dx}[x^n] = n x^{n-1} $$
+$$ \frac{d}{dx}[e^x] = e^x $$
+$$ \frac{d}{dx}[a^x] = a^x \ln(a) $$
+$$ \frac{d}{dx}[\ln x] = \frac{1}{x} $$
+$$ \frac{d}{dx}[\log_a x] = \frac{1}{x \ln a} $$
 
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  INTEGRALS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  ∫ xⁿ dx           = xⁿ⁺¹/(n+1) + C   (n≠−1)
-  ∫ 1/x dx          = ln|x| + C
-  ∫ eˣ dx           = eˣ + C
-  ∫ aˣ dx           = aˣ/ln(a) + C
-  ∫ sin x dx        = −cos x + C
-  ∫ cos x dx        = sin x + C
-  ∫ sec²x dx        = tan x + C
-  ∫ 1/(1+x²) dx     = tan⁻¹x + C
-  ∫ 1/√(1−x²) dx   = sin⁻¹x + C
+**Trigonometric:**
+$$ \frac{d}{dx}[\sin x] = \cos x $$
+$$ \frac{d}{dx}[\cos x] = -\sin x $$
+$$ \frac{d}{dx}[\tan x] = \sec^2 x $$
+$$ \frac{d}{dx}[\arcsin x] = \frac{1}{\sqrt{1 - x^2}} $$
+$$ \frac{d}{dx}[\arctan x] = \frac{1}{1 + x^2} $$
 
-  TECHNIQUES:
-  Parts:        ∫ u dv = uv − ∫ v du
-  Substitution: ∫ f(g(x))g'(x)dx = ∫ f(u)du
+**Rules:**
+- **Product Rule:** $(fg)' = f'g + fg'$
+- **Quotient Rule:** $\left(\frac{f}{g}\right)' = \frac{f'g - fg'}{g^2}$
+- **Chain Rule:** $[f(g(x))]' = f'(g(x)) \cdot g'(x)$
 
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  TAYLOR/MACLAURIN SERIES
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  eˣ      = 1 + x + x²/2! + x³/3! + ...
-  sin(x)  = x − x³/3! + x⁵/5! − ...
-  cos(x)  = 1 − x²/2! + x⁴/4! − ...
-  ln(1+x) = x − x²/2 + x³/3 − ...     |x|<1
-  (1+x)^k = 1 + kx + k(k−1)x²/2! + ...
+---
 
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  MULTIVARIABLE
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  ∇f          = <∂f/∂x, ∂f/∂y, ∂f/∂z>
-  Dᵤf         = ∇f · û
-  Chain Rule  : dz/dt = (∂z/∂x)(dx/dt) + (∂z/∂y)(dy/dt)
-  Tangent Plane: z−f(a,b) = fₓ(a,b)(x−a) + fᵧ(a,b)(y−b)
+### Integrals
+**Basic Forms:**
+$$ \int x^n \, dx = \frac{x^{n+1}}{n+1} + C \quad (n \neq -1) $$
+$$ \int \frac{1}{x} \, dx = \ln|x| + C $$
+$$ \int e^x \, dx = e^x + C $$
+$$ \int a^x \, dx = \frac{a^x}{\ln a} + C $$
 
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  VECTOR CALCULUS
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  curl F     = ∇ × F
-  div F      = ∇ · F
-  Green's:    ∮_C F·dr = ∬_D curl F dA
-  Stokes':    ∮_C F·dr = ∬_S curl F · dS
-  Divergence: ∬_S F·dS = ∭_E div F dV
-```
+**Trigonometric:**
+$$ \int \sin x \, dx = -\cos x + C $$
+$$ \int \cos x \, dx = \sin x + C $$
+$$ \int \sec^2 x \, dx = \tan x + C $$
+$$ \int \frac{1}{1+x^2} \, dx = \arctan x + C $$
+$$ \int \frac{1}{\sqrt{1-x^2}} \, dx = \arcsin x + C $$
+
+**Techniques:**
+- **Integration by Parts:** $\int u \, dv = uv - \int v \, du$
+- **Substitution:** $\int f(g(x))g'(x) \, dx = \int f(u) \, du$
+
+---
+
+### Taylor/Maclaurin Series
+$$ e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \dots $$
+$$ \sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \dots $$
+$$ \cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \dots $$
+$$ \ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \dots \quad (|x| < 1) $$
+$$ (1+x)^k = 1 + kx + \frac{k(k-1)}{2!}x^2 + \dots $$
+
+---
+
+### Multivariable Calculus
+- **Gradient:** $\nabla f = \left\langle \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right\rangle$
+- **Directional Derivative:** $D_{\mathbf{u}}f = \nabla f \cdot \mathbf{\hat{u}}$
+- **Chain Rule:** $\frac{dz}{dt} = \frac{\partial z}{\partial x}\frac{dx}{dt} + \frac{\partial z}{\partial y}\frac{dy}{dt}$
+- **Tangent Plane:** $z - f(a,b) = f_x(a,b)(x - a) + f_y(a,b)(y - b)$
+
+---
+
+### Vector Calculus
+- **Curl:** $\text{curl } \mathbf{F} = \nabla \times \mathbf{F}$
+- **Divergence:** $\text{div } \mathbf{F} = \nabla \cdot \mathbf{F}$
+- **Green's Theorem:** $\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_D \text{curl } \mathbf{F} \, dA$
+- **Stokes' Theorem:** $\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_S \text{curl } \mathbf{F} \cdot d\mathbf{S}$
+- **Divergence Theorem:** $\iint_S \mathbf{F} \cdot d\mathbf{S} = \iiint_E \text{div } \mathbf{F} \, dV$

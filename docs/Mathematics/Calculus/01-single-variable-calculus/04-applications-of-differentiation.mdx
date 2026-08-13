@@ -22,14 +22,9 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 />
 
 **Finding extrema:**
-```
-  ① Extreme Value Theorem: if f continuous on [a,b],
-    then f attains both abs max and abs min.
-
-  ② Critical numbers: f'(c) = 0  OR  f'(c) undefined
-
-  ③ Check: critical points + endpoints → evaluate f
-```
+1. **Extreme Value Theorem**: If $f$ is continuous on $[a,b]$, then $f$ attains both an absolute maximum and absolute minimum.
+2. **Critical numbers**: $f'(c) = 0$ OR $f'(c)$ is undefined.
+3. **Check**: Evaluate $f$ at critical points + endpoints to find the absolute extrema.
 
 ---
 
@@ -82,15 +77,13 @@ The tangent at $c$ is **parallel** to the secant line joining $\bigl(a, f(a)\big
 
 ### 4.3 How Derivatives Affect Graph Shape
 
-```
-  f'(x) > 0  →  f is INCREASING  ↗
-  f'(x) < 0  →  f is DECREASING  ↘
-  f'(x) = 0  →  f has horizontal tangent (potential extremum)
+- $f'(x) > 0 \implies f$ is **INCREASING** ↗
+- $f'(x) < 0 \implies f$ is **DECREASING** ↘
+- $f'(x) = 0 \implies f$ has a horizontal tangent (potential extremum)
 
-  f''(x) > 0  →  f is CONCAVE UP    ∪
-  f''(x) < 0  →  f is CONCAVE DOWN  ∩
-  f''(x) = 0  →  possible INFLECTION POINT
-```
+- $f''(x) > 0 \implies f$ is **CONCAVE UP** ∪
+- $f''(x) < 0 \implies f$ is **CONCAVE DOWN** ∩
+- $f''(x) = 0 \implies$ possible **INFLECTION POINT**
 
 **Full picture** — a curve carrying a local max, a local min, and an inflection point where concavity flips:
 
@@ -114,12 +107,10 @@ The tangent at $c$ is **parallel** to the secant line joining $\bigl(a, f(a)\big
 />
 
 **Second Derivative Test:**
-```
-  At critical point c where f'(c) = 0:
-  f''(c) > 0  →  local MINIMUM  (concave up = bowl)  ∪
-  f''(c) < 0  →  local MAXIMUM  (concave down = hill) ∩
-  f''(c) = 0  →  test inconclusive (need more analysis)
-```
+**At critical point $c$ where $f'(c) = 0$:**
+- $f''(c) > 0 \implies$ local **MINIMUM** (concave up = bowl) ∪
+- $f''(c) < 0 \implies$ local **MAXIMUM** (concave down = hill) ∩
+- $f''(c) = 0 \implies$ test inconclusive (need more analysis)
 
 ---
 
@@ -127,70 +118,60 @@ The tangent at $c$ is **parallel** to the secant line joining $\bigl(a, f(a)\big
 
 For **0/0** or **∞/∞** indeterminate forms:
 
-```
-  lim f(x)/g(x) = lim f'(x)/g'(x)
-  x→a             x→a
+$$
+\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}
+$$
+*(Provided the right-hand limit exists)*
 
-  (provided the right-hand limit exists)
-
-  Examples:
-
-  lim  sin(x)/x  [0/0 form]
-  x→0
-  = lim  cos(x)/1  = 1
-    x→0
-
-  lim  x/eˣ  [∞/∞ form]
-  x→∞
-  = lim  1/eˣ  = 0    (exponential beats polynomial!)
-    x→∞
-```
+**Examples:**
+$$
+\lim_{x \to 0} \frac{\sin(x)}{x} \quad \left[ \frac{0}{0} \text{ form} \right] \implies \lim_{x \to 0} \frac{\cos(x)}{1} = 1
+$$
+$$
+\lim_{x \to \infty} \frac{x}{e^x} \quad \left[ \frac{\infty}{\infty} \text{ form} \right] \implies \lim_{x \to \infty} \frac{1}{e^x} = 0
+$$
 
 **Other indeterminate forms — convert first:**
-```
-  0·∞ → rewrite as 0/(1/∞) or ∞/(1/0)
-  ∞−∞ → find common denominator
-  0⁰, 1^∞, ∞⁰ → take logarithm first
-```
+- $0 \cdot \infty \implies$ rewrite as $\frac{0}{1/\infty}$ or $\frac{\infty}{1/0}$
+- $\infty - \infty \implies$ find common denominator
+- $0^0, 1^\infty, \infty^0 \implies$ take logarithm first
 
 ---
 
 ### 4.5 Curve Sketching Checklist
 
-```
-  STEP-BY-STEP:
-
-  A  Domain          Where is f defined?
-  B  Intercepts      Set f=0 (x-int), x=0 (y-int)
-  C  Symmetry        Even? f(-x)=f(x)  Odd? f(-x)=-f(x)
-  D  Asymptotes      Vertical (where f→∞), Horizontal (limits at ±∞)
-  E  Increase/Dec    Sign of f'
-  F  Local Extrema   f'=0 and sign change
-  G  Concavity       Sign of f''
-  H  Inflection pts  f'' changes sign
-  I  Sketch!
-```
+**STEP-BY-STEP:**
+1. **Domain**: Where is $f$ defined?
+2. **Intercepts**: Set $f=0$ (x-int), $x=0$ (y-int)
+3. **Symmetry**: Even? $f(-x)=f(x)$ Odd? $f(-x)=-f(x)$
+4. **Asymptotes**: Vertical (where $f \to \infty$), Horizontal (limits at $\pm \infty$)
+5. **Increase/Dec**: Sign of $f'$
+6. **Local Extrema**: $f'=0$ and sign change
+7. **Concavity**: Sign of $f''$
+8. **Inflection pts**: $f''$ changes sign
+9. **Sketch!**
 
 ---
 
 ### 4.7 Optimization Problems
 
-```
-  STRATEGY:
-  1. Read carefully — what to maximize/minimize?
-  2. Draw a diagram
-  3. Label variables, write constraint equation
-  4. Write objective function in ONE variable
-  5. Find critical points (set derivative = 0)
-  6. Verify it's max/min (2nd derivative test or interval check)
+**STRATEGY:**
+1. **Read carefully** — what to maximize/minimize?
+2. **Draw a diagram**
+3. **Label variables**, write constraint equation
+4. **Write objective function** in ONE variable
+5. **Find critical points** (set derivative = $0$)
+6. **Verify** it's max/min (2nd derivative test or interval check)
 
-  CLASSIC EXAMPLE: Maximize area of rectangle with perimeter = 40
-
-  P = 2x + 2y = 40  →  y = 20 − x
-  A = xy = x(20−x) = 20x − x²
-  A' = 20 − 2x = 0  →  x = 10, y = 10
-  → Square maximizes area!
-```
+**CLASSIC EXAMPLE:** Maximize area of rectangle with perimeter = 40.
+$$
+\begin{aligned}
+P &= 2x + 2y = 40 \implies y = 20 - x \\
+A &= xy = x(20 - x) = 20x - x^2 \\
+A' &= 20 - 2x = 0 \implies x = 10, y = 10
+\end{aligned}
+$$
+> A square maximizes the area!
 
 ---
 
@@ -226,21 +207,19 @@ Each step gives a **better** approximation of the root.
 
 F is an antiderivative of f if F'(x) = f(x).
 
-```
-  ∫ f(x) dx = F(x) + C     (C = constant of integration)
+$$
+\int f(x) dx = F(x) + C \quad (C = \text{constant of integration})
+$$
 
-  Example:
-  d/dx[x³] = 3x²
-  ∴ antiderivative of 3x² is x³ + C
+**Example:**
+$\frac{d}{dx}[x^3] = 3x^2 \implies$ antiderivative of $3x^2$ is $x^3 + C$
 
-  Key antiderivatives:
-  ┌──────────────────────────────────┐
-  │  f(x)          F(x) = ∫f dx     │
-  ├──────────────────────────────────┤
-  │  xⁿ (n≠−1)    xⁿ⁺¹/(n+1) + C  │
-  │  1/x           ln|x| + C        │
-  │  eˣ            eˣ + C           │
-  │  sin(x)       −cos(x) + C       │
-  │  cos(x)        sin(x) + C       │
-  └──────────────────────────────────┘
-```
+**Key antiderivatives:**
+
+| $f(x)$ | $F(x) = \int f dx$ |
+|---|---|
+| $x^n \ (n \neq -1)$ | $\frac{x^{n+1}}{n+1} + C$ |
+| $1/x$ | $\ln\|x\| + C$ |
+| $e^x$ | $e^x + C$ |
+| $\sin(x)$ | $-\cos(x) + C$ |
+| $\cos(x)$ | $\sin(x) + C$ |

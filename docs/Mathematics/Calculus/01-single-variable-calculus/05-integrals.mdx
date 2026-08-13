@@ -72,13 +72,16 @@ $$
 />
 
 **Properties:**
-```
-  ∫_a^a f dx = 0
-  ∫_a^b f dx = −∫_b^a f dx
-  ∫_a^b [f±g] dx = ∫f dx ± ∫g dx
-  ∫_a^b c·f dx = c·∫_a^b f dx
-  ∫_a^b f dx = ∫_a^c f dx + ∫_c^b f dx
-```
+
+$$
+\begin{aligned}
+\int_a^a f(x) \, dx &= 0 \\
+\int_a^b f(x) \, dx &= -\int_b^a f(x) \, dx \\
+\int_a^b [f(x) \pm g(x)] \, dx &= \int_a^b f(x) \, dx \pm \int_a^b g(x) \, dx \\
+\int_a^b c \cdot f(x) \, dx &= c \int_a^b f(x) \, dx \\
+\int_a^b f(x) \, dx &= \int_a^c f(x) \, dx + \int_c^b f(x) \, dx
+\end{aligned}
+$$
 
 ---
 
@@ -142,16 +145,18 @@ $$
 
 ### 5.4 Indefinite Integrals and Net Change
 
-```
-  ∫ f(x) dx = F(x) + C     (general antiderivative)
+$$
+\int f(x) \, dx = F(x) + C \quad (\text{general antiderivative})
+$$
 
-  Net Change Theorem:
-  ∫_a^b F'(x) dx = F(b) − F(a)
+**Net Change Theorem:**
+$$
+\int_a^b F'(x) \, dx = F(b) - F(a)
+$$
 
-  If v(t) = velocity:
-  ∫_a^b v(t) dt = displacement (net change in position)
-  ∫_a^b |v(t)| dt = total distance traveled
-```
+If $v(t) = \text{velocity}$:
+- $\int_a^b v(t) \, dt = \text{displacement (net change in position)}$
+- $\int_a^b |v(t)| \, dt = \text{total distance traveled}$
 
 ---
 
@@ -159,20 +164,24 @@ $$
 
 **Reverse chain rule for integration:**
 
-```
-  ∫ f(g(x))·g'(x) dx  =  ∫ f(u) du     where u = g(x)
+$$
+\int f(g(x)) \cdot g'(x) \, dx = \int f(u) \, du \quad \text{where} \quad u = g(x)
+$$
 
-  STEPS:
-  1. Choose u = g(x)  (the "inside" function)
-  2. Compute du = g'(x)dx
-  3. Rewrite integral entirely in u
-  4. Integrate
-  5. Substitute back
+**STEPS:**
+1. Choose $u = g(x)$ (the "inside" function)
+2. Compute $du = g'(x) dx$
+3. Rewrite integral entirely in $u$
+4. Integrate
+5. Substitute back
 
-  Example: ∫ 2x·cos(x²) dx
-    u = x²
-    du = 2x dx
-    = ∫ cos(u) du
-    = sin(u) + C
-    = sin(x²) + C
-```
+**Example:** $\int 2x \cdot \cos(x^2) \, dx$
+$$
+\begin{aligned}
+u &= x^2 \\
+du &= 2x \, dx \\
+&= \int \cos(u) \, du \\
+&= \sin(u) + C \\
+&= \sin(x^2) + C
+\end{aligned}
+$$

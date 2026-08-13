@@ -7,22 +7,21 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 17.1 Second-Order Linear Equations
 
-```
-  ay'' + by' + cy = 0     (homogeneous, constant coefficients)
+**General Form (homogeneous, constant coefficients):**
+$$
+ay'' + by' + cy = 0
+$$
 
-  AUXILIARY EQUATION: ar² + br + c = 0
+**AUXILIARY EQUATION:** $ar^2 + br + c = 0$
 
-  Solve for r — three cases:
+Solve for $r$. There are three cases:
 
-  Case 1: Two real roots r₁ ≠ r₂
-  y = C₁e^(r₁x) + C₂e^(r₂x)
-
-  Case 2: Repeated root r₁ = r₂ = r
-  y = (C₁ + C₂x)e^(rx)
-
-  Case 3: Complex roots r = α ± βi
-  y = e^(αx)(C₁cos(βx) + C₂sin(βx))
-```
+1. **Two real roots** $r_1 \neq r_2$:
+   $$y = C_1 e^{r_1 x} + C_2 e^{r_2 x}$$
+2. **Repeated real root** $r_1 = r_2 = r$:
+   $$y = (C_1 + C_2 x)e^{rx}$$
+3. **Complex roots** $r = \alpha \pm \beta i$:
+   $$y = e^{\alpha x}(C_1 \cos(\beta x) + C_2 \sin(\beta x))$$
 
 Case 3 gives oscillations whose amplitude is shaped by the envelope $e^{\alpha x}$:
 
@@ -46,39 +45,46 @@ Case 3 gives oscillations whose amplitude is shaped by the envelope $e^{\alpha x
 
 ### 17.2 Nonhomogeneous Equations
 
-```
-  ay'' + by' + cy = G(x)
+**General Form (non-homogeneous):**
+$$
+ay'' + by' + cy = G(x)
+$$
 
-  GENERAL SOLUTION:
-  y = yₚ + yc
+**GENERAL SOLUTION:**
+$$
+y = y_p + y_c
+$$
+- $y_c = \text{complementary solution}$ (solution to the homogeneous part)
+- $y_p = \text{particular solution}$ (any one solution to the full equation)
 
-  yc = complementary (solution to homogeneous part)
-  yₚ = particular  (any one solution to full equation)
+**METHOD OF UNDETERMINED COEFFICIENTS:**
 
-  METHOD OF UNDETERMINED COEFFICIENTS:
-  ┌─────────────────────────────────────────┐
-  │ G(x)           Try yₚ =                │
-  ├─────────────────────────────────────────┤
-  │ polynomial pₙ  Ax^n+...+A₀             │
-  │ Ce^(kx)        Ae^(kx)                 │
-  │ C cos(kx)      A cos(kx) + B sin(kx)   │
-  │ C sin(kx)      A cos(kx) + B sin(kx)   │
-  └─────────────────────────────────────────┘
-```
+| $G(x)$ | Try $y_p =$ |
+| :--- | :--- |
+| Polynomial of degree $n$ | $A_n x^n + \dots + A_0$ |
+| $C e^{kx}$ | $A e^{kx}$ |
+| $C \cos(kx)$ or $C \sin(kx)$ | $A \cos(kx) + B \sin(kx)$ |
 
 ---
 
 ### 17.3 Spring-Mass System
 
-```
-  m·x'' + c·x' + k·x = F(t)
+$$
+m x'' + c x' + k x = F(t)
+$$
+Where:
+- $m = \text{mass}$
+- $c = \text{damping constant}$
+- $k = \text{spring constant}$
+- $F(t) = \text{external force}$
 
-  m = mass, c = damping, k = spring constant, F = external force
-
-  Undamped free oscillation (c=0, F=0):
-  x'' + ω₀²x = 0     ω₀ = √(k/m)
-  x(t) = A cos(ω₀t) + B sin(ω₀t)   (pure oscillation)
-```
+**Undamped free oscillation** ($c=0, F=0$):
+$$
+x'' + \omega_0^2 x = 0 \quad \text{where } \omega_0 = \sqrt{\frac{k}{m}}
+$$
+$$
+x(t) = A \cos(\omega_0 t) + B \sin(\omega_0 t) \quad \text{(pure oscillation)}
+$$
 
 **Undamped free oscillation** ($c = 0$): the mass swings forever with constant amplitude — a pure sinusoid $x(t) = A\cos(\omega_0 t) + B\sin(\omega_0 t)$.
 
@@ -111,13 +117,17 @@ Case 3 gives oscillations whose amplitude is shaped by the envelope $e^{\alpha x
 
 ### 17.4 Series Solutions
 
-```
-  For variable-coefficient ODEs, try:
-  y = Σ cₙxⁿ = c₀ + c₁x + c₂x² + c₃x³ + ...
+For variable-coefficient ODEs, try a power series solution:
+$$
+y = \sum_{n=0}^{\infty} c_n x^n = c_0 + c_1 x + c_2 x^2 + c_3 x^3 + \dots
+$$
 
-  Substitute into ODE and match coefficients.
+Substitute into the ODE and match coefficients.
 
-  Example: y'' − y = 0
-  → y = cosh(x) = 1 + x²/2! + x⁴/4! + ...
-     or y = sinh(x) = x + x³/3! + x⁵/5! + ...
-```
+**Example:** $y'' - y = 0$
+$$
+\implies y = \cosh(x) = 1 + \frac{x^2}{2!} + \frac{x^4}{4!} + \dots
+$$
+$$
+\text{or } y = \sinh(x) = x + \frac{x^3}{3!} + \frac{x^5}{5!} + \dots
+$$

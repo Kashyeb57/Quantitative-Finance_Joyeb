@@ -3,86 +3,96 @@ title: "Chapter 10: Parametric Equations & Polar Coordinates"
 sidebar_position: 10
 ---
 
+import HandPlot from '@site/src/components/CalcLab/HandPlot';
+
 ### 10.1–10.2 Parametric Curves
 
-```
-  Instead of y=f(x), use:
-  x = f(t),   y = g(t)     (t = parameter, often time)
+Instead of $y=f(x)$, use:
+$$
+\begin{aligned}
+x &= f(t) \\
+y &= g(t)
+\end{aligned} \quad (t \text{ is the parameter, often time})
+$$
 
-  Example: Circle  x = cos(t), y = sin(t), 0≤t≤2π
+**Example:** Circle $x = \cos(t)$, $y = \sin(t)$, $0 \le t \le 2\pi$
 
-  t=π/2 → (0,1)
-  t=0 → (1,0)         y
-  t=π → (−1,0)        1     *
-  t=3π/2 → (0,−1)         *   *
-                       |  *     *
-                       | *   +   *
-                       |  *     *
-                       |    *   *
-                       −1    *
-                       +──−1───1──> x
+<HandPlot
+  title="Parametric Circle"
+  xLabel="x" yLabel="y"
+  domain={[-2, 2]} range={[-2, 2]}
+  curves={[
+    { f: (x) => Math.sqrt(1 - x*x), color: 'blue' },
+    { f: (x) => -Math.sqrt(1 - x*x), color: 'blue' }
+  ]}
+  marks={[
+    { x: 1, y: 0, color: 'pencil', label: 't=0 (1,0)' },
+    { x: 0, y: 1, color: 'pencil', label: 't=π/2 (0,1)' },
+    { x: -1, y: 0, color: 'pencil', label: 't=π (-1,0)' },
+    { x: 0, y: -1, color: 'pencil', label: 't=3π/2 (0,-1)' }
+  ]}
+  height={300}
+/>
 
-  Derivatives:
-  dy/dx = (dy/dt) / (dx/dt)
+**Derivatives:**
+$$
+\frac{dy}{dx} = \frac{dy/dt}{dx/dt}
+$$
 
-  Arc Length:
-  L = ∫ √((dx/dt)² + (dy/dt)²) dt
-```
+**Arc Length:**
+$$
+L = \int \sqrt{\left(\frac{dx}{dt}\right)^2 + \left(\frac{dy}{dt}\right)^2} \, dt
+$$
 
 ---
 
 ### 10.3–10.4 Polar Coordinates
 
-```
-  Point P = (r, θ) where:
-  r = distance from origin
-  θ = angle from positive x-axis
+Point $P = (r, \theta)$ instead of $(x, y)$ where:
+- $r =$ distance from origin
+- $\theta =$ angle from positive x-axis
 
-  Conversions:
-  x = r·cos(θ)        r² = x² + y²
-  y = r·sin(θ)        tan(θ) = y/x
+**Conversions:**
+$$
+\begin{aligned}
+x &= r \cos(\theta) &\quad r^2 &= x^2 + y^2 \\
+y &= r \sin(\theta) &\quad \tan(\theta) &= \frac{y}{x}
+\end{aligned}
+$$
 
-  y
-  |    P(r,θ)
-  |   /
-  | r/
-  |  /
-  | / θ
-  +─────────────> x
+**Common curves:**
+- $r = a$ → circle of radius a
+- $r = a\cos(\theta)$ → circle through origin
+- $r = 1+\cos(\theta)$ → cardioid (heart shape)
 
-  Common curves:
-  r = a             → circle of radius a
-  r = a·cos(θ)      → circle through origin
-  r = 1+cos(θ)      → cardioid (heart shape)
+<HandPlot
+  title="Cardioid r = 1 + cos(θ)"
+  xLabel="x" yLabel="y"
+  domain={[-1, 3]} range={[-2, 2]}
+  curves={[
+    { f: (x) => Math.sqrt(Math.max(0, (1+x/Math.sqrt(x*x+1))**2 - x*x)), color: 'red' },
+    { f: (x) => -Math.sqrt(Math.max(0, (1+x/Math.sqrt(x*x+1))**2 - x*x)), color: 'red' }
+  ]}
+  caption="A cardioid curve plotted in polar coordinates."
+  height={300}
+/>
 
-  Cardioid r=1+cos(θ):
-       y
-       |  * *
-     * |       *
-   *   |         *
-  *────+──────────*──> x
-   *   |         *
-     * |       *
-       |  * *
-
-  Area in polar:  A = (1/2)∫r² dθ
-```
+**Area in polar:**
+$$
+A = \int_\alpha^\beta \frac{1}{2} r^2 \, d\theta
+$$
 
 ---
 
 ### 10.5–10.6 Conic Sections
 
-```
-  All conics: locus of points where (dist to focus)/(dist to directrix) = e
+All conics: locus of points where $\frac{\text{dist to focus}}{\text{dist to directrix}} = e$
 
-  e = 0:  Circle         e = 0.5: Ellipse      e = 1: Parabola   e = 2: Hyperbola
-
-       *                    * *                  *                 *     *
-     *   *                *     *               * *               *       *
-    *     *              *       *             *   *             *         *
-     *   *                *     *            *     *             *         *
-       *                    * *             *       *             *       *
-                                                                  *     *
-```
+| Eccentricity $e$ | Conic Section |
+|---|---|
+| $e = 0$ | Circle |
+| $0 < e < 1$ | Ellipse |
+| $e = 1$ | Parabola |
+| $e > 1$ | Hyperbola |
 
 **Polar form:** r = ed/(1 ± e·cos θ) or r = ed/(1 ± e·sin θ)

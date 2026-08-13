@@ -31,26 +31,29 @@ The shaded region between $a$ and $b$ is the area we want to compute under the c
 
 **Riemann Sum approach** — divide [a,b] into n rectangles:
 
-```
-  y             Each rectangle has:
-  |  |  |  |   - width:  Δx = (b-a)/n
-  |▓▓|▓▓|▓▓|   - height: f(xᵢ*)
-  |▓▓|▓▓|▓▓|
-  |▓▓|▓▓|▓▓|   Area ≈ Σ f(xᵢ*)·Δx
-  +-----------> x
-  a         b
-
-  As n → ∞, approximation becomes exact.
-```
-
-<CalcPlot name="riemann-sum" />
+<HandPlot
+  title="Area Approximation using Rectangles"
+  xLabel="x" yLabel="y"
+  domain={[0, 4]} range={[0, 5]}
+  curves={[{ f: (x) => -0.2 * Math.pow(x - 2, 2) + 4, color: 'blue' }]}
+  polygons={[
+    { points: [[0.5,0], [0.5,3.55], [1.5,3.55], [1.5,0]], color: 'green' },
+    { points: [[1.5,0], [1.5,3.95], [2.5,3.95], [2.5,0]], color: 'green' },
+    { points: [[2.5,0], [2.5,3.55], [3.5,3.55], [3.5,0]], color: 'green' }
+  ]}
+  marks={[
+    { x: 0.5, y: -0.2, color: 'pencil', label: 'a' },
+    { x: 3.5, y: -0.2, color: 'pencil', label: 'b' }
+  ]}
+  caption="Each rectangle has width Δx = (b-a)/n and height f(xᵢ*). As n → ∞, approximation becomes exact."
+  height={300}
+/>
 
 
 **Formula:**
-```
-A = lim     Σ f(xᵢ*)·Δx     where Δx = (b-a)/n
-    n→∞   i=1 to n
-```
+$$
+A = \lim_{n \to \infty} \sum_{i=1}^{n} f(x_i^*) \Delta x \quad \text{where} \quad \Delta x = \frac{b-a}{n}
+$$
 
 > **Quant Finance:** Area under a probability density function = probability of an event. Used in option pricing (risk-neutral valuation) and expected value of payoffs.
 

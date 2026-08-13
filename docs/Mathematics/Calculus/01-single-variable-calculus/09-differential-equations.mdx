@@ -7,16 +7,14 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 ### 9.1 What is a Differential Equation?
 
-```
-  An equation involving a function AND its derivatives.
+An equation involving a function AND its derivatives.
 
-  ORDER = highest derivative present.
+**ORDER** = highest derivative present.
 
-  Examples:
-  y' = ky                    (1st order — population growth)
-  y'' + ω²y = 0              (2nd order — oscillation)
-  ∂u/∂t = k·∂²u/∂x²         (PDE — heat equation)
-```
+**Examples:**
+- $y' = ky$ (1st order — population growth)
+- $y'' + \omega^2y = 0$ (2nd order — oscillation)
+- $\frac{\partial u}{\partial t} = k \frac{\partial^2 u}{\partial x^2}$ (PDE — heat equation)
 
 ---
 
@@ -24,21 +22,24 @@ import HandPlot from '@site/src/components/CalcLab/HandPlot';
 
 **Direction Field:** At each point (x,y), draw a short line with slope f'=F(x,y).
 
-```
-  y' = y (solution is eˣ)
+Example: $y' = y$ (solution is $e^x$)
 
-  Direction field:         Solution curves:
-
-  y                        y
-  3  → → → → →            3       /
-  2  → → → → →            2      /
-  1  → → → → →            1     /
-  0  → → → → →     →      0 ───/──────
-  −1 → → → → →           −1   /
-  +──────────> x           +──────────> x
-
-  Arrows show direction    Curves follow arrows
-```
+<HandPlot
+  title="Direction Field & Solution Curve"
+  xLabel="x" yLabel="y"
+  domain={[-2, 2]} range={[-1, 3]}
+  curves={[
+    { f: (x) => Math.exp(x), color: 'blue', label: 'y = eˣ' }
+  ]}
+  marks={[
+    { x: 1, y: Math.exp(1), color: 'green', label: '→' },
+    { x: 0, y: Math.exp(0), color: 'green', label: '→' },
+    { x: -1, y: Math.exp(-1), color: 'green', label: '→' },
+    { x: -2, y: Math.exp(-2), color: 'green', label: '→' }
+  ]}
+  caption="Arrows show direction (slope = y). Solution curves follow the arrows."
+  height={300}
+/>
 
 **Euler's Method** — numerical approximation:
 
@@ -65,22 +66,27 @@ Start at $(x_0, y_0)$ and take steps of size $h$. Each step follows the local ta
 
 ### 9.3 Separable Equations
 
-```
-  Form: dy/dx = g(x)·h(y)
+**Form:** $\frac{dy}{dx} = g(x) \cdot h(y)$
 
-  Separate variables:
-  1/h(y) dy = g(x) dx
+**Separate variables:**
+$$
+\frac{1}{h(y)} \, dy = g(x) \, dx
+$$
 
-  Integrate both sides:
-  ∫ 1/h(y) dy = ∫ g(x) dx
+**Integrate both sides:**
+$$
+\int \frac{1}{h(y)} \, dy = \int g(x) \, dx
+$$
 
-  Example: dy/dx = xy
-
-  dy/y = x dx
-  ∫ dy/y = ∫ x dx
-  ln|y| = x²/2 + C
-  y = Ae^(x²/2)
-```
+**Example:** $\frac{dy}{dx} = xy$
+$$
+\begin{aligned}
+\frac{dy}{y} &= x \, dx \\
+\int \frac{dy}{y} &= \int x \, dx \\
+\ln|y| &= \frac{x^2}{2} + C \\
+y &= A e^{x^2/2}
+\end{aligned}
+$$
 
 ---
 
@@ -110,20 +116,24 @@ where $M$ is the **carrying capacity** (maximum sustainable population). Growth 
 
 ### 9.5 First-Order Linear ODEs
 
-```
-  Form: y' + P(x)y = Q(x)
+**Form:** $y' + P(x)y = Q(x)$
 
-  SOLUTION METHOD — Integrating Factor:
-  I(x) = e^(∫P(x)dx)
+**SOLUTION METHOD — Integrating Factor:**
+$$
+I(x) = e^{\int P(x) dx}
+$$
 
-  Multiply both sides by I(x):
-  [I(x)·y]' = I(x)·Q(x)
+Multiply both sides by $I(x)$:
+$$
+[I(x) \cdot y]' = I(x) \cdot Q(x)
+$$
 
-  Integrate both sides:
-  I(x)·y = ∫ I(x)·Q(x) dx
+Integrate both sides:
+$$
+I(x) \cdot y = \int I(x) \cdot Q(x) \, dx
+$$
 
-  Solve for y.
-```
+Solve for $y$.
 
 ---
 
