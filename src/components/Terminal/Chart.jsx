@@ -67,6 +67,48 @@ function ctTimeFormatter(time) {
   }).format(ctToDate(time));
 }
 
+// Black–Scholes gamma (client copy) — lets us re-price the dealer gamma flip
+// and walls at the LIVE spot on every tick (open interest is fixed intraday,
+// but gamma moves with spot and with the collapsing time-to-expiry).
+function bsmGammaC(S, K, T, sig) {
+  if (!(T > 0) || !(sig > 0) || !(S > 0)) return 0;
+  const d1 = (Math.log(S / K) + (0.045 + 0.5 * sig * sig) * T) / (sig * Math.sqrt(T));
+  return Math.exp(-0.5 * d1 * d1) / Math.sqrt(2 * Math.PI) / (S * sig * Math.sqrt(T));
+}
+const YEAR_MS = 365 * 86400000;
+function gexLevels(rows, S) {
+  if (!rows || !rows.length || !(S > 0)) return null;
+  const now = Date.now();
+  const SCALE = 100 * S * S * 0.01;
+  const Tof = (e) => Math.max((e - now) / YEAR_MS, 1 / (365 * 24)); // floor ≈ 1 hour
+  let netGex = 0, cw = 0, pw = 0, callWall = null, putWall = null;
+  for (const r of rows) {
+    const T = Tof(r.e);
+    const cg = bsmGammaC(S, r.k, T, r.civ) * r.coi;
+    const pg = bsmGammaC(S, r.k, T, r.piv) * r.poi;
+    netGex += (cg - pg) * SCALE;
+    if (cg > cw) { cw = cg; callWall = r.k; }
+    if (pg > pw) { pw = pg; putWall = r.k; }
+  }
+  const gexAt = (x) => {
+    let s = 0;
+    for (const r of rows) { const T = Tof(r.e); s += bsmGammaC(x, r.k, T, r.civ) * r.coi - bsmGammaC(x, r.k, T, r.piv) * r.poi; }
+    return s;
+  };
+  let flip = null, pS = S * 0.9, pV = gexAt(pS);
+  for (let i = 1; i <= 30; i++) {
+    const x = S * 0.9 + S * 0.2 * (i / 30), v = gexAt(x);
+    if ((pV < 0 && v >= 0) || (pV > 0 && v <= 0)) { flip = v === pV ? pS : pS + (x - pS) * (-pV) / (v - pV); break; }
+    pS = x; pV = v;
+  }
+  return {
+    netGex: Math.round(netGex),
+    gammaFlip: flip ? Math.round(flip * 100) / 100 : null,
+    regime: flip == null ? null : (S >= flip ? 'positive' : 'negative'),
+    callWall, putWall,
+  };
+}
+
 export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
@@ -83,9 +125,11 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const [pl, setPl] = useState(null);      // live { value, pct } for that position
   const [plY, setPlY] = useState(null);    // y-pixel of the entry line (for the pill)
   const entryLineRef = useRef(null);
-  const [gex, setGex] = useState(null);        // dealer gamma levels for this ticker
+  const [gex, setGex] = useState(null);          // dealer gamma levels (recomputed live)
+  const [gexChain, setGexChain] = useState(null); // per-strike chain from the worker
+  const [gexExp, setGexExp] = useState('day');    // expiry bucket: day | week | 15d | 30d
   const [showGex, setShowGex] = useState(false);
-  const gexLinesRef = useRef([]);
+  const gexLinesRef = useRef({});
 
   const toggleFs = () => {
     const el = areaRef.current;
@@ -358,45 +402,57 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pos]);
 
-  /* ---- gamma exposure: fetch dealer gamma levels for this ticker ---- */
+  /* ---- gamma exposure: fetch the per-strike chain for this ticker + expiry ---- */
   useEffect(() => {
     let cancelled = false;
-    setGex(null);
+    setGexChain(null); setGex(null);
     if (isCrypto(ticker)) return undefined; // options exist for equities/ETFs only
     const sym = (ticker || '').toUpperCase();
-    async function pull() {
+    (async () => {
       try {
-        const res = await fetch(`/_m/gex?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
-        if (!res.ok) { if (!cancelled) setGex(null); return; }
+        const res = await fetch(`/_m/gex?symbol=${encodeURIComponent(sym)}&exp=${gexExp}`, { cache: 'no-store' });
+        if (!res.ok) { if (!cancelled) { setGexChain(null); setGex(null); } return; }
         const d = await res.json();
-        if (!cancelled) setGex(d && d.spot ? d : null);
+        if (cancelled) return;
+        if (!d || !d.spot) { setGexChain(null); setGex(null); return; }
+        setGexChain(d);
+        // paint the server's (delayed-spot) levels immediately; the live
+        // re-compute below refines them at the terminal's real-time price.
+        setGex({ gammaFlip: d.gammaFlip, callWall: d.callWall, putWall: d.putWall, regime: d.regime, netGex: d.netGex });
       } catch (_) { /* overlay is optional — never break the chart */ }
-    }
-    pull(); // one-shot per ticker — GEX is end-of-day data, so no polling
+    })();
     return () => { cancelled = true; };
-  }, [ticker]);
+  }, [ticker, gexExp]);
 
-  /* ---- draw the gamma-flip + call/put walls as labeled price lines ---- */
+  /* ---- re-price the gamma flip + walls at the LIVE spot (every ~2s) ---- */
+  useEffect(() => {
+    if (!showGex || !gexChain || !gexChain.rows) return undefined;
+    const recompute = () => {
+      const S = (lastBarRef.current && lastBarRef.current.close) || gexChain.spot;
+      const lv = gexLevels(gexChain.rows, S);
+      if (lv) setGex(lv);
+    };
+    recompute();
+    const id = setInterval(recompute, 2000);
+    return () => clearInterval(id);
+  }, [gexChain, showGex]);
+
+  /* ---- draw/update the gamma-flip + call/put walls as labeled price lines ---- */
   useEffect(() => {
     const s = seriesRef.current;
-    const clear = () => {
-      if (s) for (const ln of gexLinesRef.current) { try { s.removePriceLine(ln); } catch (_) {} }
-      gexLinesRef.current = [];
+    const L = gexLinesRef.current;
+    const drop = (key) => { if (s && L[key]) { try { s.removePriceLine(L[key]); } catch (_) {} } L[key] = null; };
+    if (!showGex || !gex || !s) { for (const k of ['flip', 'call', 'put']) drop(k); return undefined; }
+    // update lines in place (no flicker) as the live re-compute nudges them
+    const set = (key, price, color, title) => {
+      if (price == null) { drop(key); return; }
+      if (L[key]) { try { L[key].applyOptions({ price, title }); } catch (_) {} }
+      else { try { L[key] = s.createPriceLine({ price, color, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title }); } catch (_) {} }
     };
-    clear();
-    if (!showGex || !gex || !s) return undefined;
-    const mk = (price, color, title) => {
-      if (price == null) return;
-      try {
-        gexLinesRef.current.push(s.createPriceLine({
-          price, color, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title,
-        }));
-      } catch (_) {}
-    };
-    mk(gex.gammaFlip, '#a855f7', `Γ flip ${gex.gammaFlip}`);
-    mk(gex.callWall, '#f97316', `Call wall ${gex.callWall}`);
-    mk(gex.putWall, '#14b8a6', `Put wall ${gex.putWall}`);
-    return clear;
+    set('flip', gex.gammaFlip, '#a855f7', `Γ flip ${gex.gammaFlip}`);
+    set('call', gex.callWall, '#f97316', `Call wall ${gex.callWall}`);
+    set('put', gex.putWall, '#14b8a6', `Put wall ${gex.putWall}`);
+    return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gex, showGex]);
 
@@ -420,6 +476,16 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         >
           Γ
         </button>
+        {showGex && !isCrypto(ticker) && [['day', 'Day'], ['week', '1W'], ['15d', '15D'], ['30d', '30D']].map(([v, l]) => (
+          <button
+            key={v}
+            className={`${styles.tfBtn} ${styles.gexExpBtn} ${gexExp === v ? styles.tfBtnActive : ''}`}
+            onClick={() => setGexExp(v)}
+            title={`Gamma expiry window: ${l}`}
+          >
+            {l}
+          </button>
+        ))}
       </div>
       <button
         className={styles.fsBtn}
@@ -474,10 +540,11 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
               <span className={gex.regime === 'positive' ? styles.up : styles.down}>
                 γ {gex.regime || '—'}
               </span>
+              {' · '}{gexExp === 'day' ? '0DTE' : gexExp}
               {gex.gammaFlip != null && <> · flip {gex.gammaFlip}</>}
               {(gex.putWall != null || gex.callWall != null) && <> · walls {gex.putWall ?? '—'}/{gex.callWall ?? '—'}</>}
             </>
-          ) : (isCrypto(ticker) ? 'γ: n/a for crypto' : 'γ: no options data')}
+          ) : (isCrypto(ticker) ? 'γ: n/a for crypto' : (gexChain === null ? 'γ: loading…' : 'γ: no options data'))}
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />

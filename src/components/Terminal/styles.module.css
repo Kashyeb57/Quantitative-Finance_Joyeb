@@ -408,6 +408,10 @@
   font-weight: 700;
   font-size: 0.9rem;
 }
+.gexExpBtn {
+  font-size: 0.66rem;
+  padding: 0.2rem 0.45rem;
+}
 .gexBadge {
   position: absolute;
   top: 40px;

@@ -408,16 +408,19 @@ function parseOcc(s) {
 async function handleGex(request, env, url) {
   const symbol = (url.searchParams.get('symbol') || '').toUpperCase();
   if (!SYMBOL_RE.test(symbol)) return json(request, { error: 'Bad symbol' }, 400);
+  const exp = (url.searchParams.get('exp') || 'day').toLowerCase();
+  const WINDOW = { day: 1.5, week: 7, '15d': 15, '30d': 30 };
+  const winDays = WINDOW[exp] || 1.5;
 
   const cache = caches.default;
-  const cacheKey = new Request(`https://gex.internal/${symbol}`);
+  const cacheKey = new Request(`https://gex.internal/${symbol}/${exp}`);
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
 
   const path = (CBOE_INDEXES.includes(symbol) ? '_' : '') + symbol;
   const res = await fetch(`${CBOE}/${path}.json`, {
     headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
-    cf: { cacheTtl: 300, cacheEverything: true },
+    cf: { cacheTtl: 120, cacheEverything: true },
   });
   if (!res.ok) return json(request, { error: `no options data for ${symbol}` }, res.status === 404 ? 404 : 502);
 
@@ -427,68 +430,81 @@ async function handleGex(request, env, url) {
   if (!spot || !opts.length) return json(request, { error: 'empty options data' }, 502);
 
   const now = Date.now();
-  const MAX_DAYS = 65, r = 0.045;
-  const bandLo = spot * 0.75, bandHi = spot * 1.25;
-  const SCALE = 100 * spot * spot * 0.01; // $ gamma per 1% move, per contract
+  const dayStart = now - (now % 86400000);
+  const r = 0.045;
+  const bandLo = spot * 0.85, bandHi = spot * 1.15;
 
-  const byStrike = new Map();
-  const near = [];
-  let netGex = 0, totalOI = 0;
-
+  // parse contracts (OI>0, near the money, not expired); track the front expiry
+  let frontExp = Infinity;
+  const all = [];
   for (const o of opts) {
     const oi = numOr(o.open_interest, 0);
     if (!oi) continue;
     const p = parseOcc(o.option);
-    if (!p || p.strike < bandLo || p.strike > bandHi) continue;
-    const days = (p.expiryMs - now) / 86400000;
-    if (days < 0 || days > MAX_DAYS) continue;
-    const g = numOr(o.gamma, 0);
-    const iv = numOr(o.iv, 0);
-    totalOI += oi;
-    netGex += (p.type === 'call' ? 1 : -1) * g * oi * SCALE;
-    const rec = byStrike.get(p.strike) || { call: 0, put: 0 };
-    rec[p.type] += g * oi;
-    byStrike.set(p.strike, rec);
-    near.push({ K: p.strike, type: p.type, oi, iv, T: Math.max(days, 0.5) / 365 });
+    if (!p || p.strike < bandLo || p.strike > bandHi || p.expiryMs < dayStart) continue;
+    if (p.expiryMs < frontExp) frontExp = p.expiryMs;
+    all.push({ k: p.strike, type: p.type, oi, iv: numOr(o.iv, 0), gamma: numOr(o.gamma, 0), expMs: p.expiryMs });
   }
+  // 'day' = the nearest expiry only (0DTE focus); else everything ≤ window
+  const cutoff = now + winDays * 86400000;
+  const keep = all.filter((c) => (exp === 'day' ? c.expMs === frontExp : c.expMs <= cutoff));
 
+  // aggregate to per (strike, expiry) rows so the browser can re-compute the
+  // flip + walls at the LIVE spot every tick (open interest is fixed intraday).
+  const rowMap = new Map();
+  const expiries = new Set();
+  for (const c of keep) {
+    expiries.add(c.expMs);
+    const key = c.k + '|' + c.expMs;
+    let row = rowMap.get(key);
+    if (!row) { row = { k: c.k, e: c.expMs, coi: 0, poi: 0, civ: 0, piv: 0 }; rowMap.set(key, row); }
+    if (c.type === 'call') { row.coi += c.oi; if (c.iv) row.civ = c.iv; }
+    else { row.poi += c.oi; if (c.iv) row.piv = c.iv; }
+  }
+  let rows = [...rowMap.values()];
+  if (rows.length > 600) rows = rows.sort((a, b) => (b.coi + b.poi) - (a.coi + a.poi)).slice(0, 600);
+
+  // server-side flip/walls at the delayed CBOE spot — initial paint before the
+  // client's first live re-compute.
+  const SCALE = 100 * spot * spot * 0.01;
+  const byStrike = new Map();
+  let netGex = 0;
+  for (const c of keep) {
+    netGex += (c.type === 'call' ? 1 : -1) * c.gamma * c.oi * SCALE;
+    const rec = byStrike.get(c.k) || { call: 0, put: 0 };
+    rec[c.type] += c.gamma * c.oi;
+    byStrike.set(c.k, rec);
+  }
   let callWall = null, putWall = null, cw = 0, pw = 0;
-  const profile = [];
-  for (const [K, rec] of byStrike) {
-    profile.push({ strike: K, net: Math.round((rec.call - rec.put) * SCALE) });
-    if (rec.call > cw) { cw = rec.call; callWall = K; }
-    if (rec.put > pw) { pw = rec.put; putWall = K; }
+  for (const [k, rec] of byStrike) {
+    if (rec.call > cw) { cw = rec.call; callWall = k; }
+    if (rec.put > pw) { pw = rec.put; putWall = k; }
   }
-  profile.sort((a, b) => a.strike - b.strike);
-
-  // gamma flip: spot where net dealer gamma crosses zero (BSM re-compute)
   const gexAt = (S) => {
     let sum = 0;
-    for (const c of near) sum += (c.type === 'call' ? 1 : -1) * bsmGamma(S, c.K, c.T, c.iv, r) * c.oi;
+    for (const c of keep) {
+      const T = Math.max((c.expMs - now) / 86400000, 0.25) / 365;
+      sum += (c.type === 'call' ? 1 : -1) * bsmGamma(S, c.k, T, c.iv, r) * c.oi;
+    }
     return sum;
   };
-  let gammaFlip = null;
-  const lo = spot * 0.8, hi = spot * 1.2, steps = 40;
-  let pS = lo, pV = gexAt(lo);
-  for (let i = 1; i <= steps; i++) {
-    const S = lo + (hi - lo) * (i / steps), v = gexAt(S);
-    if ((pV < 0 && v >= 0) || (pV > 0 && v <= 0)) {
-      gammaFlip = v === pV ? pS : pS + (S - pS) * (-pV) / (v - pV);
-      break;
-    }
+  let gammaFlip = null, pS = spot * 0.88, pV = gexAt(pS);
+  for (let i = 1; i <= 40; i++) {
+    const S = spot * 0.88 + spot * 0.24 * (i / 40), v = gexAt(S);
+    if ((pV < 0 && v >= 0) || (pV > 0 && v <= 0)) { gammaFlip = v === pV ? pS : pS + (S - pS) * (-pV) / (v - pV); break; }
     pS = S; pV = v;
   }
 
   const out = {
-    symbol, spot,
+    symbol, exp, spot, asOf: new Date().toISOString(),
     netGex: Math.round(netGex),
     gammaFlip: gammaFlip ? Math.round(gammaFlip * 100) / 100 : null,
     regime: gammaFlip == null ? null : (spot >= gammaFlip ? 'positive' : 'negative'),
-    callWall, putWall, totalOI,
-    profile: profile.filter((p) => p.net !== 0),
-    asOf: new Date().toISOString(),
+    callWall, putWall,
+    expiries: [...expiries].sort((a, b) => a - b),
+    rows,
   };
-  const resp = json(request, out, 200, 600);
+  const resp = json(request, out, 200, 300);
   await cache.put(cacheKey, resp.clone());
   return resp;
 }
