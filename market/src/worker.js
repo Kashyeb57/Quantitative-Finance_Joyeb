@@ -379,35 +379,118 @@ async function handleStream(request, env, url) {
   return new Response(null, { status: 101, webSocket: client });
 }
 
-// TEMP diagnostic — what options data does this Alpaca account expose?
-// (open interest via the trading API's contracts, greeks+IV via the v1beta1
-// options snapshots on the indicative vs opra feed). Read-only market data;
-// removed once we've confirmed availability and built /_m/gex.
-async function handleOptProbe(request, env, url) {
-  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) {
-    return json(request, { error: 'not_connected' }, 200);
+// ─── Gamma exposure (GEX) from CBOE's free delayed options feed ──────────────
+// Full chain with per-strike open_interest + gamma, no auth. We compute net
+// dealer gamma by strike (calls +, puts −, the standard convention), the total
+// GEX, the gamma-flip / zero-gamma price (BSM re-compute across spot), and the
+// call/put "walls" (largest gamma·OI strikes). Result is cached ~10 min (the
+// feed is delayed and open interest is end-of-day, so this is plenty fresh).
+const CBOE = 'https://cdn.cboe.com/api/global/delayed_quotes/options';
+const CBOE_INDEXES = ['SPX', 'VIX', 'NDX', 'RUT', 'XSP', 'DJX', 'XEO', 'OEX'];
+
+function normPdf(x) { return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI); }
+function bsmGamma(S, K, T, sigma, r) {
+  if (!(T > 0) || !(sigma > 0) || !(S > 0)) return 0;
+  const d1 = (Math.log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * Math.sqrt(T));
+  return normPdf(d1) / (S * sigma * Math.sqrt(T));
+}
+// OCC symbol: ROOT + YYMMDD + [C|P] + strike×1000 (8 digits)
+function parseOcc(s) {
+  const m = /^[A-Z]+(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/.exec(s || '');
+  if (!m) return null;
+  return {
+    type: m[4] === 'C' ? 'call' : 'put',
+    strike: parseInt(m[5], 10) / 1000,
+    expiryMs: Date.UTC(2000 + +m[1], +m[2] - 1, +m[3]),
+  };
+}
+
+async function handleGex(request, env, url) {
+  const symbol = (url.searchParams.get('symbol') || '').toUpperCase();
+  if (!SYMBOL_RE.test(symbol)) return json(request, { error: 'Bad symbol' }, 400);
+
+  const cache = caches.default;
+  const cacheKey = new Request(`https://gex.internal/${symbol}`);
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  const path = (CBOE_INDEXES.includes(symbol) ? '_' : '') + symbol;
+  const res = await fetch(`${CBOE}/${path}.json`, {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
+    cf: { cacheTtl: 300, cacheEverything: true },
+  });
+  if (!res.ok) return json(request, { error: `no options data for ${symbol}` }, res.status === 404 ? 404 : 502);
+
+  const data = (await res.json()).data || {};
+  const spot = numOr(data.current_price);
+  const opts = Array.isArray(data.options) ? data.options : [];
+  if (!spot || !opts.length) return json(request, { error: 'empty options data' }, 502);
+
+  const now = Date.now();
+  const MAX_DAYS = 65, r = 0.045;
+  const bandLo = spot * 0.75, bandHi = spot * 1.25;
+  const SCALE = 100 * spot * spot * 0.01; // $ gamma per 1% move, per contract
+
+  const byStrike = new Map();
+  const near = [];
+  let netGex = 0, totalOI = 0;
+
+  for (const o of opts) {
+    const oi = numOr(o.open_interest, 0);
+    if (!oi) continue;
+    const p = parseOcc(o.option);
+    if (!p || p.strike < bandLo || p.strike > bandHi) continue;
+    const days = (p.expiryMs - now) / 86400000;
+    if (days < 0 || days > MAX_DAYS) continue;
+    const g = numOr(o.gamma, 0);
+    const iv = numOr(o.iv, 0);
+    totalOI += oi;
+    netGex += (p.type === 'call' ? 1 : -1) * g * oi * SCALE;
+    const rec = byStrike.get(p.strike) || { call: 0, put: 0 };
+    rec[p.type] += g * oi;
+    byStrike.set(p.strike, rec);
+    near.push({ K: p.strike, type: p.type, oi, iv, T: Math.max(days, 0.5) / 365 });
   }
-  const symbol = (url.searchParams.get('symbol') || 'SPY').toUpperCase();
-  const hdr = {
-    'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
-    'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
-    'Accept': 'application/json',
+
+  let callWall = null, putWall = null, cw = 0, pw = 0;
+  const profile = [];
+  for (const [K, rec] of byStrike) {
+    profile.push({ strike: K, net: Math.round((rec.call - rec.put) * SCALE) });
+    if (rec.call > cw) { cw = rec.call; callWall = K; }
+    if (rec.put > pw) { pw = rec.put; putWall = K; }
+  }
+  profile.sort((a, b) => a.strike - b.strike);
+
+  // gamma flip: spot where net dealer gamma crosses zero (BSM re-compute)
+  const gexAt = (S) => {
+    let sum = 0;
+    for (const c of near) sum += (c.type === 'call' ? 1 : -1) * bsmGamma(S, c.K, c.T, c.iv, r) * c.oi;
+    return sum;
   };
-  const probe = async (label, u) => {
-    try {
-      const r = await fetch(u, { headers: hdr });
-      const text = await r.text();
-      return { label, status: r.status, sample: text.slice(0, 700) };
-    } catch (e) {
-      return { label, error: String(e).slice(0, 200) };
+  let gammaFlip = null;
+  const lo = spot * 0.8, hi = spot * 1.2, steps = 40;
+  let pS = lo, pV = gexAt(lo);
+  for (let i = 1; i <= steps; i++) {
+    const S = lo + (hi - lo) * (i / steps), v = gexAt(S);
+    if ((pV < 0 && v >= 0) || (pV > 0 && v <= 0)) {
+      gammaFlip = v === pV ? pS : pS + (S - pS) * (-pV) / (v - pV);
+      break;
     }
+    pS = S; pV = v;
+  }
+
+  const out = {
+    symbol, spot,
+    netGex: Math.round(netGex),
+    gammaFlip: gammaFlip ? Math.round(gammaFlip * 100) / 100 : null,
+    regime: gammaFlip == null ? null : (spot >= gammaFlip ? 'positive' : 'negative'),
+    callWall, putWall, totalOI,
+    profile: profile.filter((p) => p.net !== 0),
+    asOf: new Date().toISOString(),
   };
-  const results = await Promise.all([
-    probe('contracts_OI', `${ALPACA_PAPER}/options/contracts?underlying_symbols=${symbol}&limit=3`),
-    probe('snapshots_indicative', `https://data.alpaca.markets/v1beta1/options/snapshots/${symbol}?feed=indicative&limit=2`),
-    probe('snapshots_opra', `https://data.alpaca.markets/v1beta1/options/snapshots/${symbol}?feed=opra&limit=2`),
-  ]);
-  return json(request, { symbol, results }, 200, 0);
+  const resp = json(request, out, 200, 600);
+  await cache.put(cacheKey, resp.clone());
+  return resp;
 }
 
 export default {
@@ -427,7 +510,7 @@ export default {
     if (url.pathname === '/_m/snapshot')  return handleSnapshot(request, env, url);
     if (url.pathname === '/_m/portfolio') return handlePortfolio(request, env);
     if (url.pathname === '/_m/ledger')    return handleLedger(request, env);
-    if (url.pathname === '/_m/opt-probe') return handleOptProbe(request, env, url);
+    if (url.pathname === '/_m/gex')       return handleGex(request, env, url);
     if (url.pathname === '/_m/health')    return json(request, { ok: true });
 
     return json(request, { error: 'Not found' }, 404);
