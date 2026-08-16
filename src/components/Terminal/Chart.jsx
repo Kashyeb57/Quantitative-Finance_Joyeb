@@ -365,7 +365,6 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     if (isCrypto(ticker)) return undefined; // options exist for equities/ETFs only
     const sym = (ticker || '').toUpperCase();
     async function pull() {
-      if (document.visibilityState === 'hidden') return;
       try {
         const res = await fetch(`/_m/gex?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
         if (!res.ok) { if (!cancelled) setGex(null); return; }
@@ -373,9 +372,8 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         if (!cancelled) setGex(d && d.spot ? d : null);
       } catch (_) { /* overlay is optional — never break the chart */ }
     }
-    pull();
-    const id = setInterval(pull, 10 * 60 * 1000); // GEX is end-of-day / slow-moving
-    return () => { cancelled = true; clearInterval(id); };
+    pull(); // one-shot per ticker — GEX is end-of-day data, so no polling
+    return () => { cancelled = true; };
   }, [ticker]);
 
   /* ---- draw the gamma-flip + call/put walls as labeled price lines ---- */
