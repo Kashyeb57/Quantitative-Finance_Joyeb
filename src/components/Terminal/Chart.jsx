@@ -83,6 +83,9 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const [pl, setPl] = useState(null);      // live { value, pct } for that position
   const [plY, setPlY] = useState(null);    // y-pixel of the entry line (for the pill)
   const entryLineRef = useRef(null);
+  const [gex, setGex] = useState(null);        // dealer gamma levels for this ticker
+  const [showGex, setShowGex] = useState(false);
+  const gexLinesRef = useRef([]);
 
   const toggleFs = () => {
     const el = areaRef.current;
@@ -355,6 +358,50 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pos]);
 
+  /* ---- gamma exposure: fetch dealer gamma levels for this ticker ---- */
+  useEffect(() => {
+    let cancelled = false;
+    setGex(null);
+    if (isCrypto(ticker)) return undefined; // options exist for equities/ETFs only
+    const sym = (ticker || '').toUpperCase();
+    async function pull() {
+      if (document.visibilityState === 'hidden') return;
+      try {
+        const res = await fetch(`/_m/gex?symbol=${encodeURIComponent(sym)}`, { cache: 'no-store' });
+        if (!res.ok) { if (!cancelled) setGex(null); return; }
+        const d = await res.json();
+        if (!cancelled) setGex(d && d.spot ? d : null);
+      } catch (_) { /* overlay is optional — never break the chart */ }
+    }
+    pull();
+    const id = setInterval(pull, 10 * 60 * 1000); // GEX is end-of-day / slow-moving
+    return () => { cancelled = true; clearInterval(id); };
+  }, [ticker]);
+
+  /* ---- draw the gamma-flip + call/put walls as labeled price lines ---- */
+  useEffect(() => {
+    const s = seriesRef.current;
+    const clear = () => {
+      if (s) for (const ln of gexLinesRef.current) { try { s.removePriceLine(ln); } catch (_) {} }
+      gexLinesRef.current = [];
+    };
+    clear();
+    if (!showGex || !gex || !s) return undefined;
+    const mk = (price, color, title) => {
+      if (price == null) return;
+      try {
+        gexLinesRef.current.push(s.createPriceLine({
+          price, color, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title,
+        }));
+      } catch (_) {}
+    };
+    mk(gex.gammaFlip, '#a855f7', `Γ flip ${gex.gammaFlip}`);
+    mk(gex.callWall, '#f97316', `Call wall ${gex.callWall}`);
+    mk(gex.putWall, '#14b8a6', `Put wall ${gex.putWall}`);
+    return clear;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gex, showGex]);
+
   return (
     <div className={styles.chartArea} ref={areaRef}>
       <div className={styles.chartToolbar}>
@@ -367,6 +414,14 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
             {tf.label}
           </button>
         ))}
+        <button
+          className={`${styles.tfBtn} ${styles.gexBtn} ${showGex ? styles.tfBtnActive : ''}`}
+          onClick={() => setShowGex((v) => !v)}
+          disabled={isCrypto(ticker)}
+          title="Gamma exposure — dealer gamma-flip level and call/put walls"
+        >
+          Γ
+        </button>
       </div>
       <button
         className={styles.fsBtn}
@@ -412,6 +467,19 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
             {pl.value >= 0 ? '+' : '−'}${fmtPrice(Math.abs(pl.value))}
             {pl.pct != null && ` (${pl.value >= 0 ? '+' : '−'}${Math.abs(pl.pct).toFixed(2)}%)`}
           </span>
+        </div>
+      )}
+      {status === 'ok' && showGex && (
+        <div className={styles.gexBadge}>
+          {gex ? (
+            <>
+              <span className={gex.regime === 'positive' ? styles.up : styles.down}>
+                γ {gex.regime || '—'}
+              </span>
+              {gex.gammaFlip != null && <> · flip {gex.gammaFlip}</>}
+              {(gex.putWall != null || gex.callWall != null) && <> · walls {gex.putWall ?? '—'}/{gex.callWall ?? '—'}</>}
+            </>
+          ) : (isCrypto(ticker) ? 'γ: n/a for crypto' : 'γ: no options data')}
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />

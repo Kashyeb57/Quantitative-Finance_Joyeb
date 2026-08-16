@@ -404,6 +404,30 @@
 }
 
 /* Full-screen: keep a solid page background instead of black. */
+.gexBtn {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.gexBadge {
+  position: absolute;
+  top: 40px;
+  left: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 88%, transparent);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .chartArea:fullscreen {
   background: var(--ifm-background-color);
 }
