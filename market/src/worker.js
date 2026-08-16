@@ -379,6 +379,37 @@ async function handleStream(request, env, url) {
   return new Response(null, { status: 101, webSocket: client });
 }
 
+// TEMP diagnostic — what options data does this Alpaca account expose?
+// (open interest via the trading API's contracts, greeks+IV via the v1beta1
+// options snapshots on the indicative vs opra feed). Read-only market data;
+// removed once we've confirmed availability and built /_m/gex.
+async function handleOptProbe(request, env, url) {
+  if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) {
+    return json(request, { error: 'not_connected' }, 200);
+  }
+  const symbol = (url.searchParams.get('symbol') || 'SPY').toUpperCase();
+  const hdr = {
+    'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
+    'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
+    'Accept': 'application/json',
+  };
+  const probe = async (label, u) => {
+    try {
+      const r = await fetch(u, { headers: hdr });
+      const text = await r.text();
+      return { label, status: r.status, sample: text.slice(0, 700) };
+    } catch (e) {
+      return { label, error: String(e).slice(0, 200) };
+    }
+  };
+  const results = await Promise.all([
+    probe('contracts_OI', `${ALPACA_PAPER}/options/contracts?underlying_symbols=${symbol}&limit=3`),
+    probe('snapshots_indicative', `https://data.alpaca.markets/v1beta1/options/snapshots/${symbol}?feed=indicative&limit=2`),
+    probe('snapshots_opra', `https://data.alpaca.markets/v1beta1/options/snapshots/${symbol}?feed=opra&limit=2`),
+  ]);
+  return json(request, { symbol, results }, 200, 0);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -396,6 +427,7 @@ export default {
     if (url.pathname === '/_m/snapshot')  return handleSnapshot(request, env, url);
     if (url.pathname === '/_m/portfolio') return handlePortfolio(request, env);
     if (url.pathname === '/_m/ledger')    return handleLedger(request, env);
+    if (url.pathname === '/_m/opt-probe') return handleOptProbe(request, env, url);
     if (url.pathname === '/_m/health')    return json(request, { ok: true });
 
     return json(request, { error: 'Not found' }, 404);
