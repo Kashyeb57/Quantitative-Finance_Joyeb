@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import styles from './styles.module.css';
 
 /*
- * GEX-by-strike histogram sidebar. Vertical axis = strike (high at top),
- * horizontal bars = net dealer gamma at that strike (green +, red −). The
- * strike price is printed at each bar's tip in the bar's colour. When a
- * priceRange is supplied (the chart's visible price window) the panel zooms
- * to match the chart, so scrolling/zooming the chart zooms the profile too.
- * Hovering a bar shows its exact net GEX.
+ * GEX-by-strike histogram sidebar with its OWN zoom (independent of the chart).
+ * Vertical axis = strike (high at top), horizontal bars = net dealer gamma at
+ * that strike (green +, red −), strike price printed at each bar's tip in the
+ * bar's colour. Scroll over the panel to zoom in/out around the cursor;
+ * double-click resets. Hover a bar to read its exact net GEX.
  */
+const PADT = 6, PADB = 6, PADL = 6, PADR = 6;
+
 const fmtGex = (v) => {
   const a = Math.abs(v), s = v < 0 ? '−' : '+';
   if (a >= 1e9) return s + (a / 1e9).toFixed(2) + 'B';
@@ -17,10 +18,15 @@ const fmtGex = (v) => {
   return s + a.toFixed(0);
 };
 
-export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip, priceRange }) {
+export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip, resetKey }) {
   const boxRef = useRef(null);
+  const stRef = useRef({});
   const [dim, setDim] = useState({ w: 210, h: 440 });
   const [hover, setHover] = useState(null);
+  const [view, setView] = useState(null); // [min, max] user zoom, or null = fit all
+
+  // reset zoom when the ticker / expiry changes
+  useEffect(() => { setView(null); }, [resetKey]);
 
   useEffect(() => {
     const el = boxRef.current;
@@ -33,24 +39,55 @@ export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip
     return () => ro.disconnect();
   }, []);
 
+  // non-passive wheel listener so we can preventDefault (stop page scroll)
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return undefined;
+    const onWheel = (e) => {
+      const s = stRef.current;
+      if (!s.ready) return;
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const frac = (e.clientY - rect.top - PADT) / (s.H - PADT - PADB);
+      const cursorK = s.maxK - frac * (s.maxK - s.minK);
+      const factor = e.deltaY < 0 ? 0.86 : 1.16;
+      let nlo = cursorK - (cursorK - s.minK) * factor;
+      let nhi = cursorK + (s.maxK - cursorK) * factor;
+      const dataSpan = s.dataMax - s.dataMin || 1;
+      const minSpan = Math.max(s.spot ? s.spot * 0.004 : 0.5, dataSpan * 0.02);
+      const maxSpan = dataSpan * 3;
+      let span = nhi - nlo;
+      if (span < minSpan) { nlo = cursorK - minSpan / 2; nhi = cursorK + minSpan / 2; }
+      else if (span > maxSpan) { const c = (nlo + nhi) / 2; nlo = c - maxSpan / 2; nhi = c + maxSpan / 2; }
+      setView([nlo, nhi]);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
   const ready = profile && profile.length >= 2;
   const { w: W, h: H } = dim;
 
-  let bars = [], sy = null, zeroX = 0, rowH = 8, minK = 0, maxK = 0;
-  if (ready && W > 30 && H > 30) {
-    if (priceRange && priceRange[1] > priceRange[0]) {
-      minK = priceRange[0]; maxK = priceRange[1];          // follow the chart's zoom
-    } else {
-      const ks = profile.map((p) => p.strike);
-      minK = Math.min(...ks); maxK = Math.max(...ks);
-      for (const m of [spot, callWall, putWall, gammaFlip]) if (m != null) { minK = Math.min(minK, m); maxK = Math.max(maxK, m); }
-      const sp = (maxK - minK) || 1; minK -= sp * 0.04; maxK += sp * 0.04;
-    }
+  // data (fit-all) range
+  let dataMin = 0, dataMax = 0;
+  if (ready) {
+    const ks = profile.map((p) => p.strike);
+    dataMin = Math.min(...ks); dataMax = Math.max(...ks);
+    for (const m of [spot, callWall, putWall, gammaFlip]) if (m != null) { dataMin = Math.min(dataMin, m); dataMax = Math.max(dataMax, m); }
+    const sp = (dataMax - dataMin) || 1; dataMin -= sp * 0.04; dataMax += sp * 0.04;
+  }
+  const minK = view ? view[0] : dataMin;
+  const maxK = view ? view[1] : dataMax;
+
+  const plotW = W - PADL - PADR;
+  const zeroX = PADL + plotW * 0.4;
+  const sy = (k) => PADT + ((maxK - k) / (maxK - minK)) * (H - PADT - PADB);
+
+  stRef.current = { ready, H, minK, maxK, dataMin, dataMax, spot };
+
+  let bars = [], rowH = 8;
+  if (ready && W > 30 && H > 30 && maxK > minK) {
     const maxAbs = Math.max(...profile.map((p) => Math.abs(p.net)), 1);
-    const padT = 6, padB = 6, padR = 6, padL = 6;
-    const plotW = W - padL - padR;
-    zeroX = padL + plotW * 0.4;
-    sy = (k) => padT + ((maxK - k) / (maxK - minK)) * (H - padT - padB);
     const vis = profile.filter((p) => p.strike >= minK && p.strike <= maxK);
     bars = vis.map((p) => ({ strike: p.strike, net: p.net, y: sy(p.strike), bw: (p.net / maxAbs) * (plotW * 0.46) }));
     if (bars.length > 1) {
@@ -71,7 +108,7 @@ export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip
     setHover(best && bd < 16 ? best : null);
   };
 
-  const marker = (price, color, label) => (price == null || !sy || price < minK || price > maxK) ? null : (
+  const marker = (price, color, label) => (price == null || !(maxK > minK) || price < minK || price > maxK) ? null : (
     <g key={label}>
       <line x1={0} y1={sy(price)} x2={W} y2={sy(price)} stroke={color} strokeWidth="1" strokeDasharray="3 3" opacity="0.7" />
       <text x={W - 2} y={sy(price) - 2} fill={color} fontSize="9" textAnchor="end">{label} {Math.round(price)}</text>
@@ -82,8 +119,11 @@ export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip
 
   return (
     <div className={styles.gexProfile}>
-      <div className={styles.gexProfileTitle}>GEX by strike</div>
-      <div className={styles.gexProfilePlot} ref={boxRef} onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
+      <div className={styles.gexProfileTitle}>
+        GEX by strike
+        <span className={styles.gexHint}>{view ? ' · scroll zoom · dbl-click reset' : ' · scroll to zoom'}</span>
+      </div>
+      <div className={styles.gexProfilePlot} ref={boxRef} onMouseMove={onMove} onMouseLeave={() => setHover(null)} onDoubleClick={() => setView(null)}>
         {bars.length > 0 && (
           <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
             <line x1={zeroX} y1={4} x2={zeroX} y2={H - 4} stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
