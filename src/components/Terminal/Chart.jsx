@@ -134,6 +134,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const [gexChain, setGexChain] = useState(null); // per-strike chain from the worker
   const [gexExp, setGexExp] = useState('day');    // expiry bucket: day | week | 15d | 30d
   const [showGex, setShowGex] = useState(false);
+  const [gexRange, setGexRange] = useState(null); // chart's visible price window
   const gexLinesRef = useRef({});
 
   const toggleFs = () => {
@@ -442,6 +443,24 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     return () => clearInterval(id);
   }, [gexChain, showGex]);
 
+  /* ---- track the chart's visible price window so the GEX panel zooms with it ---- */
+  useEffect(() => {
+    if (!showGex) { setGexRange(null); return undefined; }
+    const tick = () => {
+      const s = seriesRef.current, wrap = wrapRef.current;
+      if (!s || !wrap) return;
+      const h = wrap.clientHeight;
+      const top = s.coordinateToPrice(2);
+      const bot = s.coordinateToPrice(h - 26); // minus the time axis strip
+      if (top != null && bot != null && Number.isFinite(top) && Number.isFinite(bot) && top > bot) {
+        setGexRange((r) => (r && Math.abs(r[0] - bot) < bot * 0.0006 && Math.abs(r[1] - top) < top * 0.0006 ? r : [bot, top]));
+      }
+    };
+    tick();
+    const id = setInterval(tick, 150);
+    return () => clearInterval(id);
+  }, [showGex]);
+
   /* ---- draw/update the gamma-flip + call/put walls as labeled price lines ---- */
   useEffect(() => {
     const s = seriesRef.current;
@@ -470,6 +489,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
           callWall={gex.callWall}
           putWall={gex.putWall}
           gammaFlip={gex.gammaFlip}
+          priceRange={gexRange}
         />
       )}
       <div className={styles.chartArea}>
