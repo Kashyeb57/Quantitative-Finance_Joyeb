@@ -4,7 +4,6 @@ import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES, fmtPrice } from 
 import { subscribeCryptoTicker } from './cryptoStream';
 import { subscribeStockTrades } from './stockStream';
 import styles from './styles.module.css';
-import GexProfile from './GexProfile';
 
 /*
  * Live price chart.
@@ -135,6 +134,8 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const [gexExp, setGexExp] = useState('day');    // expiry bucket: day | week | 15d | 30d
   const [showGex, setShowGex] = useState(false);
   const gexLinesRef = useRef({});
+  const gexCanvasRef = useRef(null);
+  const gexProfileRef = useRef(null);
 
   const toggleFs = () => {
     const el = areaRef.current;
@@ -461,18 +462,65 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gex, showGex]);
 
+  // keep the latest per-strike profile in a ref for the animation-frame loop
+  useEffect(() => { gexProfileRef.current = gex && gex.profile ? gex.profile : null; }, [gex]);
+
+  /* ---- GEX-by-strike bars INSIDE the chart, aligned to the price axis ---- */
+  useEffect(() => {
+    if (!showGex) return undefined;
+    let raf;
+    const draw = () => {
+      raf = requestAnimationFrame(draw);
+      const canvas = gexCanvasRef.current;
+      const series = seriesRef.current;
+      const parent = canvas && canvas.parentElement;
+      if (!canvas || !series || !parent) return;
+      const cw = parent.clientWidth, ch = parent.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) {
+        canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cw, ch);
+      const prof = gexProfileRef.current;
+      if (!prof || !prof.length) return;
+      // project each strike to a y-pixel on the chart's price scale
+      const pts = [];
+      let maxAbs = 1;
+      for (const p of prof) {
+        const y = series.priceToCoordinate(p.strike);
+        if (y == null || Number.isNaN(y)) continue;
+        pts.push({ y, net: p.net });
+        if (Math.abs(p.net) > maxAbs) maxAbs = Math.abs(p.net);
+      }
+      if (!pts.length) return;
+      // bar thickness ≈ the on-screen gap between adjacent strikes
+      let barH = 7;
+      if (pts.length > 1) {
+        const ys = pts.map((p) => p.y).sort((a, b) => a - b);
+        const gaps = [];
+        for (let i = 1; i < ys.length; i++) gaps.push(ys[i] - ys[i - 1]);
+        gaps.sort((a, b) => a - b);
+        barH = Math.max(2, Math.min(gaps[Math.floor(gaps.length / 2)] * 0.82, 26));
+      }
+      const maxW = Math.min(cw * 0.42, 220);
+      for (const p of pts) {
+        const w = (Math.abs(p.net) / maxAbs) * maxW;
+        ctx.fillStyle = p.net >= 0 ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)';
+        ctx.fillRect(0, p.y - barH / 2, w, barH);
+      }
+    };
+    raf = requestAnimationFrame(draw);
+    return () => {
+      cancelAnimationFrame(raf);
+      const c = gexCanvasRef.current;
+      if (c) { const ctx = c.getContext('2d'); if (ctx) ctx.clearRect(0, 0, c.width, c.height); }
+    };
+  }, [showGex]);
+
   return (
-    <div className={styles.chartRow} ref={areaRef}>
-      {showGex && gex && gex.profile && (
-        <GexProfile
-          profile={gex.profile}
-          spot={(lastBarRef.current && lastBarRef.current.close) || (gexChain && gexChain.spot)}
-          callWall={gex.callWall}
-          putWall={gex.putWall}
-          gammaFlip={gex.gammaFlip}
-        />
-      )}
-      <div className={styles.chartArea}>
+    <div className={styles.chartArea} ref={areaRef}>
       <div className={styles.chartToolbar}>
         {TIMEFRAMES.map((tf) => (
           <button
@@ -563,7 +611,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />
-      </div>
+      {showGex && <canvas ref={gexCanvasRef} className={styles.gexOverlay} />}
     </div>
   );
 }
