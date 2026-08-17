@@ -47,19 +47,14 @@ export default function GexProfile({ profile, spot, callWall, putWall, gammaFlip
       const s = stRef.current;
       if (!s.ready) return;
       e.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const frac = (e.clientY - rect.top - PADT) / (s.H - PADT - PADB);
-      const cursorK = s.maxK - frac * (s.maxK - s.minK);
-      const factor = e.deltaY < 0 ? 0.86 : 1.16;
-      let nlo = cursorK - (cursorK - s.minK) * factor;
-      let nhi = cursorK + (s.maxK - cursorK) * factor;
+      // scroll up = zoom in, scroll down = zoom out — centered on the price
+      const center = s.spot || (s.minK + s.maxK) / 2;
+      const factor = e.deltaY < 0 ? 0.85 : 1.18;
       const dataSpan = s.dataMax - s.dataMin || 1;
-      const minSpan = Math.max(s.spot ? s.spot * 0.004 : 0.5, dataSpan * 0.02);
-      const maxSpan = dataSpan * 3;
-      let span = nhi - nlo;
-      if (span < minSpan) { nlo = cursorK - minSpan / 2; nhi = cursorK + minSpan / 2; }
-      else if (span > maxSpan) { const c = (nlo + nhi) / 2; nlo = c - maxSpan / 2; nhi = c + maxSpan / 2; }
-      setView([nlo, nhi]);
+      const minHalf = Math.max(s.spot ? s.spot * 0.004 : 0.5, dataSpan * 0.02) / 2;
+      const maxHalf = (dataSpan * 3) / 2;
+      const half = Math.max(minHalf, Math.min(((s.maxK - s.minK) / 2) * factor, maxHalf));
+      setView([center - half, center + half]);
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
