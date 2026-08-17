@@ -462,7 +462,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   }, [gex, showGex]);
 
   return (
-    <div className={styles.chartRow}>
+    <div className={styles.chartRow} ref={areaRef}>
       {showGex && gex && gex.profile && (
         <GexProfile
           profile={gex.profile}
@@ -472,7 +472,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
           gammaFlip={gex.gammaFlip}
         />
       )}
-      <div className={styles.chartArea} ref={areaRef}>
+      <div className={styles.chartArea}>
       <div className={styles.chartToolbar}>
         {TIMEFRAMES.map((tf) => (
           <button

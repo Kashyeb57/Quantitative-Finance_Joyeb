@@ -344,7 +344,7 @@
   color: var(--ifm-color-emphasis-600);
   padding: 6px 8px 2px;
 }
-.gexProfile svg {
+.gexProfilePlot {
   flex: 1;
   min-height: 0;
 }
@@ -462,8 +462,9 @@
   white-space: nowrap;
 }
 
-.chartArea:fullscreen {
+.chartRow:fullscreen {
   background: var(--ifm-background-color);
+  display: flex;
 }
 
 .fsBtn {
