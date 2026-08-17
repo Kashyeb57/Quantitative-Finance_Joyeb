@@ -322,11 +322,50 @@
 .imp_neu { color: var(--ifm-color-emphasis-500); }
 
 /* In-page candlestick chart fills the panel */
-.gexOverlay {
+.chartRow {
+  display: flex;
+  flex: 1;
+  min-height: 460px;
+}
+.gexProfile {
+  width: 210px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  background: rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+.gexProfileTitle {
+  font-family: var(--ff-mono, var(--ifm-font-family-monospace));
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-600);
+  padding: 6px 8px 2px;
+}
+.gexProfilePlot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  cursor: crosshair;
+}
+.gexTip {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  transform: translateY(-50%);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-family: var(--ff-mono, var(--ifm-font-family-monospace));
+  font-size: 0.68rem;
+  white-space: nowrap;
+  background: rgba(10, 10, 12, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--ifm-color-emphasis-800, #eeeeee);
+  z-index: 5;
   pointer-events: none;
+}
+@media (max-width: 640px) {
+  .gexProfile { display: none; }
 }
 
 .chartArea {
@@ -439,8 +478,9 @@
   white-space: nowrap;
 }
 
-.chartArea:fullscreen {
+.chartRow:fullscreen {
   background: var(--ifm-background-color);
+  display: flex;
 }
 
 .fsBtn {
