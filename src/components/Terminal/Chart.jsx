@@ -4,6 +4,7 @@ import { fetchBars, tfConfig, isCrypto, cryptoGran, TIMEFRAMES, fmtPrice } from 
 import { subscribeCryptoTicker } from './cryptoStream';
 import { subscribeStockTrades } from './stockStream';
 import styles from './styles.module.css';
+import GexProfile from './GexProfile';
 
 /*
  * Live price chart.
@@ -82,14 +83,18 @@ function gexLevels(rows, S) {
   const SCALE = 100 * S * S * 0.01;
   const Tof = (e) => Math.max((e - now) / YEAR_MS, 1 / (365 * 24)); // floor ≈ 1 hour
   let netGex = 0, cw = 0, pw = 0, callWall = null, putWall = null;
+  const byK = new Map();
   for (const r of rows) {
     const T = Tof(r.e);
     const cg = bsmGammaC(S, r.k, T, r.civ) * r.coi;
     const pg = bsmGammaC(S, r.k, T, r.piv) * r.poi;
-    netGex += (cg - pg) * SCALE;
+    const net = (cg - pg) * SCALE;
+    netGex += net;
+    byK.set(r.k, (byK.get(r.k) || 0) + net);
     if (cg > cw) { cw = cg; callWall = r.k; }
     if (pg > pw) { pw = pg; putWall = r.k; }
   }
+  const profile = [...byK.entries()].map(([strike, net]) => ({ strike, net })).sort((a, b) => a.strike - b.strike);
   const gexAt = (x) => {
     let s = 0;
     for (const r of rows) { const T = Tof(r.e); s += bsmGammaC(x, r.k, T, r.civ) * r.coi - bsmGammaC(x, r.k, T, r.piv) * r.poi; }
@@ -105,7 +110,7 @@ function gexLevels(rows, S) {
     netGex: Math.round(netGex),
     gammaFlip: flip ? Math.round(flip * 100) / 100 : null,
     regime: flip == null ? null : (S >= flip ? 'positive' : 'negative'),
-    callWall, putWall,
+    callWall, putWall, profile,
   };
 }
 
@@ -457,7 +462,17 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   }, [gex, showGex]);
 
   return (
-    <div className={styles.chartArea} ref={areaRef}>
+    <div className={styles.chartRow}>
+      {showGex && gex && gex.profile && (
+        <GexProfile
+          profile={gex.profile}
+          spot={(lastBarRef.current && lastBarRef.current.close) || (gexChain && gexChain.spot)}
+          callWall={gex.callWall}
+          putWall={gex.putWall}
+          gammaFlip={gex.gammaFlip}
+        />
+      )}
+      <div className={styles.chartArea} ref={areaRef}>
       <div className={styles.chartToolbar}>
         {TIMEFRAMES.map((tf) => (
           <button
@@ -548,6 +563,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />
+      </div>
     </div>
   );
 }
