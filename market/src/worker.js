@@ -405,6 +405,66 @@ function parseOcc(s) {
   };
 }
 
+// Near-money option chain from CBOE's free delayed feed (~15-min delayed).
+async function chainFromCboe(symbol, dayStart) {
+  const path = (CBOE_INDEXES.includes(symbol) ? '_' : '') + symbol;
+  const res = await fetch(`${CBOE}/${path}.json`, {
+    headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
+    cf: { cacheTtl: 120, cacheEverything: true },
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()).data || {};
+  const spot = numOr(data.current_price);
+  const opts = Array.isArray(data.options) ? data.options : [];
+  if (!spot || !opts.length) return null;
+  const lo = spot * 0.85, hi = spot * 1.15;
+  const contracts = [];
+  for (const o of opts) {
+    const oi = numOr(o.open_interest, 0);
+    if (!oi) continue;
+    const p = parseOcc(o.option);
+    if (!p || p.strike < lo || p.strike > hi || p.expiryMs < dayStart) continue;
+    contracts.push({ k: p.strike, type: p.type, oi, iv: numOr(o.iv, 0), gamma: numOr(o.gamma, 0), expMs: p.expiryMs });
+  }
+  return { spot, contracts, source: 'cboe' };
+}
+
+// Near-money option chain from Polygon.io (paid; real-time OI + greeks + IV).
+// Active only when POLYGON_KEY is set; on any failure the caller falls back to
+// CBOE, so a missing/bad key never breaks the endpoint.
+async function chainFromPolygon(symbol, key, winDays, dayStart) {
+  const base = 'https://api.polygon.io/v3/snapshot/options/' + symbol;
+  const auth = (u) => u + (u.includes('?') ? '&' : '?') + 'apiKey=' + key;
+  const s0 = await fetch(auth(base + '?limit=1'));
+  if (!s0.ok) return null;
+  const first = ((await s0.json()).results || [])[0];
+  const spot = first && first.underlying_asset ? numOr(first.underlying_asset.price) : null;
+  if (!spot) return null;
+  const cutoff = new Date(Date.now() + Math.max(winDays, 2) * 86400000).toISOString().slice(0, 10);
+  const lo = Math.floor(spot * 0.85), hi = Math.ceil(spot * 1.15);
+  let u = auth(`${base}?strike_price.gte=${lo}&strike_price.lte=${hi}&expiration_date.lte=${cutoff}&limit=250`);
+  const contracts = [];
+  for (let pages = 0; u && pages < 8; pages++) {
+    const res = await fetch(u);
+    if (!res.ok) break;
+    const j = await res.json();
+    for (const rr of (j.results || [])) {
+      const d = rr.details || {}, g = rr.greeks || {};
+      const oi = numOr(rr.open_interest, 0);
+      if (!oi || !d.expiration_date) continue;
+      const expMs = Date.parse(d.expiration_date + 'T00:00:00Z');
+      if (expMs < dayStart) continue;
+      contracts.push({
+        k: numOr(d.strike_price),
+        type: d.contract_type === 'put' ? 'put' : 'call',
+        oi, iv: numOr(rr.implied_volatility, 0), gamma: numOr(g.gamma, 0), expMs,
+      });
+    }
+    u = j.next_url ? auth(j.next_url) : null;
+  }
+  return contracts.length ? { spot, contracts, source: 'polygon' } : null;
+}
+
 async function handleGex(request, env, url) {
   const symbol = (url.searchParams.get('symbol') || '').toUpperCase();
   if (!SYMBOL_RE.test(symbol)) return json(request, { error: 'Bad symbol' }, 400);
@@ -417,34 +477,23 @@ async function handleGex(request, env, url) {
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
 
-  const path = (CBOE_INDEXES.includes(symbol) ? '_' : '') + symbol;
-  const res = await fetch(`${CBOE}/${path}.json`, {
-    headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' },
-    cf: { cacheTtl: 120, cacheEverything: true },
-  });
-  if (!res.ok) return json(request, { error: `no options data for ${symbol}` }, res.status === 404 ? 404 : 502);
-
-  const data = (await res.json()).data || {};
-  const spot = numOr(data.current_price);
-  const opts = Array.isArray(data.options) ? data.options : [];
-  if (!spot || !opts.length) return json(request, { error: 'empty options data' }, 502);
-
   const now = Date.now();
   const dayStart = now - (now % 86400000);
   const r = 0.045;
-  const bandLo = spot * 0.85, bandHi = spot * 1.15;
 
-  // parse contracts (OI>0, near the money, not expired); track the front expiry
-  let frontExp = Infinity;
-  const all = [];
-  for (const o of opts) {
-    const oi = numOr(o.open_interest, 0);
-    if (!oi) continue;
-    const p = parseOcc(o.option);
-    if (!p || p.strike < bandLo || p.strike > bandHi || p.expiryMs < dayStart) continue;
-    if (p.expiryMs < frontExp) frontExp = p.expiryMs;
-    all.push({ k: p.strike, type: p.type, oi, iv: numOr(o.iv, 0), gamma: numOr(o.gamma, 0), expMs: p.expiryMs });
+  // real-time via Polygon.io when POLYGON_KEY is set; else free ~15-min CBOE
+  let chain = null;
+  if (env.POLYGON_KEY) {
+    try { chain = await chainFromPolygon(symbol, env.POLYGON_KEY, winDays, dayStart); } catch (_) {}
   }
+  if (!chain) chain = await chainFromCboe(symbol, dayStart);
+  if (!chain || !chain.contracts.length) return json(request, { error: `no options data for ${symbol}` }, 404);
+
+  const spot = chain.spot;
+  const source = chain.source;
+  const all = chain.contracts;
+  let frontExp = Infinity;
+  for (const c of all) if (c.expMs < frontExp) frontExp = c.expMs;
   // 'day' = the nearest expiry only (0DTE focus); else everything ≤ window
   const cutoff = now + winDays * 86400000;
   const keep = all.filter((c) => (exp === 'day' ? c.expMs === frontExp : c.expMs <= cutoff));
@@ -496,7 +545,7 @@ async function handleGex(request, env, url) {
   }
 
   const out = {
-    symbol, exp, spot, asOf: new Date().toISOString(),
+    symbol, exp, spot, source, asOf: new Date().toISOString(),
     netGex: Math.round(netGex),
     gammaFlip: gammaFlip ? Math.round(gammaFlip * 100) / 100 : null,
     regime: gammaFlip == null ? null : (spot >= gammaFlip ? 'positive' : 'negative'),
@@ -504,7 +553,7 @@ async function handleGex(request, env, url) {
     expiries: [...expiries].sort((a, b) => a - b),
     rows,
   };
-  const resp = json(request, out, 200, 300);
+  const resp = json(request, out, 200, source === 'polygon' ? 20 : 300);
   await cache.put(cacheKey, resp.clone());
   return resp;
 }
