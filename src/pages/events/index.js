@@ -13,6 +13,14 @@ import styles from './styles.module.css';
  */
 const EVENTS = [
   {
+    slug: 'jane-street-15b-loss',
+    tag: 'Rare loss',
+    date: 'July 2026',
+    title: 'Jane Street’s $15 billion month',
+    blurb:
+      'The most profitable trading firm on Wall Street — a secretive quant giant that out-earns every bank desk — had its first losing month in a decade: a ~$15B loss from its "hedge-fund side" (AI-infrastructure and Asian bets, plus a stake in the Situational Awareness fund). Among the largest single-firm trading losses ever — and yet, funded by its own ~$45B of capital, it barely flinched and still posted a record year. Same July storm as Situational Awareness; opposite ending.',
+  },
+  {
     slug: 'kospi-leverage-crash',
     tag: 'Blow-up',
     date: 'July–August 2026',
