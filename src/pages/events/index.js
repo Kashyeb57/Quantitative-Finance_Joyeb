@@ -13,6 +13,14 @@ import styles from './styles.module.css';
  */
 const EVENTS = [
   {
+    slug: 'meta-social-media-trial',
+    tag: 'Landmark trial',
+    date: 'August 2026',
+    title: 'Meta on trial: the social-media reckoning',
+    blurb:
+      'A coalition of 33 state attorneys general — led by California’s Rob Bonta — put Meta on trial in Oakland federal court, arguing Facebook and Instagram were deliberately designed to addict children and that Meta knew and hid the harm. The "Big Tobacco moment" for social media: the design-defect theory that finally got past Section 230, the damning internal documents ("bring them in as tweens"), tens of billions in potential damages, and the threat of court-ordered changes to the engagement engine behind Meta’s $201B in revenue. Developing — no verdict yet.',
+  },
+  {
     slug: 'jane-street-15b-loss',
     tag: 'Rare loss',
     date: 'July 2026',
