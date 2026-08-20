@@ -13,6 +13,15 @@ import styles from './styles.module.css';
  */
 const EVENTS = [
   {
+    slug: 'white-house-crypto-summit',
+    tag: 'Policy shift',
+    tagClass: 'tagUp',
+    date: 'August 2026',
+    title: 'Crypto goes to Washington',
+    blurb:
+      'President Trump shared a White House podium with the CEOs of Coinbase, Ripple and Robinhood (Vlad Tenev), flanked by the SEC and CFTC chairs — pressing Congress to pass the CLARITY Act and framing crypto as key to beating China. With the bill stalled, the real move was regulate-by-agency: the SEC’s new "Regulation Crypto Assets" framework landed the same week. Stacked with a Treasury buyback surprise, it lit a fuse — Bitcoin ripped past $68,000 (its biggest jump since March), over $1B of shorts were liquidated in an hour, and Coinbase +11% / Strategy +13% led the crypto-equity beta. What a policy tailwind looks like — and why summits can also mark tops.',
+  },
+  {
     slug: 'meta-social-media-trial',
     tag: 'Landmark trial',
     date: 'August 2026',
@@ -50,7 +59,7 @@ function EventCard({ e }) {
   return (
     <Link className={styles.card} to={`/events/${e.slug}`}>
       <div className={styles.cardTop}>
-        <span className={`${styles.tag} ${styles.tagCrash}`}>{e.tag}</span>
+        <span className={`${styles.tag} ${styles[e.tagClass] || styles.tagCrash}`}>{e.tag}</span>
         <span className={styles.date}>{e.date}</span>
       </div>
       <Heading as="h2" className={styles.cardTitle}>{e.title}</Heading>

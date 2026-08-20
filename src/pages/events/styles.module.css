@@ -56,6 +56,11 @@
   background: var(--viz-crit);
 }
 
+.tagUp {
+  color: #fff;
+  background: var(--viz-good);
+}
+
 .date {
   font-size: 0.8rem;
   color: var(--ifm-color-emphasis-600);
