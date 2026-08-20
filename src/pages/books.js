@@ -225,6 +225,13 @@ const LIBRARY = [
     shortCat: 'Markets',
     url: `${QR}/CREDIT%20SUISSE%20CASH%20FLOW%20AND%20OOPS%20LESSON%20FOR%20FINTECH.pdf`,
   },
+  {
+    title: 'CODE: The Hidden Language of Computer Hardware and Software',
+    author: 'Charles Petzold',
+    category: 'Programming & Computer Science',
+    shortCat: 'Programming',
+    url: `${QIP}/CODE.pdf`,
+  },
 ];
 
 const SECTIONS = [
