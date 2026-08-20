@@ -30,15 +30,6 @@
   color: var(--ifm-color-emphasis-800);
 }
 
-.actions {
-  margin-left: auto;
-  display: flex;
-  gap: 1.1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .frame {
   flex: 1 1 auto;
   width: 100%;

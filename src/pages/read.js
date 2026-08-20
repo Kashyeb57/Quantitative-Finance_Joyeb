@@ -36,9 +36,6 @@ function Reader() {
       <div className={styles.toolbar}>
         <Link to="/books" className={styles.back}>← Library</Link>
         <span className={styles.title} title={title}>{title}</span>
-        <span className={styles.actions}>
-          <a href={file} download>Download ↓</a>
-        </span>
       </div>
       <div className={styles.frame}>
         <PdfReader url={file} title={title} />
