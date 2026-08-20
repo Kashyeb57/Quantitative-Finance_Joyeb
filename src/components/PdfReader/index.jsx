@@ -168,9 +168,16 @@ export default function PdfReader({ url, title }) {
       <div className={styles.center}>
         <p>Couldn't open this book in the reader.</p>
         <p className={styles.dim}>{errorMsg}</p>
-        <a className="button button--primary" href={url} target="_blank" rel="noreferrer">
-          Open the PDF directly ↗
-        </a>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button
+            type="button"
+            className="button button--primary"
+            onClick={() => { if (typeof window !== 'undefined') window.location.reload(); }}
+          >
+            Try again
+          </button>
+          <a className="button button--secondary" href="/books">← Back to the Library</a>
+        </div>
       </div>
     );
   }
