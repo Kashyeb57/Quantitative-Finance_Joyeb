@@ -21,12 +21,25 @@ const SCALE = [
 ];
 
 const STATS = [
-  { v: '33 states', label: 'Attorneys general suing together, led by California' },
-  { v: '~6–7 wks', label: 'Expected trial length — opened Aug 18, 2026, in Oakland' },
-  { v: 'tens of $B', label: 'Damages plaintiffs have signaled they may seek', dir: 'down' },
+  { v: '29 states', label: 'AGs suing together (2023 coalition); 4 — CA, CO, KY, NJ — argue the trial' },
+  { v: '~6–7 wks', label: 'Expected trial length — opened Aug 18, 2026, in Oakland; 8-person jury' },
+  { v: '$1.4T', label: 'Theoretical max penalty; states name no figure — Bonta floated "~$200B, maybe"', dir: 'down' },
   { v: '~2,000+', label: 'Related child-harm suits waiting behind this one' },
   { v: '$201B', label: 'Meta 2025 revenue — the business the case targets' },
   { v: '$206B', label: 'Big Tobacco’s 1998 settlement — the precedent looming over it' },
+];
+
+// Reverse-chronological log of what actually happens in the courtroom, updated
+// as the trial runs. Newest first.
+const UPDATES = [
+  {
+    d: 'Aug 19, 2026 · Day 2',
+    b: 'Former Meta safety engineer and whistleblower Arturo Béjar — whom Meta had tried to bar the week before — took the stand as the states’ first witness. He testified that Meta ran on a "don’t ask, don’t tell" approach to child safety: leadership was warned repeatedly about harm to young users and largely ignored it. He said "move fast and break things" was a genuine mantra, that products like Reels were shipped "and safety was not a consideration in how it was initially deployed," and that he had briefed Mark Zuckerberg on product problems at least 100 times. His internal studies, he said, found children encountering harmful content — from predatory contact to graphic violence — at rates far above Meta’s narrow public "prevalence" figures.',
+  },
+  {
+    d: 'Aug 18, 2026 · Day 1',
+    b: 'Opening statements before an eight-person jury. Deputy AG Megan O’Neill said Meta’s playbook was to "hook the users, hold them for as long as they can, harvest their data, and then hide the truth from the public." On the stakes, a per-violation calculation puts the theoretical maximum penalty near $1.4 trillion — but Bonta said the states are not seeking a set number and accused Meta of citing $1.4T to make the case look absurd: "They generated revenue of $200 billion last year, so … maybe that amount would be appropriate. Maybe more. Maybe less." Meta countered that its apps are not defective and that it has built teen-safety tools.',
+  },
 ];
 
 const GLOSSARY = [
@@ -40,13 +53,14 @@ const GLOSSARY = [
 ];
 
 const TIMELINE = [
-  { d: 'Oct 2023', b: 'A bipartisan coalition of ~33 state attorneys general sues Meta in the Northern District of California, alleging Facebook and Instagram were designed to addict minors; ~9 more states file in their own courts. The suits are consolidated before Chief Judge Yvonne Gonzalez Rogers.' },
+  { d: 'Oct 2023', b: 'A bipartisan coalition of state attorneys general — reported as 29 in the federal action (some counts run to ~33) — sues Meta in the Northern District of California, alleging Facebook and Instagram were designed to addict minors; more states file in their own courts. The suits are consolidated before Chief Judge Yvonne Gonzalez Rogers.' },
   { d: '2024–2025', b: 'Discovery surfaces internal Meta documents and research. Courts rule the design-defect claims can proceed past Section 230, narrowing the shield that had defeated earlier suits.' },
   { d: 'Early 2026', b: 'A federal court rules Meta cannot use attorney-client privilege to bury internal teen-harm research, finding its lawyers had advised employees to “remove,” “block,” “button up” or “limit” damaging studies — a major evidentiary setback.' },
   { d: 'Mar 25–26, 2026', b: 'In a separate bellwether (K.G.M. v. Meta et al.), a California jury finds Meta and YouTube liable for addictive design that harmed a minor — the first verdict of its kind, cracking the door for the ~2,000 cases behind it.', crash: true },
   { d: 'Summer 2026', b: 'The court “fully” denies Meta’s motion for summary judgment and finds Meta failed to obtain COPPA-compliant parental consent — AG Bonta’s “critical win” heading into trial.' },
   { d: 'Aug 12, 2026', b: 'Jury selection begins in Oakland for the states’ enforcement trial — the first time a coalition of AGs takes Meta to a jury over child safety.' },
-  { d: 'Aug 18, 2026', b: 'Opening statements. A Bonta deputy tells the jury “profits won” over children’s safety; Meta counters that its products aren’t defective and that it has built extensive teen-safety tools. The trial is expected to run ~6–7 weeks.', crash: true },
+  { d: 'Aug 18, 2026', b: 'Opening statements before an eight-person jury. Deputy AG Megan O’Neill says Meta’s model was to “hook the users, hold them … harvest their data, and then hide the truth.” Meta counters that its products aren’t defective and that it has built extensive teen-safety tools. The trial is expected to run ~6–7 weeks.', crash: true },
+  { d: 'Aug 19, 2026', b: 'Whistleblower Arturo Béjar, a former Meta safety engineer, becomes the states’ first witness — describing a “don’t ask, don’t tell” culture, the “move fast and break things” mantra, Reels shipped without safety review, and having briefed Zuckerberg on product harms ~100 times.', crash: true },
 ];
 
 const WAVES = [
@@ -69,14 +83,20 @@ const WAVES = [
   {
     name: 'Social media',
     year: '2026 (on trial)',
-    plaintiffs: '33 state AGs, led by California',
+    plaintiffs: '29 state AGs, led by California',
     knew: 'Internal docs: “bring them in as tweens”; 11-yos 4× more likely to return',
     theory: 'Product design-defect + COPPA + false advertising',
-    outcome: 'TBD — tens of $B sought + court-ordered design changes',
+    outcome: 'TBD — up to ~$1.4T theoretical max (no figure named) + design changes',
   },
 ];
 
 const SOURCES = [
+  { t: 'NPR — “Whistleblower Arturo Béjar leads testimony in landmark trial against Meta” (Aug 19, 2026)', u: 'https://www.npr.org/2026/08/19/nx-s1-5936648/meta-trial-arturo-bejar-whistleblower-testimony' },
+  { t: 'Quartz — “Meta whistleblower Arturo Béjar testifies at child safety trial” (Aug 19, 2026)', u: 'https://qz.com/meta-whistleblower-arturo-bejar-child-safety-trial-081926' },
+  { t: 'ABC — “Pivotal Meta trial over social media addiction in children gets underway” (Aug 19, 2026)', u: 'https://www.abc.net.au/news/2026-08-19/meta-trial-that-could-reshape-facebook-and-instagram-begins/107052672' },
+  { t: 'Yahoo News — “Trials begin in cases questioning child safety of Meta, YouTube” (29 states; penalty math)', u: 'https://www.yahoo.com/news/articles/trials-begin-cases-questioning-child-175011292.html' },
+  { t: 'CNN Business — “Meta is back in the courtroom to face its biggest social media addiction trial yet” (Aug 18, 2026)', u: 'https://www.cnn.com/2026/08/18/tech/meta-attorneys-general-addiction-trial-opening-arguments' },
+  { t: 'CNBC — “Meta faces state AG trial over child safety claims” (Aug 17, 2026)', u: 'https://www.cnbc.com/2026/08/17/meta-attorneys-general-california-federal-trial-astronomical-consequences.html' },
   { t: 'NPR — “‘Profits won.’ The child safety trial against Meta kicks off in federal court” (Aug 18, 2026)', u: 'https://www.npr.org/2026/08/18/nx-s1-5935458/meta-child-safety-social-media-addiction-trial-opening' },
   { t: 'NPR — “Meta heads to court in a landmark trial about kids and social media addiction” (Aug 17, 2026)', u: 'https://www.npr.org/2026/08/17/nx-s1-5930701/meta-trial-kids-social-media-addiction' },
   { t: 'Oaklandside — “Meta trial claiming platforms addicted children begins in Oakland” (Aug 18, 2026)', u: 'https://oaklandside.org/2026/08/18/meta-trial-claiming-platforms-addicted-children-begins-oakland/' },
@@ -147,12 +167,12 @@ export default function MetaSocialMediaTrial() {
           <Link className={styles.backLink} to="/events">← All Big Events</Link>
           <div className={styles.articleMeta}>
             <span className={styles.developing}>Developing · trial in progress</span>
-            <span>Opened Aug 18, 2026 · ~11 min read · by Joyeb Kashyeb</span>
+            <span>Opened Aug 18 · updated Aug 19, 2026 (Day 2) · ~12 min read · by Joyeb Kashyeb</span>
           </div>
 
           <p className={styles.dek}>
             On <strong>August 18, 2026</strong>, in a federal courtroom in Oakland, a coalition of{' '}
-            <strong>33 state attorneys general</strong> &mdash; led by California&rsquo;s Rob Bonta
+            <strong>state attorneys general</strong> (29 in the federal case) &mdash; led by California&rsquo;s Rob Bonta
             &mdash; began making a case that would have been unthinkable a decade ago: that{' '}
             <strong>Facebook and Instagram are defective products</strong>, engineered to addict
             children, and that Meta <em>knew</em> the harm and hid it. It is the closest thing yet to a{' '}
@@ -169,6 +189,18 @@ export default function MetaSocialMediaTrial() {
               teen-safety tools and parental controls it has built. This page explains what the case is,
               why it matters for markets and tech, and what to watch &mdash; not who is right.
             </p>
+          </div>
+
+          <div className={styles.plainBox} style={{ borderLeftColor: 'var(--viz-crit)' }}>
+            <Heading as="h2">Latest from the courtroom</Heading>
+            <ul className={styles.timeline} style={{ marginBottom: 0 }}>
+              {UPDATES.map((u, i) => (
+                <li key={i} className={`${styles.tItem} ${styles.tItemCrash}`}>
+                  <div className={styles.tDate}>{u.d}</div>
+                  <p className={styles.tBody}>{u.b}</p>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className={styles.plainBox}>
@@ -188,11 +220,13 @@ export default function MetaSocialMediaTrial() {
               tweens,&rdquo;</em> research that <strong>11-year-olds were four times more likely to keep
               returning to Instagram</strong> (which requires users to be 13), and a court finding that
               Meta&rsquo;s lawyers advised staff to <em>&ldquo;remove,&rdquo; &ldquo;block&rdquo;</em> or{' '}
-              <em>&ldquo;button up&rdquo;</em> damaging studies. Plaintiffs across the cases have
-              signaled damages in the <strong>tens of billions</strong>, plus court-ordered changes to
-              the apps themselves. For a company that made <strong>$201B</strong> in 2025 off exactly
-              that engagement, the money is survivable &mdash; the <em>precedent</em>, and the threat to
-              the design, are not.
+              <em>&ldquo;button up&rdquo;</em> damaging studies. The per-violation math tops out at a
+              theoretical <strong>~$1.4 trillion</strong>, but the states pointedly aren&rsquo;t naming a
+              number &mdash; Bonta noted Meta made ~$200B last year and left it at
+              <em> &ldquo;maybe that amount &hellip; maybe more, maybe less&rdquo;</em> &mdash; plus
+              court-ordered changes to the apps themselves. For a company that made <strong>$201B</strong>{' '}
+              in 2025 off exactly that engagement, the money is survivable &mdash; the <em>precedent</em>,
+              and the threat to the design, are not.
             </p>
           </div>
 
@@ -231,12 +265,15 @@ export default function MetaSocialMediaTrial() {
             <h2 id="s-trial">1. What&rsquo;s on trial</h2>
             <p>
               The case is a <strong>state enforcement action</strong> &mdash; not a private lawsuit for
-              one family, but the government of <strong>33 states</strong> (led by California&rsquo;s
-              Attorney General Rob Bonta) suing Meta on behalf of the public. It is being heard in the{' '}
+              one family, but the government of <strong>29 states</strong> (led by California&rsquo;s
+              Attorney General Rob Bonta) suing Meta on behalf of the public &mdash; with four of them,
+              California, Colorado, Kentucky and New Jersey, actually arguing the case at trial. It is
+              being heard in the{' '}
               <strong>U.S. District Court for the Northern District of California</strong> in Oakland,
               before <strong>Chief Judge Yvonne Gonzalez Rogers</strong>, who also oversees the ~2,000
-              consolidated child-harm cases. Jury selection began <strong>August 12</strong>; opening
-              statements were <strong>August 18, 2026</strong>; the trial is expected to run about{' '}
+              consolidated child-harm cases, in front of an <strong>eight-person jury</strong>. Jury
+              selection began <strong>August 12</strong>; opening statements were{' '}
+              <strong>August 18, 2026</strong>; the trial is expected to run about{' '}
               <strong>six to seven weeks</strong>.
             </p>
             <p>
@@ -371,12 +408,16 @@ export default function MetaSocialMediaTrial() {
             <h2 id="s-money">5. The money and the medicine</h2>
             <p>
               There are two kinds of stakes, and the second is the bigger one. The first is{' '}
-              <strong>money</strong>: across the cases, plaintiffs have indicated they may seek damages
-              &ldquo;up to the high tens of billions of dollars,&rdquo; plus civil penalties. The second
-              is <strong>injunctive relief</strong> &mdash; a court ordering Meta to <em>change the
-              products</em>: age verification, default limits, turning off the most compulsive features
-              for minors. For an ad business built on maximizing engagement, being ordered to make the
-              apps <em>less</em> engaging is the real threat.
+              <strong>money</strong>. Run the per-violation penalties to their limit and the theoretical
+              maximum is a jaw-dropping <strong>~$1.4 trillion</strong> &mdash; a number Meta has been
+              keen to cite, precisely because it sounds absurd. The states are deliberately <em>not</em>{' '}
+              anchoring to it: Bonta said they aren&rsquo;t seeking a set figure, pointing instead to
+              Meta&rsquo;s ~$200B in annual revenue &mdash;{' '}
+              <em>&ldquo;maybe that amount would be appropriate. Maybe more. Maybe less.&rdquo;</em> The
+              second stake is <strong>injunctive relief</strong> &mdash; a court ordering Meta to{' '}
+              <em>change the products</em>: age verification, default limits, turning off the most
+              compulsive features for minors. For an ad business built on maximizing engagement, being
+              ordered to make the apps <em>less</em> engaging is the real threat.
             </p>
 
             <figure className={styles.figure}>
@@ -546,8 +587,9 @@ export default function MetaSocialMediaTrial() {
               of writing (August 2026). The states&rsquo; claims are <strong>allegations that Meta
               denies</strong> and that a jury must decide; internal-document quotes are as reported by
               news outlets and court filings and may be presented with context or rebuttal at trial. The
-              number of states (~33) and damages figures vary by source. This page is an educational
-              explainer of a public court case, not legal or investment advice.
+              number of states (reported as 29–33) and the penalty figures vary by source, and this page
+              is updated as the trial runs. It is an educational explainer of a public court case, not
+              legal or investment advice.
             </p>
           </div>
         </article>
