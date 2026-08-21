@@ -222,7 +222,6 @@ function Content() {
   const cashW = (Math.max(0, cash) / allocTotal) * 100;
 
   return (
-  return (
     <div className={styles.dashboard}>
       {/* ── Top Hero: Equity & Chart ── */}
       <div className={`p-card ${styles.heroArea}`} data-reveal style={{'--i': 0}}>
