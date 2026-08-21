@@ -26,3 +26,13 @@ yarn-debug.log*
 yarn-error.log*
 
 docs/Programming/python.md.bak
+
+# Private working notes & tooling — never commit (backed up in OneDrive)
+CLAUDE.md
+AGENTS.md
+HANDOFF.md
+HANDOFF-*.md
+DESIGN_HANDOFF.md
+MS444_STATS_GAP_REPORT.md
+.claude/
+.understand-anything/
