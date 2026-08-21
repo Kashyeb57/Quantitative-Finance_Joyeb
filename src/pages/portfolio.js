@@ -6,15 +6,16 @@ import {fmtPrice} from '@site/src/components/Terminal/marketData';
 import styles from './portfolio.module.css';
 
 /*
- * Portfolio — a full read-only view of the Alpaca *paper* trading account:
- * capital over time, the analyst's read on it (returns, win rate, exposure),
- * open positions with allocation weight, closed FIFO round-trips, and the
- * order ledger. Data comes from the market Worker's /_m/ledger endpoint, which
- * reads Alpaca server-side. No real money; nothing here places trades.
+ * Portfolio — "Command Deck": a Robinhood-grade read of the Alpaca *paper*
+ * account, plus the analytics Robinhood never ships. The equity value is the
+ * hero; SCRUBBING the equity line re-renders that hero value + day-change to
+ * the point under the cursor. Below it: a segmented allocation bar, a six-stat
+ * performance read, and holdings as a data-forward list. Read-only; no trades.
  *
- * Design note: this page leads with ONE number (equity) and the equity curve,
- * then an editorial performance read, then the receipts — deliberately built
- * with hierarchy rather than an even grid of raw API fields.
+ * Data source: the market Worker's /_m/ledger (reads Alpaca server-side).
+ * Range pills (1D/1W/…) are a deliberate fast-follow — they need a Worker
+ * endpoint that returns other windows; this v1 renders the 3-month history the
+ * ledger already provides.
  */
 
 const POLL_MS = 30000;
@@ -23,9 +24,12 @@ const money = (v) => (v == null || Number.isNaN(v) ? '—' : `$${fmtPrice(v)}`);
 const signedMoney = (v) => (v == null || Number.isNaN(v) ? '—' : `${v >= 0 ? '+' : '−'}$${fmtPrice(Math.abs(v))}`);
 const signedPct = (v) => (v == null || Number.isNaN(v) ? '' : `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}%`);
 const pctWhole = (v) => (v == null || Number.isNaN(v) ? '—' : `${v.toFixed(0)}%`);
-const dirCls = (v) => (v == null ? '' : v >= 0 ? styles.up : styles.down);
 
-// Order/closed timestamps arrive as ISO strings.
+// Zero is NEUTRAL — a flat/dead account must not glow green. null → neutral too.
+const dirCls = (v) => (v == null || v === 0 ? '' : v > 0 ? styles.up : styles.down);
+const caret = (v) => (v == null || v === 0 ? '' : v > 0 ? '▲' : '▾');
+
+// Order/closed timestamps are ISO strings.
 function fmtWhen(iso, withTime) {
   if (!iso) return '—';
   try {
@@ -35,9 +39,7 @@ function fmtWhen(iso, withTime) {
   } catch (_) { return '—'; }
 }
 
-// Equity-curve timestamps come from Alpaca portfolio history as epoch *seconds*
-// (a bare number), not ISO — so convert before formatting. Guard covers the
-// off chance the upstream ever hands back milliseconds instead.
+// Equity-curve timestamps are Alpaca epoch *seconds* (guard covers ms too).
 function fmtDay(t) {
   if (t == null) return '';
   const ms = typeof t === 'number' ? (t < 1e12 ? t * 1000 : t) : Date.parse(t);
@@ -47,23 +49,24 @@ function fmtDay(t) {
   } catch (_) { return ''; }
 }
 
-/* The centerpiece: a hoverable equity curve with a window-start baseline and a
- * mono readout chip that tracks the cursor (defaults to the latest point). */
-function EquityChart({points}) {
-  const [hov, setHov] = useState(null);
+/* The signature line: full-bleed, no axes/grid, a dashed open-baseline, and a
+ * scrub that drives the hero above it. Controlled — the parent owns the scrub
+ * index so the hero and the chart read from one source of truth. The paths live
+ * in a stretched (aspect-none) SVG for responsive height; the markers are HTML
+ * overlays positioned by percent, so dots stay round instead of squashing. */
+function EquityChart({points, scrubIdx, onScrub}) {
   const ref = useRef(null);
 
   if (!points || points.length < 2) {
-    return <div className={styles.chartEmpty}>The equity curve fills in once the account has a few days of history.</div>;
+    return <div className={styles.chartFlat}>Flat line — no open risk. The curve comes alive once the account has a few days of activity.</div>;
   }
 
-  const W = 900, H = 280;
-  const PAD = {t: 22, r: 20, b: 26, l: 66};
+  const W = 900, H = 260, PAD = {t: 16, r: 8, b: 16, l: 8};
   const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
   const vals = points.map((p) => p.value);
   const vmin = Math.min(...vals), vmax = Math.max(...vals);
   const span = (vmax - vmin) || Math.max(1, vmax * 0.01);
-  const lo = vmin - span * 0.14, hiV = vmax + span * 0.14;
+  const lo = vmin - span * 0.16, hiV = vmax + span * 0.16;
   const x = (i) => PAD.l + (i / (points.length - 1)) * iw;
   const y = (v) => PAD.t + ih - ((v - lo) / (hiV - lo)) * ih;
   const line = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
@@ -73,66 +76,57 @@ function EquityChart({points}) {
   const last = points[points.length - 1].value;
   const up = last >= start;
   const stroke = up ? 'var(--g-500)' : 'var(--amber-500)';
-  const ticks = [lo + (hiV - lo) * 0.18, (lo + hiV) / 2, hiV - (hiV - lo) * 0.18];
 
-  const sel = hov == null ? points.length - 1 : hov;
+  const sel = scrubIdx == null ? points.length - 1 : scrubIdx;
   const sx = x(sel), sy = y(points[sel].value);
-  const chipW = 150, chipH = 44;
-  const chipX = Math.max(PAD.l, Math.min(W - PAD.r - chipW, sx - chipW / 2));
+  const pctX = (px) => `${(px / W) * 100}%`;
+  const pctY = (py) => `${(py / H) * 100}%`;
+  const labelLeft = Math.max(9, Math.min(91, (sx / W) * 100));
 
-  const onMove = (e) => {
+  const move = (e) => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    const vx = ((e.clientX - r.left) / r.width) * W;
+    const cx = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+    const vx = ((cx - r.left) / r.width) * W;
     let i = Math.round(((vx - PAD.l) / iw) * (points.length - 1));
     i = Math.max(0, Math.min(points.length - 1, i));
-    setHov(i);
+    onScrub(i);
   };
 
   return (
-    <svg
+    <div
       ref={ref}
-      className={styles.chart}
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-      aria-label="Account equity over time"
-      onMouseMove={onMove}
-      onMouseLeave={() => setHov(null)}>
-      <defs>
-        <linearGradient id="eqArea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={stroke} stopOpacity="0.20" />
-          <stop offset="1" stopColor={stroke} stopOpacity="0.015" />
-        </linearGradient>
-      </defs>
+      className={styles.chartBox}
+      onMouseMove={move}
+      onMouseLeave={() => onScrub(null)}
+      onTouchStart={move}
+      onTouchMove={move}
+      onTouchEnd={() => onScrub(null)}>
+      <svg className={styles.chart} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label="Account equity over time">
+        <defs>
+          <linearGradient id="eqArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={stroke} stopOpacity="0.22" />
+            <stop offset="1" stopColor={stroke} stopOpacity="0.012" />
+          </linearGradient>
+        </defs>
+        <line x1={PAD.l} x2={W - PAD.r} y1={y(start)} y2={y(start)} stroke="var(--line-strong)" strokeWidth="1" strokeDasharray="2 5" vectorEffect="non-scaling-stroke" />
+        <path d={area} fill="url(#eqArea)" />
+        <path d={line} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        {scrubIdx != null && (
+          <line x1={sx} x2={sx} y1={PAD.t} y2={PAD.t + ih} stroke="var(--line-strong)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        )}
+      </svg>
 
-      {ticks.map((t, i) => (
-        <g key={i}>
-          <line x1={PAD.l} x2={W - PAD.r} y1={y(t)} y2={y(t)} stroke="var(--line-faint)" strokeWidth="1" />
-          <text x={PAD.l - 10} y={y(t) + 4} textAnchor="end" className={styles.axis}>{`$${fmtPrice(t)}`}</text>
-        </g>
-      ))}
-
-      {/* window-start baseline — the reference the run is measured against */}
-      <line x1={PAD.l} x2={W - PAD.r} y1={y(start)} y2={y(start)} stroke="var(--line-strong)" strokeWidth="1" strokeDasharray="2 4" />
-      <text x={W - PAD.r} y={y(start) - 6} textAnchor="end" className={styles.axisFaint}>{`start $${fmtPrice(start)}`}</text>
-
-      <path d={area} fill="url(#eqArea)" />
-      <path d={line} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-
-      <text x={PAD.l} y={H - 7} textAnchor="start" className={styles.axisFaint}>{fmtDay(points[0].t)}</text>
-      <text x={W - PAD.r} y={H - 7} textAnchor="end" className={styles.axisFaint}>{fmtDay(points[points.length - 1].t)}</text>
-
-      {/* cursor crosshair + marker + readout */}
-      <line x1={sx} x2={sx} y1={PAD.t} y2={PAD.t + ih} stroke="var(--line-strong)" strokeWidth="1" />
-      <circle cx={sx} cy={sy} r="4" fill="var(--bg-base)" stroke={stroke} strokeWidth="2" />
-      <g transform={`translate(${chipX.toFixed(1)},${PAD.t - 2})`}>
-        <rect width={chipW} height={chipH} rx="6" fill="var(--overlay)" stroke="var(--line)" />
-        <text x="11" y="19" className={styles.chipVal}>{`$${fmtPrice(points[sel].value)}`}</text>
-        <text x="11" y="35" className={styles.chipDate}>{fmtDay(points[sel].t)}{sel === points.length - 1 ? ' · now' : ''}</text>
-      </g>
-    </svg>
+      {scrubIdx == null ? (
+        <span className={styles.endDot} style={{left: pctX(x(points.length - 1)), top: pctY(y(last)), background: stroke}} aria-hidden="true" />
+      ) : (
+        <>
+          <span className={styles.scrubDot} style={{left: pctX(sx), top: pctY(sy), borderColor: stroke}} aria-hidden="true" />
+          <span className={styles.scrubTime} style={{left: `${labelLeft}%`}} aria-hidden="true">{fmtDay(points[sel].t)}</span>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -144,6 +138,7 @@ async function fetchLedger() {
 
 function Content() {
   const [state, setState] = useState({status: 'loading'});
+  const [scrubIdx, setScrubIdx] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -185,151 +180,167 @@ function Content() {
 
   const {account: a, positions, orders, closed, realizedTotal, history, asOf} = state.data;
 
-  // Alpaca's portfolio history pads the days before the account was funded with
-  // value:0. Drop those so the curve doesn't rocket up from $0 and the
-  // window-start baseline is a real equity level rather than zero.
+  // Drop Alpaca's pre-funding value:0 padding so the curve doesn't rocket from $0.
   const hist = (history || []).filter((p) => p && Number.isFinite(p.value) && p.value > 0);
+  const canScrub = hist.length > 1;
+  const sel = scrubIdx == null || !canScrub ? null : Math.min(scrubIdx, hist.length - 1);
 
   const equity = a.portfolioValue != null ? a.portfolioValue : a.equity;
   const unrealTotal = positions.reduce((s, p) => s + (p.unrealizedPL || 0), 0);
   const invested = positions.reduce((s, p) => s + Math.abs(p.marketValue || 0), 0);
   const exposure = equity ? (invested / equity) * 100 : null;
-
-  const startEq = hist.length ? hist[0].value : null;
-  const periodPL = (equity != null && startEq != null) ? equity - startEq : null;
-  const periodPct = (periodPL != null && startEq) ? (periodPL / startEq) * 100 : null;
+  const cash = a.cash != null ? a.cash : Math.max(0, (equity || 0) - invested);
 
   const wins = closed.filter((c) => c.pl > 0);
   const losses = closed.filter((c) => c.pl < 0);
   const winRate = closed.length ? (wins.length / closed.length) * 100 : null;
-  const mean = (arr) => (arr.length ? arr.reduce((s, c) => s + c.pl, 0) / arr.length : null);
-  const avgWin = mean(wins);
-  const avgLoss = mean(losses);
+  const best = closed.length ? closed.reduce((m, c) => (c.pl > m.pl ? c : m)) : null;
+  const worst = closed.length ? closed.reduce((m, c) => (c.pl < m.pl ? c : m)) : null;
+
+  // Hero: resting = live equity + today's move; scrubbing = the hovered point,
+  // its change measured from the window's open, labelled with that day.
+  const scrubbing = sel != null;
+  const heroValue = scrubbing ? hist[sel].value : equity;
+  const heroDelta = scrubbing
+    ? {v: hist[sel].value - hist[0].value, pct: hist[0].value ? ((hist[sel].value - hist[0].value) / hist[0].value) * 100 : null, label: fmtDay(hist[sel].t)}
+    : {v: a.dayPL, pct: a.dayPLpct, label: 'Today'};
 
   const metrics = [
-    {label: 'Realized P/L', value: signedMoney(realizedTotal), tone: dirCls(realizedTotal)},
-    {label: 'Unrealized P/L', value: signedMoney(unrealTotal), tone: dirCls(unrealTotal)},
-    {label: 'Round-trips', value: closed.length ? String(closed.length) : '—', sub: closed.length ? `${wins.length}W · ${losses.length}L` : null},
-    {label: 'Win rate', value: winRate != null ? pctWhole(winRate) : '—', tone: winRate != null && winRate >= 50 ? styles.up : ''},
-    {label: 'Avg win', value: avgWin != null ? signedMoney(avgWin) : '—', tone: avgWin != null ? styles.up : ''},
-    {label: 'Avg loss', value: avgLoss != null ? signedMoney(avgLoss) : '—', tone: avgLoss != null ? styles.down : ''},
+    {label: 'Realized P/L', val: signedMoney(realizedTotal), tone: dirCls(realizedTotal), sub: closed.length ? `${closed.length} round-trips` : null},
+    {label: 'Unrealized', val: signedMoney(unrealTotal), tone: dirCls(unrealTotal), sub: positions.length ? `${positions.length} open` : null},
+    {label: 'Win rate', val: winRate != null ? pctWhole(winRate) : '—', tone: winRate != null && winRate >= 50 ? styles.up : '', sub: closed.length ? `${wins.length}W · ${losses.length}L` : null},
+    {label: 'Exposure', val: pctWhole(exposure), tone: '', sub: `${money(invested)} in`},
+    {label: 'Best trade', val: best ? signedMoney(best.pl) : '—', tone: best && best.pl > 0 ? styles.up : '', sub: best ? best.symbol : null},
+    {label: 'Worst trade', val: worst ? signedMoney(worst.pl) : '—', tone: worst && worst.pl < 0 ? styles.down : '', sub: worst ? worst.symbol : null},
   ];
+
+  // Allocation segments — share of equity, with a neutral cash remainder so the
+  // bar sums to the whole account (not just what's invested).
+  const allocTotal = invested + Math.max(0, cash) || 1;
+  const segs = positions.map((p) => ({key: p.symbol, w: (Math.abs(p.marketValue || 0) / allocTotal) * 100, side: p.side}));
+  const cashW = (Math.max(0, cash) / allocTotal) * 100;
 
   return (
     <>
-      {/* ── Hero: the account, stated once ─────────────────────────────── */}
-      <section className={styles.hero}>
-        <div className={styles.heroMain}>
+      {/* ── The account: hero value, the line, the facts ───────────────── */}
+      <section className={styles.account}>
+        <div className={styles.acctPad}>
           <div className={styles.heroTag}>
-            <span className="p-pip" aria-hidden="true" />
-            Account equity · Alpaca paper
-          </div>
-          <div className={styles.heroEquity}>{money(equity)}</div>
-          <div className={styles.heroDeltas}>
-            <span className={`${styles.delta} ${dirCls(a.dayPL)}`}>
-              {signedMoney(a.dayPL)} <i>{signedPct(a.dayPLpct)}</i> <em>today</em>
+            <span className={styles.heroTagLeft}>
+              <span className="p-pip" aria-hidden="true" /> Account equity · Alpaca paper
             </span>
-            {periodPL != null && (
-              <span className={`${styles.delta} ${dirCls(periodPL)}`}>
-                {signedMoney(periodPL)} <i>{signedPct(periodPct)}</i> <em>since {fmtDay(hist[0].t)}</em>
-              </span>
-            )}
+            {asOf && <span className={styles.heroTagRight}>updated {fmtWhen(asOf, true)}</span>}
           </div>
-          <dl className={styles.rail}>
-            <div><dt>Cash</dt><dd>{money(a.cash)}</dd></div>
-            <div><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
-            <div><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
-            <div><dt>Positions</dt><dd>{positions.length}</dd></div>
-          </dl>
-        </div>
-        <div className={styles.heroChart}>
-          <div className={styles.chartHead}>
-            <span className={styles.chartTitle}>Equity curve</span>
-            {hist.length > 1 && (
-              <span className={styles.chartRange}>{fmtDay(hist[0].t)} – {fmtDay(hist[hist.length - 1].t)}</span>
-            )}
+
+          <div className={styles.heroValue}>{money(heroValue)}</div>
+
+          <div className={`${styles.heroDelta} ${heroDelta.v == null || heroDelta.v === 0 ? styles.flat : dirCls(heroDelta.v)}`}>
+            <span className={styles.caret} aria-hidden="true">{caret(heroDelta.v)}</span>
+            <span className={styles.deltaNum}>{signedMoney(heroDelta.v)}</span>
+            {heroDelta.pct != null && <span className={styles.deltaPct}>({signedPct(heroDelta.pct)})</span>}
+            <span className={styles.deltaLabel}>{heroDelta.label}</span>
           </div>
-          <EquityChart points={hist} />
         </div>
+
+        <EquityChart points={hist} scrubIdx={scrubIdx} onScrub={setScrubIdx} />
+
+        {/* range pills — v1 is fixed to the 3-month window; pills land with the Worker change */}
+        <div className={styles.pills} aria-hidden="true">
+          {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map((r) => (
+            <span key={r} className={`${styles.pill} ${r === '3M' ? styles.pillOn : styles.pillSoon}`}>{r}</span>
+          ))}
+          <span className={styles.pillNote}>3-month · daily</span>
+        </div>
+
+        <dl className={styles.facts}>
+          <div><dt>Cash</dt><dd>{money(cash)}</dd></div>
+          <div><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
+          <div><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
+          <div><dt>Positions</dt><dd>{positions.length}</dd></div>
+        </dl>
       </section>
 
-      {/* ── Performance: the analyst's read ────────────────────────────── */}
+      {/* ── The read: six stats that answer Robinhood's blind spots ─────── */}
       <section className={styles.section}>
-        <h2 className={styles.h2}>Performance <span className={styles.count}>the read</span></h2>
+        <h2 className={styles.h2}>The read <span className={styles.count}>performance</span></h2>
         <dl className={styles.metrics}>
           {metrics.map((m, i) => (
             <div key={i} className={styles.metric}>
               <dt className={styles.metricLabel}>{m.label}</dt>
-              <dd className={`${styles.metricVal} ${m.tone || ''}`}>
-                {m.value}{m.sub && <span className={styles.sub}> {m.sub}</span>}
-              </dd>
+              <dd className={`${styles.metricVal} ${m.tone || ''}`}>{m.val}</dd>
+              {m.sub && <div className={styles.metricSub}>{m.sub}</div>}
             </div>
           ))}
         </dl>
       </section>
 
-      {/* ── Open positions, with allocation weight ─────────────────────── */}
+      {/* ── Allocation: one segmented bar, cash included ────────────────── */}
       <section className={styles.section}>
-        <h2 className={styles.h2}>Open positions <span className={styles.count}>{positions.length}</span></h2>
+        <h2 className={styles.h2}>Allocation <span className={styles.count}>{pctWhole(exposure)} invested</span></h2>
+        <div className={styles.allocBar}>
+          {segs.map((s) => (
+            <span key={s.key} className={`${styles.allocSeg} ${s.side === 'short' ? styles.allocShort : ''}`} style={{width: `${s.w}%`}} title={`${s.key} ${s.w.toFixed(1)}%`} />
+          ))}
+          {cashW > 0 && <span className={styles.allocCash} style={{width: `${cashW}%`}} title={`Cash ${cashW.toFixed(1)}%`} />}
+        </div>
+        <div className={styles.allocLegend}>
+          {segs.map((s) => (
+            <span key={s.key} className={styles.legItem}>
+              <i className={`${styles.legDot} ${s.side === 'short' ? styles.legShort : ''}`} />{s.key} <b>{s.w.toFixed(0)}%</b>
+            </span>
+          ))}
+          {cashW > 0 && (
+            <span className={styles.legItem}><i className={`${styles.legDot} ${styles.legCash}`} />Cash <b>{cashW.toFixed(0)}%</b></span>
+          )}
+        </div>
+      </section>
+
+      {/* ── Holdings: a list, not a table ──────────────────────────────── */}
+      <section className={styles.section}>
+        <h2 className={styles.h2}>Holdings <span className={styles.count}>{positions.length} open</span></h2>
         {positions.length === 0 ? (
-          <p className={styles.empty}>No open positions right now.</p>
+          <p className={styles.empty}>No open positions — the account’s capital is parked in cash.</p>
         ) : (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Symbol</th>
-                  <th className={styles.num}>Qty</th>
-                  <th className={styles.num}>Avg entry</th>
-                  <th className={styles.num}>Last</th>
-                  <th className={styles.num}>Mkt value</th>
-                  <th className={styles.wtHead}>Weight</th>
-                  <th className={styles.num}>Unrealized P/L</th>
-                </tr>
-              </thead>
-              <tbody>
-                {positions.map((p) => {
-                  const w = invested ? (Math.abs(p.marketValue || 0) / invested) * 100 : 0;
-                  return (
-                    <tr key={p.symbol}>
-                      <td><span className={styles.sym}>{p.symbol}</span>{p.side === 'short' && <span className={styles.short}>SHORT</span>}</td>
-                      <td className={styles.num}>{p.qty}</td>
-                      <td className={styles.num}>{money(p.avgEntry)}</td>
-                      <td className={styles.num}>{money(p.price)}</td>
-                      <td className={styles.num}>{money(p.marketValue)}</td>
-                      <td className={styles.wtCell}>
-                        <span className={styles.wtBar}>
-                          <span className={`${styles.wtFill} ${p.side === 'short' ? styles.wtShort : ''}`} style={{width: `${Math.max(2, w).toFixed(1)}%`}} />
-                        </span>
-                        <span className={styles.wtPct}>{w.toFixed(0)}%</span>
-                      </td>
-                      <td className={`${styles.num} ${dirCls(p.unrealizedPL)}`}>{signedMoney(p.unrealizedPL)} <span className={styles.sub}>{signedPct(p.unrealizedPLpct)}</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className={styles.holdings}>
+            {positions.map((p) => {
+              const w = invested ? (Math.abs(p.marketValue || 0) / invested) * 100 : 0;
+              return (
+                <div key={p.symbol} className={styles.holding}>
+                  <div className={styles.hName}>
+                    <span className={styles.hSym}>{p.symbol}</span>
+                    {p.side === 'short' && <span className={styles.short}>SHORT</span>}
+                    <span className={styles.hSub}>{p.qty} sh · avg {money(p.avgEntry)}</span>
+                  </div>
+                  <div className={styles.hWeight}>
+                    <span className={styles.wtBar}><span className={`${styles.wtFill} ${p.side === 'short' ? styles.wtShort : ''}`} style={{width: `${Math.max(3, w)}%`}} /></span>
+                    <span className={styles.wtPct}>{w.toFixed(0)}%</span>
+                  </div>
+                  <div className={styles.hPrice}>
+                    <span className={styles.hLast}>{money(p.price)}</span>
+                    <span className={`${styles.hChg} ${dirCls(p.changeToday)}`}>{caret(p.changeToday)} {signedPct(p.changeToday)}</span>
+                  </div>
+                  <div className={styles.hVal}>
+                    <span className={styles.hMkt}>{money(p.marketValue)}</span>
+                    <span className={`${styles.hUnreal} ${dirCls(p.unrealizedPL)}`}>{signedMoney(p.unrealizedPL)}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>
 
-      {/* ── Closed round-trips (realized, FIFO) ────────────────────────── */}
+      {/* ── Receipts: closed round-trips + the order ledger, receding ───── */}
       <section className={styles.section}>
         <h2 className={styles.h2}>Closed round-trips <span className={`${styles.count} ${dirCls(realizedTotal)}`}>realized {signedMoney(realizedTotal)}</span></h2>
         {closed.length === 0 ? (
-          <p className={styles.empty}>No closed round-trips yet. Once a position is fully exited, its realized profit or loss appears here.</p>
+          <p className={styles.empty}>No closed round-trips yet. Once a position is fully exited, its realized profit or loss lands here.</p>
         ) : (
-          <div className={styles.tableWrap}>
+          <div className={`${styles.tableWrap} ${styles.receipts}`}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Symbol</th>
-                  <th>Side</th>
-                  <th className={styles.num}>Qty</th>
-                  <th className={styles.num}>Entry</th>
-                  <th className={styles.num}>Exit</th>
-                  <th className={styles.num}>Realized P/L</th>
-                  <th className={styles.num}>Closed</th>
+                  <th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th className={styles.num}>Entry</th><th className={styles.num}>Exit</th><th className={styles.num}>Realized P/L</th><th className={styles.num}>Closed</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,23 +361,16 @@ function Content() {
         )}
       </section>
 
-      {/* ── Order ledger (the receipts) ────────────────────────────────── */}
       <section className={styles.section}>
         <h2 className={styles.h2}>Order ledger <span className={styles.count}>{orders.length}</span></h2>
         {orders.length === 0 ? (
           <p className={styles.empty}>No orders yet.</p>
         ) : (
-          <div className={`${styles.tableWrap} ${styles.ledger}`}>
+          <div className={`${styles.tableWrap} ${styles.receipts}`}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Symbol</th>
-                  <th>Side</th>
-                  <th className={styles.num}>Qty</th>
-                  <th>Type</th>
-                  <th className={styles.num}>Fill price</th>
-                  <th>Status</th>
+                  <th>Time</th><th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th>Type</th><th className={styles.num}>Fill price</th><th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -389,7 +393,7 @@ function Content() {
 
       <p className={styles.foot}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
-        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · closed P/L is computed FIFO from fills ·
+        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · closed P/L is computed FIFO from fills · scrub the curve to read any day ·
         {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
       </p>
     </>
@@ -400,11 +404,11 @@ export default function PortfolioPage() {
   return (
     <Layout
       title="Portfolio"
-      description="A live, read-only view of my Alpaca paper-trading account — capital over time, open positions, closed positions with realized P/L, and full order history.">
+      description="A live, read-only view of my Alpaca paper-trading account — a scrubable equity curve, allocation, a performance read, open positions, closed round-trips, and the full order log.">
       <PageHeader
         eyebrow="Trading capital · Alpaca paper"
         title="Portfolio"
-        subtitle="A live, read-only view of the paper-trading account — capital over time, the performance read, open and closed positions, and the full order log. Play money; no real capital at risk."
+        subtitle="A live, read-only command deck for the paper-trading account — scrub the curve to read any day, then the allocation, the performance read, and every position and order. Play money; no real capital at risk."
       />
       <main className={`container ${styles.wrap}`}>
         <Content />

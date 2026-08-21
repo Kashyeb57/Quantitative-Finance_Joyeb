@@ -1,13 +1,14 @@
-/* Portfolio page — hero equity, performance read, positions, closed, ledger.
-   Built with hierarchy: one headline number + the curve dominate; the tables
-   recede as receipts. All colour from PHOSPHOR tokens (green = gain, amber =
-   loss); surfaces stay neutral graphite. */
+/* Portfolio — "Command Deck". A Robinhood-grade hero (giant equity value +
+   full-bleed scrubable line) over an analytics layer RH never ships: a
+   segmented allocation bar, a six-stat read, and holdings as a list. All colour
+   from PHOSPHOR tokens — green = gain, amber = loss, surfaces neutral graphite. */
 
 .wrap {
   padding: 2.25rem 1rem 4.5rem;
+  max-width: 1120px;
 }
 
-/* ── Loading / offline states ───────────────────────────────────────── */
+/* ── Loading / offline ──────────────────────────────────────────────── */
 .loading {
   display: flex;
   align-items: center;
@@ -17,7 +18,6 @@
   font-size: 0.9rem;
   padding: 2.5rem 0;
 }
-
 .notice {
   display: flex;
   flex-direction: column;
@@ -46,89 +46,154 @@
 .notice strong { color: var(--tx-primary); font-size: 1.02rem; }
 .notice span { color: var(--tx-secondary); font-size: 0.9rem; line-height: 1.6; }
 
-/* ── Hero: the account, stated once ─────────────────────────────────── */
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: stretch;
+/* ── The account panel: hero + line + facts, one unit ───────────────── */
+.account {
   margin-top: 0.5rem;
-}
-
-.heroMain {
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 1.6rem;
   border: 1px solid var(--line);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   background: var(--surface);
   box-shadow: var(--e1);
+  overflow: hidden;
 }
+.acctPad { padding: 1.5rem 1.6rem 0.4rem; }
+
 .heroTag {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 1rem;
   font-family: var(--ff-mono);
   font-size: 0.66rem;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--tx-muted);
 }
-.heroEquity {
+.heroTagLeft { display: inline-flex; align-items: center; gap: 0.5rem; }
+.heroTagRight { color: var(--tx-faint); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+
+.heroValue {
   font-family: var(--ff-display);
-  font-size: clamp(2.6rem, 5.5vw, 3.5rem);
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums slashed-zero;
-  margin: 0.5rem 0 0.7rem;
   color: var(--tx-primary);
+  white-space: nowrap;
+  margin: 0.45rem 0 0.55rem;
 }
 
-.heroDeltas {
+.heroDelta {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding-bottom: 1.1rem;
-  border-bottom: 1px solid var(--line);
-}
-.delta {
+  align-items: baseline;
+  gap: 0.4rem;
   font-family: var(--ff-mono);
-  font-size: 0.98rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--tx-secondary);
+}
+.caret { display: inline-block; width: 0.85em; text-align: center; font-size: 0.85em; }
+.deltaNum { font-weight: 700; }
+.deltaPct { font-weight: 600; opacity: 0.9; }
+.deltaLabel { color: var(--tx-muted); font-weight: 500; font-size: 0.8rem; margin-left: 0.15rem; }
+.heroDelta.up { color: var(--g-300); }
+.heroDelta.down { color: var(--amber-500); }
+.heroDelta.flat { color: var(--tx-secondary); }
+.heroDelta.up .deltaLabel,
+.heroDelta.down .deltaLabel,
+.heroDelta.flat .deltaLabel { color: var(--tx-muted); }
+
+/* ── The line ───────────────────────────────────────────────────────── */
+.chartBox {
+  position: relative;
+  width: 100%;
+  height: clamp(180px, 32vw, 264px);
+  margin-top: 0.6rem;
+  cursor: crosshair;
+  touch-action: pan-y;
+  user-select: none;
+}
+.chart { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.endDot {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 4px var(--surface);
+  pointer-events: none;
+}
+.scrubDot {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--bg-base);
+  border: 2px solid var(--g-500);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px var(--surface);
+  pointer-events: none;
+}
+.scrubTime {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  font-family: var(--ff-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+  color: var(--tx-secondary);
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+  pointer-events: none;
   font-variant-numeric: tabular-nums;
 }
-.delta i { font-style: normal; opacity: 0.9; margin-left: 0.15rem; }
-.delta em {
-  font-style: normal;
+.chartFlat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: clamp(160px, 26vw, 220px);
+  padding: 1rem 2rem;
   color: var(--tx-muted);
-  font-weight: 500;
-  font-size: 0.78rem;
-  margin-left: 0.35rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
-/* secondary account facts — hairline-divided, subordinate to the number */
-.rail {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  margin: 1.1rem 0 0;
-}
-.rail > div {
-  padding: 0.35rem 0.9rem;
-  border-left: 1px solid var(--line);
-}
-.rail > div:nth-child(2n+1) { border-left: 0; padding-left: 0; }
-.rail > div:nth-child(n+3) { margin-top: 0.7rem; }
-.rail dt {
+/* ── Range pills (v1: 3M fixed; the rest arrive with the Worker change) ─ */
+.pills {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.55rem 1.6rem 0.75rem;
   font-family: var(--ff-mono);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+.pill { padding: 0.1rem 0.15rem; color: var(--tx-muted); }
+.pillOn { color: var(--tx-primary); box-shadow: inset 0 -2px 0 var(--g-500); }
+.pillSoon { color: var(--tx-faint); }
+.pillNote { margin-left: auto; color: var(--tx-faint); letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.6rem; }
+
+/* ── Facts rail ─────────────────────────────────────────────────────── */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  border-top: 1px solid var(--line);
+  background: var(--bg-sunken);
+}
+.facts > div { padding: 0.85rem 1.1rem; border-left: 1px solid var(--line); }
+.facts > div:first-child { border-left: 0; }
+.facts dt {
+  font-family: var(--ff-mono);
+  font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tx-muted);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
 }
-.rail dd {
+.facts dd {
   margin: 0;
   font-family: var(--ff-mono);
   font-size: 1.02rem;
@@ -137,59 +202,8 @@
   color: var(--tx-primary);
 }
 
-/* ── Equity chart panel ─────────────────────────────────────────────── */
-.heroChart {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 1.1rem 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  box-shadow: var(--e1);
-  min-width: 0;
-}
-.chartHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.35rem;
-}
-.chartTitle {
-  font-family: var(--ff-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--tx-muted);
-}
-.chartRange {
-  font-family: var(--ff-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  color: var(--tx-faint);
-  font-variant-numeric: tabular-nums;
-}
-.chart {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: auto;
-  cursor: crosshair;
-}
-.axis { fill: var(--tx-muted); font-family: var(--ff-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
-.axisFaint { fill: var(--tx-faint); font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
-.chipVal { fill: var(--tx-primary); font-family: var(--ff-mono); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.chipDate { fill: var(--tx-muted); font-family: var(--ff-mono); font-size: 10.5px; }
-.chartEmpty {
-  padding: 3rem 1rem;
-  text-align: center;
-  color: var(--tx-muted);
-  font-size: 0.88rem;
-}
-
 /* ── Sections & headings ────────────────────────────────────────────── */
 .section { margin-top: 2.5rem; }
-
 .h2 {
   font-family: var(--ff-display);
   font-size: 1.35rem;
@@ -209,7 +223,7 @@
   font-weight: 500;
 }
 
-/* ── Performance read — one surface, internal hairline dividers ─────── */
+/* ── The read (6-up) ────────────────────────────────────────────────── */
 .metrics {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -220,14 +234,11 @@
   box-shadow: var(--e1);
   overflow: hidden;
 }
-.metric {
-  padding: 0.95rem 1.15rem;
-  border-left: 1px solid var(--line);
-}
+.metric { padding: 0.95rem 1.1rem; border-left: 1px solid var(--line); }
 .metric:first-child { border-left: 0; }
 .metricLabel {
   font-family: var(--ff-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tx-muted);
@@ -236,17 +247,95 @@
 .metricVal {
   margin: 0;
   font-family: var(--ff-display);
-  font-size: 1.3rem;
+  font-size: 1.28rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums slashed-zero;
   color: var(--tx-primary);
   white-space: nowrap;
 }
+.metricSub {
+  margin-top: 0.2rem;
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  color: var(--tx-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.sub { font-family: var(--ff-mono); font-size: 0.74rem; font-weight: 600; opacity: 0.82; }
+/* ── Allocation — one segmented bar ─────────────────────────────────── */
+.allocBar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  border-radius: var(--r-full);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.allocSeg { height: 100%; background: var(--g-500); box-shadow: inset -2px 0 0 var(--surface); }
+.allocSeg:last-child { box-shadow: none; }
+.allocShort { background: var(--amber-500); }
+.allocCash { height: 100%; background: var(--tx-faint); }
+.allocLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin-top: 0.7rem;
+  font-family: var(--ff-mono);
+  font-size: 0.76rem;
+  color: var(--tx-secondary);
+}
+.legItem { display: inline-flex; align-items: center; gap: 0.4rem; }
+.legItem b { color: var(--tx-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.legDot { width: 8px; height: 8px; border-radius: 2px; background: var(--g-500); }
+.legShort { background: var(--amber-500); }
+.legCash { background: var(--tx-faint); }
 
-/* ── Tables ─────────────────────────────────────────────────────────── */
+/* ── Holdings list ──────────────────────────────────────────────────── */
+.holdings {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--e1);
+  padding: 0 1.1rem;
+}
+.holding {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) 150px minmax(84px, 1fr) minmax(96px, 1fr);
+  gap: 0.5rem 1.1rem;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--line-faint);
+}
+.holding:last-child { border-bottom: 0; }
+.hName { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.hSym { font-family: var(--ff-mono); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--tx-primary); }
+.hSub { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--tx-muted); font-variant-numeric: tabular-nums; }
+.short {
+  align-self: flex-start;
+  margin-top: 0.05rem;
+  font-family: var(--ff-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--amber-500);
+  border: 1px solid var(--amber-500);
+  border-radius: var(--r-full);
+  padding: 0 0.35rem;
+}
+.hWeight { display: flex; align-items: center; gap: 0.5rem; }
+.wtBar { position: relative; flex: 1; height: 6px; min-width: 40px; border-radius: var(--r-full); background: var(--line); overflow: hidden; }
+.wtFill { display: block; height: 100%; border-radius: var(--r-full); background: var(--g-500); }
+.wtShort { background: var(--amber-500); }
+.wtPct { font-family: var(--ff-mono); font-size: 0.72rem; color: var(--tx-secondary); font-variant-numeric: tabular-nums; min-width: 2.1rem; text-align: right; }
+.hPrice, .hVal { display: flex; flex-direction: column; gap: 0.15rem; align-items: flex-end; font-family: var(--ff-mono); font-variant-numeric: tabular-nums; }
+.hLast, .hMkt { font-size: 0.9rem; color: var(--tx-primary); }
+.hChg, .hUnreal { font-size: 0.72rem; }
+
+/* ── Receipts (closed + ledger), receding ───────────────────────────── */
 .tableWrap {
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -254,16 +343,11 @@
   background: var(--surface);
   box-shadow: var(--e1);
 }
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--ff-mono);
-  font-size: 0.84rem;
-}
+.table { width: 100%; border-collapse: collapse; font-family: var(--ff-mono); font-size: 0.84rem; }
 .table th {
   text-align: left;
   padding: 0.6rem 1rem;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -272,60 +356,14 @@
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
-.table td {
-  padding: 0.58rem 1rem;
-  border-bottom: 1px solid var(--line-faint);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
+.table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--line-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table tbody tr:last-child td { border-bottom: 0; }
 .table tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .num { text-align: right; }
 .table th.num { text-align: right; }
 .dim { color: var(--tx-muted); }
+.sub { font-family: var(--ff-mono); font-size: 0.74rem; font-weight: 600; opacity: 0.82; }
 .sym { font-weight: 700; letter-spacing: 0.03em; color: var(--tx-primary); }
-.short {
-  margin-left: 0.4rem;
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--amber-500);
-  border: 1px solid var(--amber-500);
-  border-radius: var(--r-full);
-  padding: 0 0.35rem;
-}
-
-/* allocation weight — the bar IS the data */
-.wtHead { text-align: left; width: 132px; }
-.wtCell {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  min-width: 120px;
-}
-.wtBar {
-  position: relative;
-  flex: 1;
-  height: 6px;
-  min-width: 44px;
-  border-radius: var(--r-full);
-  background: var(--line);
-  overflow: hidden;
-}
-.wtFill {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-full);
-  background: var(--g-500);
-}
-.wtShort { background: var(--amber-500); }
-.wtPct {
-  font-size: 0.72rem;
-  color: var(--tx-secondary);
-  font-variant-numeric: tabular-nums;
-  min-width: 2.2rem;
-  text-align: right;
-}
-
 .tagBuy, .tagSell {
   font-size: 0.66rem;
   font-weight: 700;
@@ -336,23 +374,14 @@
 }
 .tagBuy { color: var(--g-300); background: var(--g-wash); }
 .tagSell { color: var(--amber-500); background: var(--amber-wash); }
-
-.status {
-  font-size: 0.64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--tx-muted);
-}
+.status { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--tx-muted); }
 .st_filled { color: var(--g-300); }
 .st_canceled, .st_expired, .st_rejected { color: var(--tx-faint); }
 .st_new, .st_accepted, .st_partially_filled { color: var(--amber-500); }
+.receipts .table { font-size: 0.79rem; }
+.receipts .table td { padding: 0.5rem 1rem; color: var(--tx-secondary); }
 
-/* the ledger recedes — it's the receipts, not the headline */
-.ledger .table { font-size: 0.79rem; }
-.ledger .table td { padding: 0.5rem 1rem; color: var(--tx-secondary); }
-
-/* gain = green, loss = amber (PHOSPHOR: amber is the negative ink) */
+/* gain = green, loss = amber; zero is neutral (handled in JS) */
 .up { color: var(--g-300); }
 .down { color: var(--amber-500); }
 
@@ -375,14 +404,27 @@
 
 /* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; }
   .metrics { grid-template-columns: repeat(3, 1fr); }
   .metric:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
   .metric:nth-child(3n+1) { border-left: 0; }
 }
-@media (max-width: 560px) {
+@media (max-width: 680px) {
+  .acctPad { padding: 1.25rem 1.15rem 0.4rem; }
+  .pills { padding-left: 1.15rem; padding-right: 1.15rem; }
+  .facts { grid-template-columns: repeat(2, 1fr); }
+  .facts > div:nth-child(3), .facts > div:nth-child(4) { border-top: 1px solid var(--line); }
+  .facts > div:nth-child(2n+1) { border-left: 0; }
+  /* holdings collapse to two columns: name/weight left, price/value right */
+  .holding { grid-template-columns: 1fr auto; gap: 0.3rem 1rem; }
+  .hName { order: 1; }
+  .hPrice { order: 2; }
+  .hWeight { order: 3; }
+  .hVal { order: 4; }
+}
+@media (max-width: 520px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
   .metric { border-bottom: 1px solid var(--line); }
   .metric:nth-child(2n+1) { border-left: 0; }
   .metricVal { font-size: 1.15rem; }
+  .heroValue { font-size: clamp(2.1rem, 11vw, 2.8rem); }
 }
