@@ -49,14 +49,15 @@
 /* ── The Dashboard Layout ───────────────────────────────────────────── */
 .dashboard {
   display: grid;
-  grid-template-columns: 320px 1fr 360px;
-  grid-template-areas: "left center right";
+  grid-template-columns: 360px 1fr;
+  grid-template-areas:
+    "hero hero"
+    "left right";
   gap: 1.5rem;
   margin-top: 1rem;
 }
 
-.centerCol { grid-area: center; display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
-.heroArea { padding: 1.6rem 1.7rem 0.5rem; }
+.heroArea { grid-area: hero; padding: 1.6rem 1.7rem 0.5rem; }
 .leftCol { grid-area: left; display: flex; flex-direction: column; gap: 1.5rem; }
 .rightCol { grid-area: right; display: flex; flex-direction: column; gap: 1.5rem; }
 
@@ -460,19 +461,11 @@
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────── */
-@media (max-width: 1200px) {
-  .dashboard {
-    grid-template-columns: 320px 1fr;
-    grid-template-areas:
-      "left center"
-      "right right";
-  }
-}
 @media (max-width: 960px) {
   .dashboard {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "center"
+      "hero"
       "left"
       "right";
   }

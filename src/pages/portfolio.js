@@ -357,21 +357,44 @@ function Content() {
 
   return (
     <div className={styles.dashboard}>
-      {/* ── Left Column: Trade & Allocation ── */}
-      <div className={styles.leftCol}>
-        {!owner ? (
-          <div className={`p-card ${styles.tradeCard}`} data-reveal style={{'--i': 0}}>
-            <div className={styles.tradeHead}>
-              <h2 className={styles.h2}>Trade <span className={styles.count}>owner · paper</span></h2>
+      {/* ── Top Hero: Equity & Chart ── */}
+      <div className={`p-card ${styles.heroArea}`} data-reveal style={{'--i': 0}}>
+        <div className={styles.heroHeader}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroTag}>
+              <span className={styles.heroTagLeft}>
+                <span className="p-pip" aria-hidden="true" /> Account equity · Alpaca paper
+              </span>
+              {asOf && <span className={styles.heroTagRight}>updated {fmtWhen(asOf, true)}</span>}
             </div>
-            <div style={{padding: '1rem 1.7rem 1.6rem'}}>
-              <button className={styles.submitBtn} onClick={unlock}>Unlock Terminal</button>
+            <div className={styles.heroValue}>{money(heroValue)}</div>
+            <div className={`${styles.heroDelta} ${heroDelta.v == null || heroDelta.v === 0 ? styles.flat : dirCls(heroDelta.v)}`}>
+              <span className={styles.caret} aria-hidden="true">{caret(heroDelta.v)}</span>
+              <span className={styles.deltaNum}>{signedMoney(heroDelta.v)}</span>
+              {heroDelta.pct != null && <span className={styles.deltaPct}>({signedPct(heroDelta.pct)})</span>}
+              <span className={styles.deltaLabel}>{heroDelta.label}</span>
             </div>
           </div>
-        ) : (
-          <TradePanel token={token} symbols={positions.map((p) => p.symbol)} onPlaced={() => pullRef.current && pullRef.current()} onLock={lock} />
-        )}
+          <div className={styles.factsRail}>
+            <div className={styles.factItem}><dt>Cash</dt><dd>{money(cash)}</dd></div>
+            <div className={styles.factItem}><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
+            <div className={styles.factItem}><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
+            <div className={styles.factItem}><dt>Positions</dt><dd>{positions.length}</dd></div>
+          </div>
+        </div>
 
+        <EquityChart points={hist} scrubIdx={scrubIdx} onScrub={setScrubIdx} />
+
+        <div className={styles.pills} aria-hidden="true">
+          {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map((r) => (
+            <span key={r} className={`${styles.pill} ${r === '3M' ? styles.pillOn : styles.pillSoon}`}>{r}</span>
+          ))}
+          <span className={styles.pillNote}>3-month · daily</span>
+        </div>
+      </div>
+
+      {/* ── Left Column: Allocation & Holdings ── */}
+      <div className={styles.leftCol}>
         <div className={`p-card ${styles.allocCard}`} data-reveal style={{'--i': 1}}>
           <h2 className={styles.h2}>Allocation <span className={styles.count}>{pctWhole(exposure)} invested</span></h2>
           <div className={styles.allocBar}>
@@ -391,46 +414,8 @@ function Content() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* ── Center Column: Hero & Holdings ── */}
-      <div className={styles.centerCol}>
-        <div className={`p-card ${styles.heroArea}`} data-reveal style={{'--i': 2}}>
-          <div className={styles.heroHeader}>
-            <div className={styles.heroLeft}>
-              <div className={styles.heroTag}>
-                <span className={styles.heroTagLeft}>
-                  <span className="p-pip" aria-hidden="true" /> Account equity · Alpaca paper
-                </span>
-                {asOf && <span className={styles.heroTagRight}>updated {fmtWhen(asOf, true)}</span>}
-              </div>
-              <div className={styles.heroValue}>{money(heroValue)}</div>
-              <div className={`${styles.heroDelta} ${heroDelta.v == null || heroDelta.v === 0 ? styles.flat : dirCls(heroDelta.v)}`}>
-                <span className={styles.caret} aria-hidden="true">{caret(heroDelta.v)}</span>
-                <span className={styles.deltaNum}>{signedMoney(heroDelta.v)}</span>
-                {heroDelta.pct != null && <span className={styles.deltaPct}>({signedPct(heroDelta.pct)})</span>}
-                <span className={styles.deltaLabel}>{heroDelta.label}</span>
-              </div>
-            </div>
-            <div className={styles.factsRail}>
-              <div className={styles.factItem}><dt>Cash</dt><dd>{money(cash)}</dd></div>
-              <div className={styles.factItem}><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
-              <div className={styles.factItem}><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
-              <div className={styles.factItem}><dt>Positions</dt><dd>{positions.length}</dd></div>
-            </div>
-          </div>
-
-          <EquityChart points={hist} scrubIdx={scrubIdx} onScrub={setScrubIdx} />
-
-          <div className={styles.pills} aria-hidden="true">
-            {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map((r) => (
-              <span key={r} className={`${styles.pill} ${r === '3M' ? styles.pillOn : styles.pillSoon}`}>{r}</span>
-            ))}
-            <span className={styles.pillNote}>3-month · daily</span>
-          </div>
-        </div>
-
-        <div className={`p-card ${styles.holdingsCard}`} data-reveal style={{'--i': 3}}>
+        <div className={`p-card ${styles.holdingsCard}`} data-reveal style={{'--i': 2}}>
           <h2 className={styles.h2}>Holdings <span className={styles.count}>{positions.length} open</span></h2>
           {livePos.length === 0 ? (
             <p className={styles.empty}>No open positions — the account’s capital is parked in cash.</p>
@@ -465,9 +450,11 @@ function Content() {
         </div>
       </div>
 
-      {/* ── Right Column: Performance & Ledger ── */}
+      {/* ── Right Column: Trade (owner) · Performance · Ledger ── */}
       <div className={styles.rightCol}>
-        <div className={`p-card ${styles.metricsCard}`} data-reveal style={{'--i': 4}}>
+        {owner && <TradePanel token={token} symbols={positions.map((p) => p.symbol)} onPlaced={() => pullRef.current && pullRef.current()} onLock={lock} />}
+
+        <div className={`p-card ${styles.metricsCard}`} data-reveal style={{'--i': 3}}>
           <h2 className={styles.h2}>The read <span className={styles.count}>performance</span></h2>
           <dl className={styles.metrics}>
             {metrics.map((m, i) => (
@@ -480,7 +467,7 @@ function Content() {
           </dl>
         </div>
 
-        <div className={`p-card ${styles.ledgerCard}`} data-reveal style={{'--i': 5}}>
+        <div className={`p-card ${styles.ledgerCard}`} data-reveal style={{'--i': 4}}>
           <div className={styles.ledgerHeader}>
             <h2 className={styles.h2}>Ledger</h2>
             <div className={styles.ledgerTabs}>
@@ -548,7 +535,7 @@ function Content() {
         </div>
       </div>
 
-      <p className={styles.foot} data-reveal style={{'--i': 6}}>
+      <p className={styles.foot} data-reveal style={{'--i': 5}}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
         {asOf && <> · updated {fmtWhen(asOf, true)}</>} · live prices stream per held symbol · scrub the curve to read any day ·
         {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
