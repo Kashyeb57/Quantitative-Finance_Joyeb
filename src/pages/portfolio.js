@@ -2,8 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import PageHeader from '@site/src/components/PageHeader';
-import {fmtPrice, isCrypto} from '@site/src/components/Terminal/marketData';
-import {subscribeStockTrades} from '@site/src/components/Terminal/stockStream';
+import {fmtPrice, isCrypto, fetchSnapshot} from '@site/src/components/Terminal/marketData';
 import {SECTIONS} from '@site/src/components/Terminal/tickers';
 import styles from './portfolio.module.css';
 
@@ -251,18 +250,35 @@ function Content() {
     return () => { cancelled = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVis); };
   }, []);
 
-  // Live prices: one trade stream per held symbol, ticking equity + marks.
+  // Live prices: poll a cached snapshot for each held symbol every few seconds
+  // and roll it into equity + marks. (Websocket streaming was dropped — Alpaca's
+  // free plan caps live data at ONE connection, so per-symbol sockets hit a 406
+  // "connection limit exceeded". Cached snapshot GETs have no such limit and
+  // degrade to a keyless fallback if the Worker is down.)
   const okData = state.status === 'ok' ? state.data : null;
   const symbolsKey = okData ? okData.positions.map((p) => p.symbol).sort().join(',') : '';
   useEffect(() => {
     if (!symbolsKey) return undefined;
     const syms = symbolsKey.split(',').filter(Boolean);
-    const unsubs = syms.map((sym) =>
-      subscribeStockTrades(sym, ({price}) => {
-        setLivePrices((prev) => (prev[sym] === price ? prev : {...prev, [sym]: price}));
-      })
-    );
-    return () => unsubs.forEach((u) => u && u());
+    let cancelled = false;
+    async function tick() {
+      if (document.visibilityState === 'hidden') return;
+      const quotes = await Promise.all(syms.map(async (sym) => {
+        try { const s = await fetchSnapshot(sym); return [sym, s && s.last]; } catch (_) { return [sym, null]; }
+      }));
+      if (cancelled) return;
+      setLivePrices((prev) => {
+        let changed = false;
+        const next = {...prev};
+        for (const [sym, price] of quotes) {
+          if (price != null && next[sym] !== price) { next[sym] = price; changed = true; }
+        }
+        return changed ? next : prev;
+      });
+    }
+    tick();
+    const timer = setInterval(tick, 5000);
+    return () => { cancelled = true; clearInterval(timer); };
   }, [symbolsKey]);
 
   const unlock = () => {
@@ -537,7 +553,7 @@ function Content() {
 
       <p className={styles.foot} data-reveal style={{'--i': 5}}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
-        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · live prices stream per held symbol · scrub the curve to read any day ·
+        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · live prices refresh every few seconds · scrub the curve to read any day ·
         {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
         {owner ? <> · <button className={styles.ownerLink} onClick={lock}>lock trading</button></> : <> · <button className={styles.ownerLink} onClick={unlock}>owner access</button></>}
       </p>
