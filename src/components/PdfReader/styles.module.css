@@ -30,6 +30,33 @@
   white-space: nowrap;
 }
 
+.pageJumpForm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pageInput {
+  width: 3.5rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-color);
+  color: var(--ifm-color-emphasis-800);
+  border-radius: 4px;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.pageInput:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+}
+
+.pageCount {
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
 .group {
   display: inline-flex;
   gap: 0.4rem;

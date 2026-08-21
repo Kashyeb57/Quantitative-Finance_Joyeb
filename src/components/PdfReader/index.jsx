@@ -70,6 +70,7 @@ export default function PdfReader({ url, title }) {
   const [scale, setScale] = useState(1.2);
   const [progress, setProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [jumpPage, setJumpPage] = useState('');
   const baseSize = useRef(null); // { w, h } of page 1 at scale 1
   const rootRef = useRef(null);
   const scrollRef = useRef(null);
@@ -163,6 +164,17 @@ export default function PdfReader({ url, title }) {
     }
   };
 
+  const handlePageJump = (e) => {
+    e.preventDefault();
+    const pageNum = parseInt(jumpPage, 10);
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= numPages) {
+      const pageEl = scrollRef.current?.querySelector(`[data-page="${pageNum}"]`);
+      if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   if (status === 'error') {
     return (
       <div className={styles.center}>
@@ -185,7 +197,24 @@ export default function PdfReader({ url, title }) {
   return (
     <div className={styles.reader} ref={rootRef}>
       <div className={styles.controls}>
-        <span className={styles.pages}>{status === 'ready' ? `${numPages} pages` : 'Loading…'}</span>
+        <span className={styles.pages}>
+          {status === 'ready' ? (
+            <form onSubmit={handlePageJump} className={styles.pageJumpForm}>
+              <input
+                type="number"
+                min="1"
+                max={numPages}
+                value={jumpPage}
+                onChange={(e) => setJumpPage(e.target.value)}
+                placeholder="Page"
+                className={styles.pageInput}
+              />
+              <span className={styles.pageCount}>/ {numPages}</span>
+            </form>
+          ) : (
+            'Loading…'
+          )}
+        </span>
 
         <span className={styles.group}>
           <button onClick={() => setScale(fitScale('width'))} disabled={status !== 'ready'}>
