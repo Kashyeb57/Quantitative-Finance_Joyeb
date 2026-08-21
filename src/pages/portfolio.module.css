@@ -573,6 +573,19 @@
 .tradeInput::placeholder { color: var(--tx-faint); }
 .tradeInput:focus { outline: none; border-color: var(--g-500); box-shadow: 0 0 0 3px var(--g-wash); }
 
+.tradeSelect {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 1.9rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%236e6e76' stroke-width='1.5'><path d='M1 1.5 6 6.5 11 1.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 11px;
+}
+.tradeSelect option { background: var(--overlay); color: var(--tx-primary); }
+.tradeSelect optgroup { background: var(--surface); color: var(--tx-muted); font-style: normal; }
+
 .submitBtn {
   grid-column: 1 / -1;
   font-family: var(--ff-mono);

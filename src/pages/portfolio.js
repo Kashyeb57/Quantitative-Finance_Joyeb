@@ -2,8 +2,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import PageHeader from '@site/src/components/PageHeader';
-import {fmtPrice} from '@site/src/components/Terminal/marketData';
+import {fmtPrice, isCrypto} from '@site/src/components/Terminal/marketData';
 import {subscribeStockTrades} from '@site/src/components/Terminal/stockStream';
+import {SECTIONS} from '@site/src/components/Terminal/tickers';
 import styles from './portfolio.module.css';
 
 /*
@@ -19,7 +20,12 @@ import styles from './portfolio.module.css';
 
 const POLL_MS = 30000;
 const TRADE_TOKEN_KEY = 'pf_trade_token';
-const WATCHLIST = ['AMD', 'MU', 'SNDK', 'META', 'COIN', 'SOXL', 'NVDA'];
+// Tradeable universe = the terminal's sectors, minus crypto (the equity order
+// path can't place -USD pairs). Grouped so the picker mirrors the terminal.
+const TRADE_SECTIONS = SECTIONS
+  .map((s) => ({name: s.name, tickers: s.tickers.filter((t) => !isCrypto(t))}))
+  .filter((s) => s.tickers.length);
+const DEFAULT_SYMBOL = 'AMD';
 const PENDING = ['new', 'accepted', 'partially_filled', 'pending_new', 'held', 'accepted_for_bidding'];
 
 const money = (v) => (v == null || Number.isNaN(v) ? '—' : `$${fmtPrice(v)}`);
@@ -151,9 +157,14 @@ function EquityChart({points, scrubIdx, onScrub}) {
 
 /* Owner-only buy/sell. Hidden from visitors; gated for real by the Worker. */
 function TradePanel({token, symbols, onPlaced, onLock}) {
-  const [form, setForm] = useState({symbol: WATCHLIST[0], side: 'buy', qty: ''});
+  const [form, setForm] = useState({symbol: DEFAULT_SYMBOL, side: 'buy', qty: ''});
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  // Held symbols not already in a sector (e.g. an older buy) still need a home,
+  // so you can always sell what you hold.
+  const listed = new Set(TRADE_SECTIONS.flatMap((s) => s.tickers));
+  const heldExtra = symbols.filter((s) => !listed.has(s));
 
   const submit = async (e) => {
     e.preventDefault();
@@ -183,10 +194,18 @@ function TradePanel({token, symbols, onPlaced, onLock}) {
           <button type="button" className={`${styles.sideBtn} ${form.side === 'buy' ? styles.sideBuy : ''}`} onClick={() => setForm((f) => ({...f, side: 'buy'}))}>Buy</button>
           <button type="button" className={`${styles.sideBtn} ${form.side === 'sell' ? styles.sideSell : ''}`} onClick={() => setForm((f) => ({...f, side: 'sell'}))}>Sell</button>
         </div>
-        <input list="pf-watchlist" className={styles.tradeInput} value={form.symbol} onChange={(e) => setForm((f) => ({...f, symbol: e.target.value.toUpperCase()}))} placeholder="Symbol" aria-label="Symbol" spellCheck="false" autoCapitalize="characters" />
-        <datalist id="pf-watchlist">
-          {[...new Set([...symbols, ...WATCHLIST])].map((s) => <option key={s} value={s} />)}
-        </datalist>
+        <select className={`${styles.tradeInput} ${styles.tradeSelect}`} value={form.symbol} onChange={(e) => setForm((f) => ({...f, symbol: e.target.value}))} aria-label="Symbol">
+          {heldExtra.length > 0 && (
+            <optgroup label="Holdings">
+              {heldExtra.map((t) => <option key={t} value={t}>{t}</option>)}
+            </optgroup>
+          )}
+          {TRADE_SECTIONS.map((s) => (
+            <optgroup key={s.name} label={s.name}>
+              {s.tickers.map((t) => <option key={t} value={t}>{t}</option>)}
+            </optgroup>
+          ))}
+        </select>
         <input className={styles.tradeInput} type="number" min="1" step="1" value={form.qty} onChange={(e) => setForm((f) => ({...f, qty: e.target.value}))} placeholder="Shares" aria-label="Shares" />
         <button className={`${styles.submitBtn} ${form.side === 'sell' ? styles.submitSell : ''}`} type="submit" disabled={busy}>
           {busy ? 'Placing…' : `${form.side === 'buy' ? 'Buy' : 'Sell'} at market`}

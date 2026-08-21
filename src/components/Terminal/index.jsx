@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
+import { SECTIONS } from './tickers';
 import styles from './styles.module.css';
 
 /*
@@ -12,16 +13,6 @@ import styles from './styles.module.css';
  * pick a symbol → the chart + news follow it. Every symbol supports every
  * timeframe offered by the chart (1m · 3m · 5m · 15m · 1H · 1D).
  */
-
-const SECTIONS = [
-  { name: 'Semis',        tickers: ['NVDA', 'AMD', 'AVGO', 'TSM', 'ASML', 'MU', 'QCOM', 'MRVL', 'ARM', 'AMAT', 'TXN', 'INTC', 'SNDK'] },
-  { name: 'Software',     tickers: ['MSFT', 'GOOGL', 'META', 'AMZN', 'ORCL', 'NOW', 'PLTR', 'IBM', 'BABA', 'NOK'] },
-  { name: 'Crypto',       tickers: ['COIN', 'MSTR', 'CRCL', 'BMNR', 'BTC-USD'] },
-  { name: 'Space',        tickers: ['SPCX', 'RKLB', 'ASTS', 'LUNR', 'RDW', 'PL'] },
-  { name: 'Neocloud',     tickers: ['CRWV', 'NBIS', 'IREN', 'APLD', 'WULF'] },
-  { name: 'EV & Battery', tickers: ['TSLA', 'QS', 'ABAT'] },
-  { name: 'ETFs',         tickers: ['SPY', 'QQQ', 'IWM', 'SOXL'] },
-];
 
 const tickerLabel = (t) => (t === 'BTC-USD' ? '₿ BTC' : t);
 const sectionOf = (t) => (SECTIONS.find((s) => s.tickers.includes(t)) || SECTIONS[0]).name;
