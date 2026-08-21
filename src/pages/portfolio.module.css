@@ -308,16 +308,20 @@
 }
 .holding {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) 150px minmax(84px, 1fr) minmax(96px, 1fr);
-  gap: 0.5rem 1.1rem;
-  align-items: center;
-  padding: 0.8rem 0;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "name   price"
+    "weight value";
+  column-gap: 0.9rem;
+  row-gap: 0.45rem;
+  align-items: start;
+  padding: 0.85rem 0;
   border-bottom: 1px solid var(--line-faint);
 }
 .holding:last-child { border-bottom: 0; }
-.hName { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
-.hSym { font-family: var(--ff-mono); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--tx-primary); }
-.hSub { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--tx-muted); font-variant-numeric: tabular-nums; }
+.hName { grid-area: name; display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.hSym { font-family: var(--ff-mono); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--tx-primary); white-space: nowrap; }
+.hSub { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--tx-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .short {
   align-self: flex-start;
   margin-top: 0.05rem;
@@ -330,14 +334,16 @@
   border-radius: var(--r-full);
   padding: 0 0.35rem;
 }
-.hWeight { display: flex; align-items: center; gap: 0.5rem; }
+.hWeight { grid-area: weight; display: flex; align-items: center; gap: 0.5rem; align-self: center; }
 .wtBar { position: relative; flex: 1; height: 6px; min-width: 40px; border-radius: var(--r-full); background: var(--line); overflow: hidden; }
 .wtFill { display: block; height: 100%; border-radius: var(--r-full); background: var(--g-500); }
 .wtShort { background: var(--amber-500); }
 .wtPct { font-family: var(--ff-mono); font-size: 0.72rem; color: var(--tx-secondary); font-variant-numeric: tabular-nums; min-width: 2.1rem; text-align: right; }
+.hPrice { grid-area: price; }
+.hVal { grid-area: value; align-self: center; }
 .hPrice, .hVal { display: flex; flex-direction: column; gap: 0.15rem; align-items: flex-end; font-family: var(--ff-mono); font-variant-numeric: tabular-nums; }
-.hLast, .hMkt { font-size: 0.9rem; color: var(--tx-primary); }
-.hChg, .hUnreal { font-size: 0.72rem; }
+.hLast, .hMkt { font-size: 0.9rem; color: var(--tx-primary); white-space: nowrap; }
+.hChg, .hUnreal { font-size: 0.72rem; white-space: nowrap; }
 
 /* ── Ledger: Tabs & Scroller ────────────────────────────────────────── */
 .ledgerHeader {
