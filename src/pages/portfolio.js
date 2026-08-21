@@ -185,12 +185,17 @@ function Content() {
 
   const {account: a, positions, orders, closed, realizedTotal, history, asOf} = state.data;
 
+  // Alpaca's portfolio history pads the days before the account was funded with
+  // value:0. Drop those so the curve doesn't rocket up from $0 and the
+  // window-start baseline is a real equity level rather than zero.
+  const hist = (history || []).filter((p) => p && Number.isFinite(p.value) && p.value > 0);
+
   const equity = a.portfolioValue != null ? a.portfolioValue : a.equity;
   const unrealTotal = positions.reduce((s, p) => s + (p.unrealizedPL || 0), 0);
   const invested = positions.reduce((s, p) => s + Math.abs(p.marketValue || 0), 0);
   const exposure = equity ? (invested / equity) * 100 : null;
 
-  const startEq = history && history.length ? history[0].value : null;
+  const startEq = hist.length ? hist[0].value : null;
   const periodPL = (equity != null && startEq != null) ? equity - startEq : null;
   const periodPct = (periodPL != null && startEq) ? (periodPL / startEq) * 100 : null;
 
@@ -226,7 +231,7 @@ function Content() {
             </span>
             {periodPL != null && (
               <span className={`${styles.delta} ${dirCls(periodPL)}`}>
-                {signedMoney(periodPL)} <i>{signedPct(periodPct)}</i> <em>since {fmtDay(history[0].t)}</em>
+                {signedMoney(periodPL)} <i>{signedPct(periodPct)}</i> <em>since {fmtDay(hist[0].t)}</em>
               </span>
             )}
           </div>
@@ -240,11 +245,11 @@ function Content() {
         <div className={styles.heroChart}>
           <div className={styles.chartHead}>
             <span className={styles.chartTitle}>Equity curve</span>
-            {history && history.length > 1 && (
-              <span className={styles.chartRange}>{fmtDay(history[0].t)} – {fmtDay(history[history.length - 1].t)}</span>
+            {hist.length > 1 && (
+              <span className={styles.chartRange}>{fmtDay(hist[0].t)} – {fmtDay(hist[hist.length - 1].t)}</span>
             )}
           </div>
-          <EquityChart points={history} />
+          <EquityChart points={hist} />
         </div>
       </section>
 
