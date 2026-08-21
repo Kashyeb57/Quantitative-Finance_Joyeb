@@ -62,6 +62,27 @@ function PdfPage({ pdf, pageNumber, scale, registerObserver }) {
   );
 }
 
+function OutlineNode({ item, onNavigate }) {
+  const hasChildren = item.items && item.items.length > 0;
+  return (
+    <div className={styles.outlineNode}>
+      <div 
+        className={styles.outlineItem} 
+        onClick={() => onNavigate(item.dest)}
+      >
+        {item.title}
+      </div>
+      {hasChildren && (
+        <div className={styles.outlineChildren}>
+          {item.items.map((child, i) => (
+            <OutlineNode key={i} item={child} onNavigate={onNavigate} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PdfReader({ url, title }) {
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [errorMsg, setErrorMsg] = useState('');
@@ -71,6 +92,8 @@ export default function PdfReader({ url, title }) {
   const [progress, setProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [jumpPage, setJumpPage] = useState('');
+  const [outline, setOutline] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const baseSize = useRef(null); // { w, h } of page 1 at scale 1
   const rootRef = useRef(null);
   const scrollRef = useRef(null);
@@ -136,6 +159,14 @@ export default function PdfReader({ url, title }) {
         if (el) setScale(clampScale(Math.min((el.clientWidth - 28) / vp.width, 1.6)));
         setPdf(doc);
         setNumPages(doc.numPages);
+
+        try {
+          const outlineData = await doc.getOutline();
+          setOutline(outlineData || []);
+        } catch (err) {
+          setOutline([]);
+        }
+
         setStatus('ready');
       } catch (err) {
         if (!cancelled) {
@@ -175,6 +206,26 @@ export default function PdfReader({ url, title }) {
     }
   };
 
+  const handleOutlineClick = async (dest) => {
+    if (!dest || !pdf) return;
+    try {
+      let destArray = dest;
+      if (typeof dest === 'string') {
+        destArray = await pdf.getDestination(dest);
+      }
+      if (Array.isArray(destArray) && destArray[0]) {
+        const pageIndex = await pdf.getPageIndex(destArray[0]);
+        const pageNum = pageIndex + 1; // 1-based
+        const pageEl = scrollRef.current?.querySelector(`[data-page="${pageNum}"]`);
+        if (pageEl) {
+          pageEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    } catch (e) {
+      console.error('Could not jump to destination', e);
+    }
+  };
+
   if (status === 'error') {
     return (
       <div className={styles.center}>
@@ -197,6 +248,15 @@ export default function PdfReader({ url, title }) {
   return (
     <div className={styles.reader} ref={rootRef}>
       <div className={styles.controls}>
+        {outline && outline.length > 0 && (
+          <button 
+            className={styles.sidebarToggle} 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title="Toggle Table of Contents"
+          >
+            ☰
+          </button>
+        )}
         <span className={styles.pages}>
           {status === 'ready' ? (
             <form onSubmit={handlePageJump} className={styles.pageJumpForm}>
@@ -236,30 +296,43 @@ export default function PdfReader({ url, title }) {
         </button>
       </div>
 
-      <div className={styles.scroll} ref={scrollRef}>
-        {status === 'loading' && (
-          <div className={styles.center}>
-            <div className={styles.spinner} />
-            <p>Loading “{title}”…</p>
-            {progress > 0 && (
-              <div className={styles.progressWrap}>
-                <div className={styles.progressBar} style={{ width: `${progress}%` }} />
-              </div>
-            )}
-            {progress > 0 && <p className={styles.dim}>{progress}%</p>}
+      <div className={styles.mainArea}>
+        {sidebarOpen && outline && outline.length > 0 && (
+          <div className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>Table of Contents</div>
+            <div className={styles.outlineTree}>
+              {outline.map((item, i) => (
+                <OutlineNode key={i} item={item} onNavigate={handleOutlineClick} />
+              ))}
+            </div>
           </div>
         )}
-        {status === 'ready' &&
-          pdf &&
-          Array.from({ length: numPages }, (_, i) => (
-            <PdfPage
-              key={`${i}-${scale}`}
-              pdf={pdf}
-              pageNumber={i + 1}
-              scale={scale}
-              registerObserver={registerObserver}
-            />
-          ))}
+
+        <div className={styles.scroll} ref={scrollRef}>
+          {status === 'loading' && (
+            <div className={styles.center}>
+              <div className={styles.spinner} />
+              <p>Loading “{title}”…</p>
+              {progress > 0 && (
+                <div className={styles.progressWrap}>
+                  <div className={styles.progressBar} style={{ width: `${progress}%` }} />
+                </div>
+              )}
+              {progress > 0 && <p className={styles.dim}>{progress}%</p>}
+            </div>
+          )}
+          {status === 'ready' &&
+            pdf &&
+            Array.from({ length: numPages }, (_, i) => (
+              <PdfPage
+                key={`${i}-${scale}`}
+                pdf={pdf}
+                pageNumber={i + 1}
+                scale={scale}
+                registerObserver={registerObserver}
+              />
+            ))}
+        </div>
       </div>
     </div>
   );
