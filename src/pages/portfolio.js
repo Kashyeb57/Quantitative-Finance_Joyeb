@@ -3,22 +3,24 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import PageHeader from '@site/src/components/PageHeader';
 import {fmtPrice} from '@site/src/components/Terminal/marketData';
+import {subscribeStockTrades} from '@site/src/components/Terminal/stockStream';
 import styles from './portfolio.module.css';
 
 /*
- * Portfolio — "Command Deck": a Robinhood-grade read of the Alpaca *paper*
- * account, plus the analytics Robinhood never ships. The equity value is the
- * hero; SCRUBBING the equity line re-renders that hero value + day-change to
- * the point under the cursor. Below it: a segmented allocation bar, a six-stat
- * performance read, and holdings as a data-forward list. Read-only; no trades.
- *
- * Data source: the market Worker's /_m/ledger (reads Alpaca server-side).
- * Range pills (1D/1W/…) are a deliberate fast-follow — they need a Worker
- * endpoint that returns other windows; this v1 renders the 3-month history the
- * ledger already provides.
+ * Portfolio — "Spatial Command Deck". A Robinhood-grade read of the Alpaca
+ * *paper* account, plus the analytics Robinhood never ships. Two audiences:
+ *   • Everyone      — a live, read-only view. Held-symbol trade streams tick the
+ *                     equity value and position marks in real time.
+ *   • The owner     — unlocks a buy/sell panel with a passphrase (stored only in
+ *                     the browser, sent as X-Trade-Token). The real gate is the
+ *                     Worker: POST /_m/order and /_m/cancel reject anything
+ *                     without a valid TRADE_TOKEN. Paper account only.
  */
 
 const POLL_MS = 30000;
+const TRADE_TOKEN_KEY = 'pf_trade_token';
+const WATCHLIST = ['AMD', 'MU', 'SNDK', 'META', 'COIN', 'SOXL', 'NVDA'];
+const PENDING = ['new', 'accepted', 'partially_filled', 'pending_new', 'held', 'accepted_for_bidding'];
 
 const money = (v) => (v == null || Number.isNaN(v) ? '—' : `$${fmtPrice(v)}`);
 const signedMoney = (v) => (v == null || Number.isNaN(v) ? '—' : `${v >= 0 ? '+' : '−'}$${fmtPrice(Math.abs(v))}`);
@@ -47,6 +49,23 @@ function fmtDay(t) {
   try {
     return new Intl.DateTimeFormat('en-US', {timeZone: 'America/Chicago', month: 'short', day: '2-digit'}).format(new Date(ms));
   } catch (_) { return ''; }
+}
+
+async function fetchLedger() {
+  const res = await fetch('/_m/ledger', {cache: 'no-store'});
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function postJson(path, token, body) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-Trade-Token': token},
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
 }
 
 /* The signature line: full-bleed, no axes/grid, a dashed open-baseline, and a
@@ -130,16 +149,67 @@ function EquityChart({points, scrubIdx, onScrub}) {
   );
 }
 
-async function fetchLedger() {
-  const res = await fetch('/_m/ledger', {cache: 'no-store'});
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+/* Owner-only buy/sell. Hidden from visitors; gated for real by the Worker. */
+function TradePanel({token, symbols, onPlaced, onLock}) {
+  const [form, setForm] = useState({symbol: WATCHLIST[0], side: 'buy', qty: ''});
+  const [msg, setMsg] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const qty = parseInt(form.qty, 10);
+    const symbol = form.symbol.trim().toUpperCase();
+    if (!symbol || !(qty > 0)) { setMsg({ok: false, text: 'Enter a symbol and a whole share count.'}); return; }
+    setBusy(true); setMsg(null);
+    try {
+      const r = await postJson('/_m/order', token, {symbol, side: form.side, qty});
+      setMsg({ok: true, text: `${form.side === 'buy' ? 'Bought' : 'Sold'} ${qty} ${symbol} — order ${r.order && r.order.status ? r.order.status : 'submitted'}.`});
+      setForm((f) => ({...f, qty: ''}));
+      onPlaced && onPlaced();
+    } catch (err) {
+      const m = String(err.message || err);
+      setMsg({ok: false, text: m === 'unauthorized' ? 'Passphrase rejected — lock and re-unlock.' : `Order failed: ${m}`});
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className={`p-card ${styles.tradeCard}`}>
+      <div className={styles.tradeHead}>
+        <h2 className={styles.h2}>Trade <span className={styles.count}>owner · paper</span></h2>
+        <button type="button" className={styles.lockBtn} onClick={onLock}>Lock</button>
+      </div>
+      <form className={styles.tradeForm} onSubmit={submit}>
+        <div className={styles.sideToggle} role="group" aria-label="Order side">
+          <button type="button" className={`${styles.sideBtn} ${form.side === 'buy' ? styles.sideBuy : ''}`} onClick={() => setForm((f) => ({...f, side: 'buy'}))}>Buy</button>
+          <button type="button" className={`${styles.sideBtn} ${form.side === 'sell' ? styles.sideSell : ''}`} onClick={() => setForm((f) => ({...f, side: 'sell'}))}>Sell</button>
+        </div>
+        <input list="pf-watchlist" className={styles.tradeInput} value={form.symbol} onChange={(e) => setForm((f) => ({...f, symbol: e.target.value.toUpperCase()}))} placeholder="Symbol" aria-label="Symbol" spellCheck="false" autoCapitalize="characters" />
+        <datalist id="pf-watchlist">
+          {[...new Set([...symbols, ...WATCHLIST])].map((s) => <option key={s} value={s} />)}
+        </datalist>
+        <input className={styles.tradeInput} type="number" min="1" step="1" value={form.qty} onChange={(e) => setForm((f) => ({...f, qty: e.target.value}))} placeholder="Shares" aria-label="Shares" />
+        <button className={`${styles.submitBtn} ${form.side === 'sell' ? styles.submitSell : ''}`} type="submit" disabled={busy}>
+          {busy ? 'Placing…' : `${form.side === 'buy' ? 'Buy' : 'Sell'} at market`}
+        </button>
+      </form>
+      {msg && <p className={`${styles.tradeMsg} ${msg.ok ? styles.tradeOk : styles.tradeErr}`}>{msg.text}</p>}
+      <p className={styles.tradeNote}>Market orders · whole shares · paper account. Market orders fill during regular hours.</p>
+    </div>
+  );
 }
 
 function Content() {
   const [state, setState] = useState({status: 'loading'});
   const [scrubIdx, setScrubIdx] = useState(null);
   const [ledgerTab, setLedgerTab] = useState('closed');
+  const [livePrices, setLivePrices] = useState({});
+  const [token, setToken] = useState('');
+  const pullRef = useRef(null);
+
+  // Owner token from the browser (never in the bundle).
+  useEffect(() => {
+    try { const t = localStorage.getItem(TRADE_TOKEN_KEY); if (t) setToken(t); } catch (_) { /* ignore */ }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -154,12 +224,38 @@ function Content() {
         if (!cancelled) setState((s) => (s.status === 'ok' ? s : {status: 'idle'}));
       }
     }
+    pullRef.current = pull;
     pull();
     const timer = setInterval(pull, POLL_MS);
     const onVis = () => { if (document.visibilityState === 'visible') pull(); };
     document.addEventListener('visibilitychange', onVis);
     return () => { cancelled = true; clearInterval(timer); document.removeEventListener('visibilitychange', onVis); };
   }, []);
+
+  // Live prices: one trade stream per held symbol, ticking equity + marks.
+  const okData = state.status === 'ok' ? state.data : null;
+  const symbolsKey = okData ? okData.positions.map((p) => p.symbol).sort().join(',') : '';
+  useEffect(() => {
+    if (!symbolsKey) return undefined;
+    const syms = symbolsKey.split(',').filter(Boolean);
+    const unsubs = syms.map((sym) =>
+      subscribeStockTrades(sym, ({price}) => {
+        setLivePrices((prev) => (prev[sym] === price ? prev : {...prev, [sym]: price}));
+      })
+    );
+    return () => unsubs.forEach((u) => u && u());
+  }, [symbolsKey]);
+
+  const unlock = () => {
+    const t = window.prompt('Owner passphrase to enable trading:');
+    if (t == null) return;
+    const v = t.trim();
+    if (!v) return;
+    try { localStorage.setItem(TRADE_TOKEN_KEY, v); } catch (_) { /* ignore */ }
+    setToken(v);
+  };
+  const lock = () => { try { localStorage.removeItem(TRADE_TOKEN_KEY); } catch (_) { /* ignore */ } setToken(''); };
+  const owner = !!token;
 
   if (state.status === 'loading') {
     return (
@@ -186,11 +282,33 @@ function Content() {
   const canScrub = hist.length > 1;
   const sel = scrubIdx == null || !canScrub ? null : Math.min(scrubIdx, hist.length - 1);
 
-  const equity = a.portfolioValue != null ? a.portfolioValue : a.equity;
-  const unrealTotal = positions.reduce((s, p) => s + (p.unrealizedPL || 0), 0);
-  const invested = positions.reduce((s, p) => s + Math.abs(p.marketValue || 0), 0);
+  // Live-adjust each position from its streamed price, then roll that into a
+  // live equity + today's P/L so the hero value moves in real time.
+  const equityBase = a.portfolioValue != null ? a.portfolioValue : a.equity;
+  const livePos = positions.map((p) => {
+    const lp = livePrices[p.symbol];
+    if (lp == null || !p.price) return p;
+    const mv = p.marketValue != null ? p.marketValue * (lp / p.price) : p.marketValue;
+    const dMV = mv != null && p.marketValue != null ? mv - p.marketValue : 0;
+    return {
+      ...p,
+      price: lp,
+      marketValue: mv,
+      unrealizedPL: (p.unrealizedPL || 0) + dMV,
+      unrealizedPLpct: p.costBasis ? (((p.unrealizedPL || 0) + dMV) / Math.abs(p.costBasis)) * 100 : p.unrealizedPLpct,
+    };
+  });
+  const liveDelta = livePos.reduce((s, p, i) => s + ((p.marketValue || 0) - (positions[i].marketValue || 0)), 0);
+  const equity = equityBase != null ? equityBase + liveDelta : equityBase;
+
+  const unrealTotal = livePos.reduce((s, p) => s + (p.unrealizedPL || 0), 0);
+  const invested = livePos.reduce((s, p) => s + Math.abs(p.marketValue || 0), 0);
   const exposure = equity ? (invested / equity) * 100 : null;
   const cash = a.cash != null ? a.cash : Math.max(0, (equity || 0) - invested);
+
+  const lastEq = equityBase != null ? equityBase - (a.dayPL || 0) : null;
+  const dayPLlive = (a.dayPL || 0) + liveDelta;
+  const dayPctLive = lastEq ? (dayPLlive / lastEq) * 100 : a.dayPLpct;
 
   const wins = closed.filter((c) => c.pl > 0);
   const losses = closed.filter((c) => c.pl < 0);
@@ -198,13 +316,12 @@ function Content() {
   const best = closed.length ? closed.reduce((m, c) => (c.pl > m.pl ? c : m)) : null;
   const worst = closed.length ? closed.reduce((m, c) => (c.pl < m.pl ? c : m)) : null;
 
-  // Hero: resting = live equity + today's move; scrubbing = the hovered point,
-  // its change measured from the window's open, labelled with that day.
+  // Hero: resting = live equity + today's (live) move; scrubbing = hovered point.
   const scrubbing = sel != null;
   const heroValue = scrubbing ? hist[sel].value : equity;
   const heroDelta = scrubbing
     ? {v: hist[sel].value - hist[0].value, pct: hist[0].value ? ((hist[sel].value - hist[0].value) / hist[0].value) * 100 : null, label: fmtDay(hist[sel].t)}
-    : {v: a.dayPL, pct: a.dayPLpct, label: 'Today'};
+    : {v: dayPLlive, pct: dayPctLive, label: 'Today'};
 
   const metrics = [
     {label: 'Realized P/L', val: signedMoney(realizedTotal), tone: dirCls(realizedTotal), sub: closed.length ? `${closed.length} round-trips` : null},
@@ -215,10 +332,8 @@ function Content() {
     {label: 'Worst trade', val: worst ? signedMoney(worst.pl) : '—', tone: worst && worst.pl < 0 ? styles.down : '', sub: worst ? worst.symbol : null},
   ];
 
-  // Allocation segments — share of equity, with a neutral cash remainder so the
-  // bar sums to the whole account (not just what's invested).
   const allocTotal = invested + Math.max(0, cash) || 1;
-  const segs = positions.map((p) => ({key: p.symbol, w: (Math.abs(p.marketValue || 0) / allocTotal) * 100, side: p.side}));
+  const segs = livePos.map((p) => ({key: p.symbol, w: (Math.abs(p.marketValue || 0) / allocTotal) * 100, side: p.side}));
   const cashW = (Math.max(0, cash) / allocTotal) * 100;
 
   return (
@@ -283,11 +398,11 @@ function Content() {
 
         <div className={`p-card ${styles.holdingsCard}`} data-reveal style={{'--i': 2}}>
           <h2 className={styles.h2}>Holdings <span className={styles.count}>{positions.length} open</span></h2>
-          {positions.length === 0 ? (
-            <p className={styles.empty}>No open positions.</p>
+          {livePos.length === 0 ? (
+            <p className={styles.empty}>No open positions — the account’s capital is parked in cash.</p>
           ) : (
             <div className={styles.holdings}>
-              {positions.map((p) => {
+              {livePos.map((p) => {
                 const w = invested ? (Math.abs(p.marketValue || 0) / invested) * 100 : 0;
                 return (
                   <div key={p.symbol} className={styles.holding}>
@@ -316,8 +431,10 @@ function Content() {
         </div>
       </div>
 
-      {/* ── Right Column: Performance & Ledger ── */}
+      {/* ── Right Column: Trade (owner) · Performance · Ledger ── */}
       <div className={styles.rightCol}>
+        {owner && <TradePanel token={token} symbols={positions.map((p) => p.symbol)} onPlaced={() => pullRef.current && pullRef.current()} onLock={lock} />}
+
         <div className={`p-card ${styles.metricsCard}`} data-reveal style={{'--i': 3}}>
           <h2 className={styles.h2}>The read <span className={styles.count}>performance</span></h2>
           <dl className={styles.metrics}>
@@ -374,17 +491,23 @@ function Content() {
                     <tr><th>Time</th><th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th>Type</th><th className={styles.num}>Fill</th><th>Status</th></tr>
                   </thead>
                   <tbody>
-                    {orders.slice(0, 50).map((o) => (
-                      <tr key={o.id}>
-                        <td className={styles.dim}>{fmtWhen(o.submittedAt, true)}</td>
-                        <td><span className={styles.sym}>{o.symbol}</span></td>
-                        <td><span className={o.side === 'buy' ? styles.tagBuy : styles.tagSell}>{o.side}</span></td>
-                        <td className={styles.num}>{o.qty}</td>
-                        <td className={styles.dim}>{o.type}</td>
-                        <td className={styles.num}>{o.filledAvgPrice != null ? money(o.filledAvgPrice) : '—'}</td>
-                        <td><span className={`${styles.status} ${styles['st_' + (o.status || '').replace(/[^a-z_]/gi, '')]}`}>{o.status}</span></td>
-                      </tr>
-                    ))}
+                    {orders.slice(0, 50).map((o) => {
+                      const cancelable = owner && PENDING.includes((o.status || '').toLowerCase());
+                      return (
+                        <tr key={o.id}>
+                          <td className={styles.dim}>{fmtWhen(o.submittedAt, true)}</td>
+                          <td><span className={styles.sym}>{o.symbol}</span></td>
+                          <td><span className={o.side === 'buy' ? styles.tagBuy : styles.tagSell}>{o.side}</span></td>
+                          <td className={styles.num}>{o.qty}</td>
+                          <td className={styles.dim}>{o.type}</td>
+                          <td className={styles.num}>{o.filledAvgPrice != null ? money(o.filledAvgPrice) : '—'}</td>
+                          <td>
+                            <span className={`${styles.status} ${styles['st_' + (o.status || '').replace(/[^a-z_]/gi, '')]}`}>{o.status}</span>
+                            {cancelable && <button className={styles.cancelBtn} onClick={() => postJson('/_m/cancel', token, {id: o.id}).then(() => pullRef.current && pullRef.current()).catch(() => {})}>cancel</button>}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )
@@ -395,8 +518,9 @@ function Content() {
 
       <p className={styles.foot} data-reveal style={{'--i': 5}}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
-        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · scrub the curve to read any day ·
+        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · live prices stream per held symbol · scrub the curve to read any day ·
         {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
+        {owner ? <> · <button className={styles.ownerLink} onClick={lock}>lock trading</button></> : <> · <button className={styles.ownerLink} onClick={unlock}>owner access</button></>}
       </p>
     </div>
   );

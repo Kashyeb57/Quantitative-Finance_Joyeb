@@ -15,6 +15,9 @@
  * our own domain and never sees the credentials.
  *
  * Secrets used:  ALPACA_KEY_ID , ALPACA_SECRET_KEY
+ *   TRADE_TOKEN  — owner-only passphrase gating POST /_m/order and /_m/cancel.
+ *                  Set with `wrangler secret put TRADE_TOKEN`. Without it, the
+ *                  write endpoints reject everything (read endpoints unaffected).
  */
 
 const ALPACA = 'https://data.alpaca.markets/v2/stocks';
@@ -44,8 +47,8 @@ function corsHeaders(request) {
   const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Trade-Token',
     'Vary': 'Origin',
   };
 }
@@ -79,23 +82,84 @@ async function alpaca(path, env) {
   return { ok: true, data: await res.json() };
 }
 
-// Same auth, but against the PAPER TRADING base (account + positions).
-async function alpacaTrade(path, env) {
+// Same auth, but against the PAPER TRADING base. GET by default; pass
+// { method, body } for writes (order placement / cancel). A 204 (cancel) comes
+// back as an empty object so callers can treat every ok result uniformly.
+async function alpacaTrade(path, env, init) {
   if (!env.ALPACA_KEY_ID || !env.ALPACA_SECRET_KEY) {
     return { ok: false, status: 503, error: 'not_connected' };
   }
-  const res = await fetch(`${ALPACA_PAPER}${path}`, {
-    headers: {
-      'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
-      'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
-      'Accept': 'application/json',
-    },
-  });
+  const headers = {
+    'APCA-API-KEY-ID': env.ALPACA_KEY_ID,
+    'APCA-API-SECRET-KEY': env.ALPACA_SECRET_KEY,
+    'Accept': 'application/json',
+  };
+  const opt = { headers };
+  if (init && init.method) {
+    opt.method = init.method;
+    if (init.body != null) {
+      headers['Content-Type'] = 'application/json';
+      opt.body = JSON.stringify(init.body);
+    }
+  }
+  const res = await fetch(`${ALPACA_PAPER}${path}`, opt);
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     return { ok: false, status: res.status, error: text.slice(0, 300) || 'Upstream error' };
   }
-  return { ok: true, data: await res.json() };
+  const ct = res.headers.get('content-type') || '';
+  const data = res.status === 204 || !ct.includes('json') ? {} : await res.json().catch(() => ({}));
+  return { ok: true, status: res.status, data };
+}
+
+// Owner gate for the write endpoints. The passphrase lives ONLY as the
+// TRADE_TOKEN Worker secret and in the owner's browser — never in the bundle.
+// Constant-time compare so a wrong token can't be timed out character by char.
+function safeEq(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
+function ownerOk(request, env) {
+  return !!env.TRADE_TOKEN && safeEq(request.headers.get('X-Trade-Token') || '', env.TRADE_TOKEN);
+}
+
+// POST /_m/order — owner-only. Places a MARKET, whole-share, day order on the
+// PAPER account. Never touches real money (paper base URL). Rejects anything
+// without a valid TRADE_TOKEN.
+async function handleOrder(request, env) {
+  if (!ownerOk(request, env)) return json(request, { error: 'unauthorized' }, 401);
+  let body;
+  try { body = await request.json(); } catch (_) { return json(request, { error: 'bad_json' }, 400); }
+  const symbol = String(body.symbol || '').toUpperCase();
+  const side = body.side === 'sell' ? 'sell' : 'buy';
+  const qty = Math.floor(Number(body.qty));
+  if (!SYMBOL_RE.test(symbol)) return json(request, { error: 'bad_symbol' }, 400);
+  if (!Number.isFinite(qty) || qty < 1 || qty > 100000) return json(request, { error: 'bad_qty' }, 400);
+
+  const out = await alpacaTrade('/orders', env, {
+    method: 'POST',
+    body: { symbol, qty: String(qty), side, type: 'market', time_in_force: 'day' },
+  });
+  if (!out.ok) return json(request, { error: out.error }, out.status === 503 ? 503 : 400);
+  const o = out.data || {};
+  return json(request, {
+    ok: true,
+    order: { id: o.id, symbol: o.symbol, side: o.side, qty: numOr(o.qty), type: o.type, status: o.status, submittedAt: o.submitted_at },
+  });
+}
+
+// POST /_m/cancel — owner-only. Cancels a still-open order by id.
+async function handleCancel(request, env) {
+  if (!ownerOk(request, env)) return json(request, { error: 'unauthorized' }, 401);
+  let body;
+  try { body = await request.json(); } catch (_) { return json(request, { error: 'bad_json' }, 400); }
+  const id = String(body.id || '');
+  if (!/^[a-f0-9-]{10,60}$/i.test(id)) return json(request, { error: 'bad_id' }, 400);
+  const out = await alpacaTrade(`/orders/${id}`, env, { method: 'DELETE' });
+  if (!out.ok) return json(request, { error: out.error }, out.status === 503 ? 503 : 400);
+  return json(request, { ok: true });
 }
 
 async function handleBars(request, env, url) {
@@ -566,6 +630,13 @@ export default {
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
+    }
+
+    // Owner-only writes — token-gated inside each handler.
+    if (request.method === 'POST') {
+      if (url.pathname === '/_m/order')  return handleOrder(request, env);
+      if (url.pathname === '/_m/cancel') return handleCancel(request, env);
+      return json(request, { error: 'Not found' }, 404);
     }
     if (request.method !== 'GET') {
       return json(request, { error: 'Method not allowed' }, 405);
