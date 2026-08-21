@@ -1,37 +1,201 @@
-/* Portfolio page — trading capital, positions, closed P/L, order history */
+/* Portfolio page — hero equity, performance read, positions, closed, ledger.
+   Built with hierarchy: one headline number + the curve dominate; the tables
+   recede as receipts. All colour from PHOSPHOR tokens (green = gain, amber =
+   loss); surfaces stay neutral graphite. */
 
 .wrap {
-  padding: 2rem 1rem 4rem;
+  padding: 2.25rem 1rem 4.5rem;
 }
 
-.msg {
+/* ── Loading / offline states ───────────────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   color: var(--tx-secondary);
-  padding: 2rem 0;
+  font-family: var(--ff-mono);
+  font-size: 0.9rem;
+  padding: 2.5rem 0;
 }
 
 .notice {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
   max-width: 46rem;
   margin: 1.5rem 0;
-  padding: 1.25rem 1.4rem;
+  padding: 1.35rem 1.5rem;
   border: 1px solid var(--line);
   border-left: 3px solid var(--amber-500);
   border-radius: var(--r-md);
   background: var(--surface);
+  box-shadow: var(--e1);
 }
-.notice strong { color: var(--tx-primary); }
-.notice span { color: var(--tx-secondary); font-size: 0.9rem; line-height: 1.55; }
+.noticeTag {
+  align-self: flex-start;
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber-500);
+  border: 1px solid var(--amber-500);
+  border-radius: var(--r-full);
+  padding: 0.1rem 0.55rem;
+  margin-bottom: 0.2rem;
+}
+.notice strong { color: var(--tx-primary); font-size: 1.02rem; }
+.notice span { color: var(--tx-secondary); font-size: 0.9rem; line-height: 1.6; }
 
-.section { margin-top: 2.25rem; }
-.section:first-child { margin-top: 0.5rem; }
+/* ── Hero: the account, stated once ─────────────────────────────────── */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  margin-top: 0.5rem;
+}
+
+.heroMain {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--e1);
+}
+.heroTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ff-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx-muted);
+}
+.heroEquity {
+  font-family: var(--ff-display);
+  font-size: clamp(2.6rem, 5.5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums slashed-zero;
+  margin: 0.5rem 0 0.7rem;
+  color: var(--tx-primary);
+}
+
+.heroDeltas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.delta {
+  font-family: var(--ff-mono);
+  font-size: 0.98rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.delta i { font-style: normal; opacity: 0.9; margin-left: 0.15rem; }
+.delta em {
+  font-style: normal;
+  color: var(--tx-muted);
+  font-weight: 500;
+  font-size: 0.78rem;
+  margin-left: 0.35rem;
+}
+
+/* secondary account facts — hairline-divided, subordinate to the number */
+.rail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 1.1rem 0 0;
+}
+.rail > div {
+  padding: 0.35rem 0.9rem;
+  border-left: 1px solid var(--line);
+}
+.rail > div:nth-child(2n+1) { border-left: 0; padding-left: 0; }
+.rail > div:nth-child(n+3) { margin-top: 0.7rem; }
+.rail dt {
+  font-family: var(--ff-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tx-muted);
+  margin-bottom: 0.15rem;
+}
+.rail dd {
+  margin: 0;
+  font-family: var(--ff-mono);
+  font-size: 1.02rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tx-primary);
+}
+
+/* ── Equity chart panel ─────────────────────────────────────────────── */
+.heroChart {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.1rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--e1);
+  min-width: 0;
+}
+.chartHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+.chartTitle {
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tx-muted);
+}
+.chartRange {
+  font-family: var(--ff-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--tx-faint);
+  font-variant-numeric: tabular-nums;
+}
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: auto;
+  cursor: crosshair;
+}
+.axis { fill: var(--tx-muted); font-family: var(--ff-mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+.axisFaint { fill: var(--tx-faint); font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.chipVal { fill: var(--tx-primary); font-family: var(--ff-mono); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chipDate { fill: var(--tx-muted); font-family: var(--ff-mono); font-size: 10.5px; }
+.chartEmpty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--tx-muted);
+  font-size: 0.88rem;
+}
+
+/* ── Sections & headings ────────────────────────────────────────────── */
+.section { margin-top: 2.5rem; }
 
 .h2 {
   font-family: var(--ff-display);
   font-size: 1.35rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.95rem;
   display: flex;
   align-items: baseline;
   gap: 0.6rem;
@@ -45,61 +209,42 @@
   font-weight: 500;
 }
 
-/* ── Stat strip ─────────────────────────────────────────────────────── */
-.statStrip {
+/* ── Performance read — one surface, internal hairline dividers ─────── */
+.metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  overflow: hidden;
-}
-.stat {
-  background: var(--surface);
-  padding: 0.85rem 1.1rem;
-}
-.statLabel {
-  font-family: var(--ff-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--tx-muted);
-  margin-bottom: 0.25rem;
-}
-.statVal {
-  font-family: var(--ff-mono);
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.sub { font-size: 0.78rem; font-weight: 600; opacity: 0.85; }
-
-/* ── Equity chart ───────────────────────────────────────────────────── */
-.chartCard {
-  margin-top: 1rem;
+  grid-template-columns: repeat(6, 1fr);
+  margin: 0;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--surface);
   box-shadow: var(--e1);
-  padding: 1rem 1.1rem 0.6rem;
+  overflow: hidden;
 }
-.chartTitle {
+.metric {
+  padding: 0.95rem 1.15rem;
+  border-left: 1px solid var(--line);
+}
+.metric:first-child { border-left: 0; }
+.metricLabel {
   font-family: var(--ff-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tx-muted);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 }
-.chart { display: block; width: 100%; height: auto; }
-.axis { fill: var(--viz-muted); font-family: var(--ff-mono); font-size: 11px; }
-.chartEmpty {
-  padding: 2.5rem 1rem;
-  text-align: center;
-  color: var(--tx-muted);
-  font-size: 0.88rem;
+.metricVal {
+  margin: 0;
+  font-family: var(--ff-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums slashed-zero;
+  color: var(--tx-primary);
+  white-space: nowrap;
 }
+
+.sub { font-family: var(--ff-mono); font-size: 0.74rem; font-weight: 600; opacity: 0.82; }
 
 /* ── Tables ─────────────────────────────────────────────────────────── */
 .tableWrap {
@@ -107,6 +252,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--surface);
+  box-shadow: var(--e1);
 }
 .table {
   width: 100%;
@@ -117,7 +263,7 @@
 .table th {
   text-align: left;
   padding: 0.6rem 1rem;
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -127,7 +273,7 @@
   white-space: nowrap;
 }
 .table td {
-  padding: 0.55rem 1rem;
+  padding: 0.58rem 1rem;
   border-bottom: 1px solid var(--line-faint);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -137,15 +283,47 @@
 .num { text-align: right; }
 .table th.num { text-align: right; }
 .dim { color: var(--tx-muted); }
-.sym { font-weight: 700; letter-spacing: 0.03em; }
+.sym { font-weight: 700; letter-spacing: 0.03em; color: var(--tx-primary); }
 .short {
   margin-left: 0.4rem;
   font-size: 0.6rem;
   font-weight: 700;
   color: var(--amber-500);
   border: 1px solid var(--amber-500);
-  border-radius: 999px;
+  border-radius: var(--r-full);
   padding: 0 0.35rem;
+}
+
+/* allocation weight — the bar IS the data */
+.wtHead { text-align: left; width: 132px; }
+.wtCell {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 120px;
+}
+.wtBar {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  min-width: 44px;
+  border-radius: var(--r-full);
+  background: var(--line);
+  overflow: hidden;
+}
+.wtFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--g-500);
+}
+.wtShort { background: var(--amber-500); }
+.wtPct {
+  font-size: 0.72rem;
+  color: var(--tx-secondary);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.2rem;
+  text-align: right;
 }
 
 .tagBuy, .tagSell {
@@ -153,7 +331,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-radius: 999px;
+  border-radius: var(--r-full);
   padding: 0.1rem 0.5rem;
 }
 .tagBuy { color: var(--g-300); background: var(--g-wash); }
@@ -170,11 +348,16 @@
 .st_canceled, .st_expired, .st_rejected { color: var(--tx-faint); }
 .st_new, .st_accepted, .st_partially_filled { color: var(--amber-500); }
 
-.up { color: #22c55e; }
-.down { color: #ef4444; }
+/* the ledger recedes — it's the receipts, not the headline */
+.ledger .table { font-size: 0.79rem; }
+.ledger .table td { padding: 0.5rem 1rem; color: var(--tx-secondary); }
+
+/* gain = green, loss = amber (PHOSPHOR: amber is the negative ink) */
+.up { color: var(--g-300); }
+.down { color: var(--amber-500); }
 
 .empty {
-  padding: 1.5rem;
+  padding: 1.6rem;
   text-align: center;
   color: var(--tx-muted);
   font-size: 0.9rem;
@@ -183,8 +366,23 @@
 }
 
 .foot {
-  margin-top: 2rem;
+  margin-top: 2.25rem;
   font-size: 0.74rem;
+  line-height: 1.7;
   color: var(--tx-muted);
   font-family: var(--ff-mono);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(3, 1fr); }
+  .metric:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
+  .metric:nth-child(3n+1) { border-left: 0; }
+}
+@media (max-width: 560px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .metric { border-bottom: 1px solid var(--line); }
+  .metric:nth-child(2n+1) { border-left: 0; }
+  .metricVal { font-size: 1.15rem; }
 }
