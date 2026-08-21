@@ -122,7 +122,7 @@ function EquityChart({points, scrubIdx, onScrub}) {
         <span className={styles.endDot} style={{left: pctX(x(points.length - 1)), top: pctY(y(last)), background: stroke}} aria-hidden="true" />
       ) : (
         <>
-          <span className={styles.scrubDot} style={{left: pctX(sx), top: pctY(sy), borderColor: stroke}} aria-hidden="true" />
+          <span className={styles.scrubDot} style={{left: pctX(sx), top: pctY(sy), borderColor: stroke, '--glow': stroke}} aria-hidden="true" />
           <span className={styles.scrubTime} style={{left: `${labelLeft}%`}} aria-hidden="true">{fmtDay(points[sel].t)}</span>
         </>
       )}
@@ -139,6 +139,7 @@ async function fetchLedger() {
 function Content() {
   const [state, setState] = useState({status: 'loading'});
   const [scrubIdx, setScrubIdx] = useState(null);
+  const [ledgerTab, setLedgerTab] = useState('closed');
 
   useEffect(() => {
     let cancelled = false;
@@ -221,182 +222,184 @@ function Content() {
   const cashW = (Math.max(0, cash) / allocTotal) * 100;
 
   return (
-    <>
-      {/* ── The account: hero value, the line, the facts ───────────────── */}
-      <section className={styles.account}>
-        <div className={styles.acctPad}>
-          <div className={styles.heroTag}>
-            <span className={styles.heroTagLeft}>
-              <span className="p-pip" aria-hidden="true" /> Account equity · Alpaca paper
-            </span>
-            {asOf && <span className={styles.heroTagRight}>updated {fmtWhen(asOf, true)}</span>}
+  return (
+    <div className={styles.dashboard}>
+      {/* ── Top Hero: Equity & Chart ── */}
+      <div className={`p-card ${styles.heroArea}`} data-reveal style={{'--i': 0}}>
+        <div className={styles.heroHeader}>
+          <div className={styles.heroLeft}>
+            <div className={styles.heroTag}>
+              <span className={styles.heroTagLeft}>
+                <span className="p-pip" aria-hidden="true" /> Account equity · Alpaca paper
+              </span>
+              {asOf && <span className={styles.heroTagRight}>updated {fmtWhen(asOf, true)}</span>}
+            </div>
+            <div className={styles.heroValue}>{money(heroValue)}</div>
+            <div className={`${styles.heroDelta} ${heroDelta.v == null || heroDelta.v === 0 ? styles.flat : dirCls(heroDelta.v)}`}>
+              <span className={styles.caret} aria-hidden="true">{caret(heroDelta.v)}</span>
+              <span className={styles.deltaNum}>{signedMoney(heroDelta.v)}</span>
+              {heroDelta.pct != null && <span className={styles.deltaPct}>({signedPct(heroDelta.pct)})</span>}
+              <span className={styles.deltaLabel}>{heroDelta.label}</span>
+            </div>
           </div>
-
-          <div className={styles.heroValue}>{money(heroValue)}</div>
-
-          <div className={`${styles.heroDelta} ${heroDelta.v == null || heroDelta.v === 0 ? styles.flat : dirCls(heroDelta.v)}`}>
-            <span className={styles.caret} aria-hidden="true">{caret(heroDelta.v)}</span>
-            <span className={styles.deltaNum}>{signedMoney(heroDelta.v)}</span>
-            {heroDelta.pct != null && <span className={styles.deltaPct}>({signedPct(heroDelta.pct)})</span>}
-            <span className={styles.deltaLabel}>{heroDelta.label}</span>
+          <div className={styles.factsRail}>
+            <div className={styles.factItem}><dt>Cash</dt><dd>{money(cash)}</dd></div>
+            <div className={styles.factItem}><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
+            <div className={styles.factItem}><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
+            <div className={styles.factItem}><dt>Positions</dt><dd>{positions.length}</dd></div>
           </div>
         </div>
 
         <EquityChart points={hist} scrubIdx={scrubIdx} onScrub={setScrubIdx} />
 
-        {/* range pills — v1 is fixed to the 3-month window; pills land with the Worker change */}
         <div className={styles.pills} aria-hidden="true">
           {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map((r) => (
             <span key={r} className={`${styles.pill} ${r === '3M' ? styles.pillOn : styles.pillSoon}`}>{r}</span>
           ))}
           <span className={styles.pillNote}>3-month · daily</span>
         </div>
+      </div>
 
-        <dl className={styles.facts}>
-          <div><dt>Cash</dt><dd>{money(cash)}</dd></div>
-          <div><dt>Buying power</dt><dd>{money(a.buyingPower)}</dd></div>
-          <div><dt>Invested</dt><dd>{pctWhole(exposure)}</dd></div>
-          <div><dt>Positions</dt><dd>{positions.length}</dd></div>
-        </dl>
-      </section>
-
-      {/* ── The read: six stats that answer Robinhood's blind spots ─────── */}
-      <section className={styles.section}>
-        <h2 className={styles.h2}>The read <span className={styles.count}>performance</span></h2>
-        <dl className={styles.metrics}>
-          {metrics.map((m, i) => (
-            <div key={i} className={styles.metric}>
-              <dt className={styles.metricLabel}>{m.label}</dt>
-              <dd className={`${styles.metricVal} ${m.tone || ''}`}>{m.val}</dd>
-              {m.sub && <div className={styles.metricSub}>{m.sub}</div>}
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* ── Allocation: one segmented bar, cash included ────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.h2}>Allocation <span className={styles.count}>{pctWhole(exposure)} invested</span></h2>
-        <div className={styles.allocBar}>
-          {segs.map((s) => (
-            <span key={s.key} className={`${styles.allocSeg} ${s.side === 'short' ? styles.allocShort : ''}`} style={{width: `${s.w}%`}} title={`${s.key} ${s.w.toFixed(1)}%`} />
-          ))}
-          {cashW > 0 && <span className={styles.allocCash} style={{width: `${cashW}%`}} title={`Cash ${cashW.toFixed(1)}%`} />}
+      {/* ── Left Column: Allocation & Holdings ── */}
+      <div className={styles.leftCol}>
+        <div className={`p-card ${styles.allocCard}`} data-reveal style={{'--i': 1}}>
+          <h2 className={styles.h2}>Allocation <span className={styles.count}>{pctWhole(exposure)} invested</span></h2>
+          <div className={styles.allocBar}>
+            {segs.map((s) => (
+              <span key={s.key} className={`${styles.allocSeg} ${s.side === 'short' ? styles.allocShort : ''}`} style={{width: `${s.w}%`}} title={`${s.key} ${s.w.toFixed(1)}%`} />
+            ))}
+            {cashW > 0 && <span className={styles.allocCash} style={{width: `${cashW}%`}} title={`Cash ${cashW.toFixed(1)}%`} />}
+          </div>
+          <div className={styles.allocLegend}>
+            {segs.map((s) => (
+              <span key={s.key} className={styles.legItem}>
+                <i className={`${styles.legDot} ${s.side === 'short' ? styles.legShort : ''}`} />{s.key} <b>{s.w.toFixed(0)}%</b>
+              </span>
+            ))}
+            {cashW > 0 && (
+              <span className={styles.legItem}><i className={`${styles.legDot} ${styles.legCash}`} />Cash <b>{cashW.toFixed(0)}%</b></span>
+            )}
+          </div>
         </div>
-        <div className={styles.allocLegend}>
-          {segs.map((s) => (
-            <span key={s.key} className={styles.legItem}>
-              <i className={`${styles.legDot} ${s.side === 'short' ? styles.legShort : ''}`} />{s.key} <b>{s.w.toFixed(0)}%</b>
-            </span>
-          ))}
-          {cashW > 0 && (
-            <span className={styles.legItem}><i className={`${styles.legDot} ${styles.legCash}`} />Cash <b>{cashW.toFixed(0)}%</b></span>
+
+        <div className={`p-card ${styles.holdingsCard}`} data-reveal style={{'--i': 2}}>
+          <h2 className={styles.h2}>Holdings <span className={styles.count}>{positions.length} open</span></h2>
+          {positions.length === 0 ? (
+            <p className={styles.empty}>No open positions.</p>
+          ) : (
+            <div className={styles.holdings}>
+              {positions.map((p) => {
+                const w = invested ? (Math.abs(p.marketValue || 0) / invested) * 100 : 0;
+                return (
+                  <div key={p.symbol} className={styles.holding}>
+                    <div className={styles.hName}>
+                      <span className={styles.hSym}>{p.symbol}</span>
+                      {p.side === 'short' && <span className={styles.short}>SHORT</span>}
+                      <span className={styles.hSub}>{p.qty} sh · avg {money(p.avgEntry)}</span>
+                    </div>
+                    <div className={styles.hWeight}>
+                      <span className={styles.wtBar}><span className={`${styles.wtFill} ${p.side === 'short' ? styles.wtShort : ''}`} style={{width: `${Math.max(3, w)}%`}} /></span>
+                      <span className={styles.wtPct}>{w.toFixed(0)}%</span>
+                    </div>
+                    <div className={styles.hPrice}>
+                      <span className={styles.hLast}>{money(p.price)}</span>
+                      <span className={`${styles.hChg} ${dirCls(p.changeToday)}`}>{caret(p.changeToday)} {signedPct(p.changeToday)}</span>
+                    </div>
+                    <div className={styles.hVal}>
+                      <span className={styles.hMkt}>{money(p.marketValue)}</span>
+                      <span className={`${styles.hUnreal} ${dirCls(p.unrealizedPL)}`}>{signedMoney(p.unrealizedPL)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
-      </section>
+      </div>
 
-      {/* ── Holdings: a list, not a table ──────────────────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.h2}>Holdings <span className={styles.count}>{positions.length} open</span></h2>
-        {positions.length === 0 ? (
-          <p className={styles.empty}>No open positions — the account’s capital is parked in cash.</p>
-        ) : (
-          <div className={styles.holdings}>
-            {positions.map((p) => {
-              const w = invested ? (Math.abs(p.marketValue || 0) / invested) * 100 : 0;
-              return (
-                <div key={p.symbol} className={styles.holding}>
-                  <div className={styles.hName}>
-                    <span className={styles.hSym}>{p.symbol}</span>
-                    {p.side === 'short' && <span className={styles.short}>SHORT</span>}
-                    <span className={styles.hSub}>{p.qty} sh · avg {money(p.avgEntry)}</span>
-                  </div>
-                  <div className={styles.hWeight}>
-                    <span className={styles.wtBar}><span className={`${styles.wtFill} ${p.side === 'short' ? styles.wtShort : ''}`} style={{width: `${Math.max(3, w)}%`}} /></span>
-                    <span className={styles.wtPct}>{w.toFixed(0)}%</span>
-                  </div>
-                  <div className={styles.hPrice}>
-                    <span className={styles.hLast}>{money(p.price)}</span>
-                    <span className={`${styles.hChg} ${dirCls(p.changeToday)}`}>{caret(p.changeToday)} {signedPct(p.changeToday)}</span>
-                  </div>
-                  <div className={styles.hVal}>
-                    <span className={styles.hMkt}>{money(p.marketValue)}</span>
-                    <span className={`${styles.hUnreal} ${dirCls(p.unrealizedPL)}`}>{signedMoney(p.unrealizedPL)}</span>
-                  </div>
-                </div>
-              );
-            })}
+      {/* ── Right Column: Performance & Ledger ── */}
+      <div className={styles.rightCol}>
+        <div className={`p-card ${styles.metricsCard}`} data-reveal style={{'--i': 3}}>
+          <h2 className={styles.h2}>The read <span className={styles.count}>performance</span></h2>
+          <dl className={styles.metrics}>
+            {metrics.map((m, i) => (
+              <div key={i} className={styles.metric}>
+                <dt className={styles.metricLabel}>{m.label}</dt>
+                <dd className={`${styles.metricVal} ${m.tone || ''}`}>{m.val}</dd>
+                {m.sub && <div className={styles.metricSub}>{m.sub}</div>}
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className={`p-card ${styles.ledgerCard}`} data-reveal style={{'--i': 4}}>
+          <div className={styles.ledgerHeader}>
+            <h2 className={styles.h2}>Ledger</h2>
+            <div className={styles.ledgerTabs}>
+              <button className={`${styles.tabBtn} ${ledgerTab === 'closed' ? styles.tabActive : ''}`} onClick={() => setLedgerTab('closed')}>
+                Round-trips <span className={styles.tabCount}>{closed.length}</span>
+              </button>
+              <button className={`${styles.tabBtn} ${ledgerTab === 'orders' ? styles.tabActive : ''}`} onClick={() => setLedgerTab('orders')}>
+                Orders <span className={styles.tabCount}>{orders.length}</span>
+              </button>
+            </div>
           </div>
-        )}
-      </section>
 
-      {/* ── Receipts: closed round-trips + the order ledger, receding ───── */}
-      <section className={styles.section}>
-        <h2 className={styles.h2}>Closed round-trips <span className={`${styles.count} ${dirCls(realizedTotal)}`}>realized {signedMoney(realizedTotal)}</span></h2>
-        {closed.length === 0 ? (
-          <p className={styles.empty}>No closed round-trips yet. Once a position is fully exited, its realized profit or loss lands here.</p>
-        ) : (
-          <div className={`${styles.tableWrap} ${styles.receipts}`}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th className={styles.num}>Entry</th><th className={styles.num}>Exit</th><th className={styles.num}>Realized P/L</th><th className={styles.num}>Closed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {closed.map((c, i) => (
-                  <tr key={i}>
-                    <td><span className={styles.sym}>{c.symbol}</span></td>
-                    <td><span className={c.side === 'short' ? styles.tagSell : styles.tagBuy}>{c.side}</span></td>
-                    <td className={styles.num}>{+c.qty.toFixed(4)}</td>
-                    <td className={styles.num}>{money(c.entry)}</td>
-                    <td className={styles.num}>{money(c.exit)}</td>
-                    <td className={`${styles.num} ${dirCls(c.pl)}`}>{signedMoney(c.pl)} <span className={styles.sub}>{signedPct(c.plpct)}</span></td>
-                    <td className={`${styles.num} ${styles.dim}`}>{fmtWhen(c.closedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className={styles.ledgerScroller}>
+            {ledgerTab === 'closed' && (
+              closed.length === 0 ? <p className={styles.empty}>No closed round-trips yet.</p> : (
+                <table className={styles.table}>
+                  <thead>
+                    <tr><th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th className={styles.num}>Entry</th><th className={styles.num}>Exit</th><th className={styles.num}>Realized P/L</th><th className={styles.num}>Closed</th></tr>
+                  </thead>
+                  <tbody>
+                    {closed.map((c, i) => (
+                      <tr key={i}>
+                        <td><span className={styles.sym}>{c.symbol}</span></td>
+                        <td><span className={c.side === 'short' ? styles.tagSell : styles.tagBuy}>{c.side}</span></td>
+                        <td className={styles.num}>{+c.qty.toFixed(4)}</td>
+                        <td className={styles.num}>{money(c.entry)}</td>
+                        <td className={styles.num}>{money(c.exit)}</td>
+                        <td className={`${styles.num} ${dirCls(c.pl)}`}>{signedMoney(c.pl)} <span className={styles.sub}>{signedPct(c.plpct)}</span></td>
+                        <td className={`${styles.num} ${styles.dim}`}>{fmtWhen(c.closedAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
+            )}
+            {ledgerTab === 'orders' && (
+              orders.length === 0 ? <p className={styles.empty}>No orders yet.</p> : (
+                <table className={styles.table}>
+                  <thead>
+                    <tr><th>Time</th><th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th>Type</th><th className={styles.num}>Fill</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {orders.slice(0, 50).map((o) => (
+                      <tr key={o.id}>
+                        <td className={styles.dim}>{fmtWhen(o.submittedAt, true)}</td>
+                        <td><span className={styles.sym}>{o.symbol}</span></td>
+                        <td><span className={o.side === 'buy' ? styles.tagBuy : styles.tagSell}>{o.side}</span></td>
+                        <td className={styles.num}>{o.qty}</td>
+                        <td className={styles.dim}>{o.type}</td>
+                        <td className={styles.num}>{o.filledAvgPrice != null ? money(o.filledAvgPrice) : '—'}</td>
+                        <td><span className={`${styles.status} ${styles['st_' + (o.status || '').replace(/[^a-z_]/gi, '')]}`}>{o.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )
+            )}
           </div>
-        )}
-      </section>
+        </div>
+      </div>
 
-      <section className={styles.section}>
-        <h2 className={styles.h2}>Order ledger <span className={styles.count}>{orders.length}</span></h2>
-        {orders.length === 0 ? (
-          <p className={styles.empty}>No orders yet.</p>
-        ) : (
-          <div className={`${styles.tableWrap} ${styles.receipts}`}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Time</th><th>Symbol</th><th>Side</th><th className={styles.num}>Qty</th><th>Type</th><th className={styles.num}>Fill price</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.slice(0, 50).map((o) => (
-                  <tr key={o.id}>
-                    <td className={styles.dim}>{fmtWhen(o.submittedAt, true)}</td>
-                    <td><span className={styles.sym}>{o.symbol}</span></td>
-                    <td><span className={o.side === 'buy' ? styles.tagBuy : styles.tagSell}>{o.side}</span></td>
-                    <td className={styles.num}>{o.qty}</td>
-                    <td className={styles.dim}>{o.type}</td>
-                    <td className={styles.num}>{o.filledAvgPrice != null ? money(o.filledAvgPrice) : '—'}</td>
-                    <td><span className={`${styles.status} ${styles['st_' + (o.status || '').replace(/[^a-z_]/gi, '')]}`}>{o.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <p className={styles.foot}>
+      <p className={styles.foot} data-reveal style={{'--i': 5}}>
         Read-only paper account via Alpaca · auto-refreshes every 30s
-        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · closed P/L is computed FIFO from fills · scrub the curve to read any day ·
+        {asOf && <> · updated {fmtWhen(asOf, true)}</>} · scrub the curve to read any day ·
         {' '}watch the tape on the <Link to="/terminal">market terminal</Link>.
       </p>
-    </>
+    </div>
   );
 }
 

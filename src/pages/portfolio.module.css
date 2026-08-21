@@ -46,16 +46,23 @@
 .notice strong { color: var(--tx-primary); font-size: 1.02rem; }
 .notice span { color: var(--tx-secondary); font-size: 0.9rem; line-height: 1.6; }
 
-/* ── The account panel: hero + line + facts, one unit ───────────────── */
-.account {
-  margin-top: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  box-shadow: var(--e1);
-  overflow: hidden;
+/* ── The Dashboard Layout ───────────────────────────────────────────── */
+.dashboard {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  grid-template-areas:
+    "hero hero"
+    "left right";
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
-.acctPad { padding: 1.5rem 1.6rem 0.4rem; }
+
+.heroArea { grid-area: hero; padding: 1.6rem 1.7rem 0.5rem; }
+.leftCol { grid-area: left; display: flex; flex-direction: column; gap: 1.5rem; }
+.rightCol { grid-area: right; display: flex; flex-direction: column; gap: 1.5rem; }
+
+.heroHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; }
+.heroLeft { flex: 1; min-width: 0; }
 
 .heroTag {
   display: flex;
@@ -129,7 +136,7 @@
   background: var(--bg-base);
   border: 2px solid var(--g-500);
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 3px var(--surface);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 16px 2px var(--glow, transparent);
   pointer-events: none;
 }
 .scrubTime {
@@ -175,35 +182,32 @@
 .pillSoon { color: var(--tx-faint); }
 .pillNote { margin-left: auto; color: var(--tx-faint); letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.6rem; }
 
-/* ── Facts rail ─────────────────────────────────────────────────────── */
-.facts {
+/* ── Facts rail (moved into hero header) ────────────────────────────── */
+.factsRail {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  margin: 0;
-  border-top: 1px solid var(--line);
-  background: var(--bg-sunken);
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem 1.8rem;
+  text-align: right;
+  align-self: flex-start;
 }
-.facts > div { padding: 0.85rem 1.1rem; border-left: 1px solid var(--line); }
-.facts > div:first-child { border-left: 0; }
-.facts dt {
+.factItem dt {
   font-family: var(--ff-mono);
   font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tx-muted);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
-.facts dd {
+.factItem dd {
   margin: 0;
   font-family: var(--ff-mono);
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--tx-primary);
 }
 
-/* ── Sections & headings ────────────────────────────────────────────── */
-.section { margin-top: 2.5rem; }
+/* ── Headings ───────────────────────────────────────────────────────── */
 .h2 {
   font-family: var(--ff-display);
   font-size: 1.35rem;
@@ -226,16 +230,16 @@
 /* ── The read (6-up) ────────────────────────────────────────────────── */
 .metrics {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   margin: 0;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-md);
-  background: var(--surface);
-  box-shadow: var(--e1);
   overflow: hidden;
 }
-.metric { padding: 0.95rem 1.1rem; border-left: 1px solid var(--line); }
-.metric:first-child { border-left: 0; }
+.metric { padding: 0.95rem 1.1rem; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.metric:nth-child(3n+1) { border-left: 0; }
+.metric:nth-child(n+4) { border-bottom: 0; }
 .metricLabel {
   font-family: var(--ff-mono);
   font-size: 0.6rem;
@@ -335,16 +339,69 @@
 .hLast, .hMkt { font-size: 0.9rem; color: var(--tx-primary); }
 .hChg, .hUnreal { font-size: 0.72rem; }
 
-/* ── Receipts (closed + ledger), receding ───────────────────────────── */
-.tableWrap {
+/* ── Ledger: Tabs & Scroller ────────────────────────────────────────── */
+.ledgerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.95rem;
+}
+.ledgerHeader .h2 { margin-bottom: 0; }
+.ledgerTabs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-sunken);
+  padding: 0.25rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+}
+.tabBtn {
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--tx-secondary);
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all var(--dur-2) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.tabBtn:hover { color: var(--tx-primary); }
+.tabActive {
+  background: var(--surface-raised);
+  color: var(--tx-primary);
+  box-shadow: var(--e1);
+}
+.tabCount {
+  background: var(--line);
+  color: var(--tx-muted);
+  padding: 0 0.35rem;
+  border-radius: 99px;
+  font-size: 0.64rem;
+}
+.tabActive .tabCount {
+  background: var(--g-wash);
+  color: var(--g-500);
+}
+
+.ledgerScroller {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 480px; /* Force vertical scroll in the card */
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--surface);
-  box-shadow: var(--e1);
 }
 .table { width: 100%; border-collapse: collapse; font-family: var(--ff-mono); font-size: 0.84rem; }
 .table th {
+  position: sticky;
+  top: 0;
   text-align: left;
   padding: 0.6rem 1rem;
   font-size: 0.62rem;
@@ -352,9 +409,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--tx-muted);
-  background: var(--bg-sunken);
+  background: var(--surface-raised);
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
+  z-index: 10;
 }
 .table td { padding: 0.55rem 1rem; border-bottom: 1px solid var(--line-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .table tbody tr:last-child td { border-bottom: 0; }
@@ -403,28 +461,51 @@
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "hero"
+      "left"
+      "right";
+  }
+}
 @media (max-width: 900px) {
-  .metrics { grid-template-columns: repeat(3, 1fr); }
-  .metric:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
-  .metric:nth-child(3n+1) { border-left: 0; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .metric:nth-child(even) { border-left: 1px solid var(--line); }
+  .metric:nth-child(odd) { border-left: 0; }
+  .metric:nth-last-child(-n+2) { border-bottom: 0; }
 }
 @media (max-width: 680px) {
-  .acctPad { padding: 1.25rem 1.15rem 0.4rem; }
+  .heroHeader { flex-direction: column; gap: 1rem; }
+  .factsRail { width: 100%; text-align: left; }
   .pills { padding-left: 1.15rem; padding-right: 1.15rem; }
-  .facts { grid-template-columns: repeat(2, 1fr); }
-  .facts > div:nth-child(3), .facts > div:nth-child(4) { border-top: 1px solid var(--line); }
-  .facts > div:nth-child(2n+1) { border-left: 0; }
+  
   /* holdings collapse to two columns: name/weight left, price/value right */
   .holding { grid-template-columns: 1fr auto; gap: 0.3rem 1rem; }
   .hName { order: 1; }
   .hPrice { order: 2; }
   .hWeight { order: 3; }
   .hVal { order: 4; }
+  .hPrice, .hVal { text-align: right; }
+  
+  .receipts .table th, .receipts .table td { padding: 0.5rem; }
 }
 @media (max-width: 520px) {
-  .metrics { grid-template-columns: repeat(2, 1fr); }
-  .metric { border-bottom: 1px solid var(--line); }
-  .metric:nth-child(2n+1) { border-left: 0; }
+  .metrics { grid-template-columns: 1fr; }
+  .metric:nth-child(n) { border-left: 0; border-bottom: 1px solid var(--line); }
+  .metric:last-child { border-bottom: 0; }
   .metricVal { font-size: 1.15rem; }
   .heroValue { font-size: clamp(2.1rem, 11vw, 2.8rem); }
+}
+
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+[data-reveal] {
+  animation: reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.08s);
 }
