@@ -458,7 +458,15 @@
 /* Full-screen: keep a solid page background instead of black. */
 .gexBtn {
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+  /* inset outline (no layout shift) so the GEX toggle reads as a distinct
+     feature, not just another timeframe — visitors notice it's clickable */
+  box-shadow: inset 0 0 0 1px var(--ifm-color-emphasis-300);
+}
+.gexBtn.tfBtnActive {
+  box-shadow: inset 0 0 0 1px var(--ifm-color-primary);
 }
 .gexExpBtn {
   font-size: 0.66rem;

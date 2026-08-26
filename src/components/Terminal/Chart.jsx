@@ -489,8 +489,9 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
           onClick={() => setShowGex((v) => !v)}
           disabled={isCrypto(ticker)}
           title="Gamma exposure — dealer gamma-flip level and call/put walls"
+          aria-label="Toggle gamma exposure (GEX)"
         >
-          Γ
+          Γ GEX
         </button>
         {showGex && !isCrypto(ticker) && [['day', 'Day'], ['week', '1W'], ['15d', '15D'], ['30d', '30D']].map(([v, l]) => (
           <button
