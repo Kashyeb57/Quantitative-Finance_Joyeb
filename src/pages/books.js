@@ -232,6 +232,13 @@ const LIBRARY = [
     shortCat: 'Programming',
     url: `${QIP}/CODE.pdf`,
   },
+  {
+    title: 'Database Systems: Design, Implementation & Management (14th ed.)',
+    author: 'Coronel, Morris & Rob',
+    category: 'Programming & Computer Science',
+    shortCat: 'Programming',
+    url: `${QIP}/Database-Systems-14e.pdf`,
+  },
 ];
 
 const SECTIONS = [
