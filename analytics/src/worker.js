@@ -28,6 +28,47 @@ const PIXEL = Uint8Array.from([
   0x44, 0x01, 0x00, 0x3b,
 ]);
 
+const OWNER_COOKIE = '_a_owner';
+
+// Read one cookie value from the request header.
+function getCookie(request, name) {
+  const raw = request.headers.get('Cookie') || '';
+  for (const part of raw.split(';')) {
+    const i = part.indexOf('=');
+    if (i > -1 && part.slice(0, i).trim() === name) return part.slice(i + 1).trim();
+  }
+  return '';
+}
+
+// The owner-cookie value is a SHA-256 of the dashboard token, so the raw token
+// never rides along in a cookie. The dashboard sets it; every collected hit
+// verifies it server-side. Empty when no VIEW_TOKEN is configured.
+async function sha256hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+async function ownerCookieValue(env) {
+  return env.VIEW_TOKEN ? sha256hex('owner:' + env.VIEW_TOKEN) : '';
+}
+
+// Insert one visit. Tries the owner-aware insert; if the `owner` column hasn't
+// been migrated in yet (migrations/002_owner.sql), falls back to the legacy
+// insert so a visit is never lost. Best-effort: analytics never surfaces errors.
+async function insertHit(env, row, owner) {
+  const cols = 'ts, ip, country, city, region, timezone, asn, path, referer, ua, device, browser, os, screen, lang, view_id';
+  const vals = [row.ts, row.ip, row.country, row.city, row.region, row.timezone, row.asn, row.path, row.referer, row.ua, row.device, row.browser, row.os, row.screen, row.lang, row.view_id];
+  const q = (extraCol, extraVal) => {
+    const placeholders = vals.map(() => '?').concat(extraCol ? ['?'] : []).join(',');
+    const stmt = env.DB.prepare(`INSERT INTO hits (${cols}${extraCol ? ', ' + extraCol : ''}) VALUES (${placeholders})`);
+    return (extraCol ? stmt.bind(...vals, extraVal) : stmt.bind(...vals)).run();
+  };
+  try {
+    await q('owner', owner);
+  } catch (_) {
+    try { await q(); } catch (_) { /* best-effort */ }
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -108,20 +149,14 @@ async function handleCollect(request, env, ctx, url) {
     view_id: String(body.v || '').slice(0, 40),
   };
 
+  // Is this one of the owner's OWN devices? True when the browser carries the
+  // owner cookie the dashboard drops (see handleDashboard) — cookie-based, so it
+  // recognises the owner across every device and network, regardless of IP.
+  const expectedOwner = await ownerCookieValue(env);
+  const owner = expectedOwner && getCookie(request, OWNER_COOKIE) === expectedOwner ? 1 : 0;
+
   // Write in the background so the beacon returns instantly.
-  const write = env.DB.prepare(
-    `INSERT INTO hits
-      (ts, ip, country, city, region, timezone, asn, path, referer, ua, device, browser, os, screen, lang, view_id)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-  )
-    .bind(
-      row.ts, row.ip, row.country, row.city, row.region, row.timezone, row.asn,
-      row.path, row.referer, row.ua, row.device, row.browser, row.os, row.screen,
-      row.lang, row.view_id
-    )
-    .run()
-    .catch(() => {});
-  ctx.waitUntil(write);
+  ctx.waitUntil(insertHit(env, row, owner));
 
   if (request.method === 'GET') {
     return new Response(PIXEL, {
@@ -232,7 +267,7 @@ async function renderDashboardResponse(request, env, url) {
 
   const [recent, totals, last15, series, topPages, topCountries, topDevices, topBrowsers, refs, visitors, languages] =
     await Promise.all([
-      run(`SELECT ts, ip, country, city, region, asn, path, referer, device, browser, os, ua, duration
+      run(`SELECT ts, ip, country, city, region, asn, path, referer, device, browser, os, ua, duration, COALESCE(owner,0) AS owner
              FROM hits ${where} ORDER BY id DESC LIMIT ?`, [...f.params, limit]),
       run(`SELECT COUNT(*) AS visits, COUNT(DISTINCT ip) AS uniques,
                   SUM(CASE WHEN device='Bot' THEN 1 ELSE 0 END) AS bots,
@@ -245,14 +280,14 @@ async function renderDashboardResponse(request, env, url) {
       run(`SELECT device, COUNT(*) AS n FROM hits ${where} GROUP BY device ORDER BY n DESC LIMIT 10`, f.params),
       run(`SELECT browser, COUNT(*) AS n FROM hits ${where} GROUP BY browser ORDER BY n DESC LIMIT 10`, f.params),
       run(`SELECT referer, COUNT(*) AS n FROM hits ${where} GROUP BY referer ORDER BY n DESC LIMIT 100`, f.params),
-      run(`SELECT ip, COUNT(*) AS n, MAX(ts) AS last_ts, country, city, region
+      run(`SELECT ip, COUNT(*) AS n, MAX(ts) AS last_ts, country, city, region, MAX(COALESCE(owner,0)) AS owner
              FROM hits ${where} GROUP BY ip ORDER BY n DESC LIMIT 15`, f.params),
       run(`SELECT lang, COUNT(*) AS n FROM hits ${langWhere} GROUP BY lang ORDER BY n DESC LIMIT 10`, f.params),
     ]);
 
   const t = totals.results[0] || { visits: 0, uniques: 0, bots: 0, avgdur: 0 };
   const html = renderDashboard({
-    token, ownerIp, hide: f.hide, humans: f.humans,
+    token, ownerIp, hide: f.hide, humans: f.humans, mine: f.mine,
     visits: t.visits || 0,
     uniques: t.uniques || 0,
     bots: t.bots || 0,
@@ -269,13 +304,20 @@ async function renderDashboardResponse(request, env, url) {
     languages: languages.results || [],
   });
 
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Robots-Tag': 'noindex, nofollow',
-    },
-  });
+  const headers = {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Robots-Tag': 'noindex, nofollow',
+  };
+  // Mark THIS device as the owner's for two years. The site's beacon will now
+  // carry this cookie on every page view, so visits from here are tagged yours.
+  // HttpOnly so JS/XSS can't read it; Secure; SameSite=Lax; Path=/ so it's sent
+  // to /_a/collect from every page.
+  const cookieVal = await ownerCookieValue(env);
+  if (cookieVal) {
+    headers['Set-Cookie'] = `${OWNER_COOKIE}=${cookieVal}; Path=/; Max-Age=63072000; Secure; HttpOnly; SameSite=Lax`;
+  }
+  return new Response(html, { headers });
 }
 
 // Parse ?hide= / ?humans= into SQL clauses (values are bound, never concatenated).
@@ -290,7 +332,9 @@ function buildFilter(url) {
   }
   const humans = url.searchParams.get('humans') === '1';
   if (humans) clauses.push(`device != 'Bot'`);
-  return { clauses, params, hide, humans };
+  const mine = url.searchParams.get('mine') === 'hide';
+  if (mine) clauses.push(`COALESCE(owner,0) = 0`);
+  return { clauses, params, hide, humans, mine };
 }
 
 function esc(s) {
@@ -361,6 +405,7 @@ function filterLink(token, obj) {
   p.set('token', token);
   if (obj.hide && obj.hide.length) p.set('hide', obj.hide.join(','));
   if (obj.humans) p.set('humans', '1');
+  if (obj.mine) p.set('mine', 'hide');
   return `${LOGS_PATH}?${p.toString()}`;
 }
 
@@ -415,7 +460,7 @@ function renderDashboard(d) {
   const visitorRows = d.visitors.map((v) => {
     const shortLoc = [v.city, v.country].filter(Boolean).join(', ');
     const fullLoc = [v.city, v.region, v.country].filter(Boolean).join(', ');
-    const you = d.ownerIp && v.ip === d.ownerIp ? ' <span class="you">you</span>' : '';
+    const you = v.owner ? ' <span class="you">you</span>' : '';
     return `<tr>
       <td class="mono small">${esc(v.ip)}${you}</td>
       <td><b class="accent">${v.n}</b></td>
@@ -430,7 +475,7 @@ function renderDashboard(d) {
     const src = refInfo(r.referer).host;
     return `<tr>
       <td class="mono small">${esc(fmtCT(r.ts))}</td>
-      <td class="mono small">${esc(r.ip)}</td>
+      <td class="mono small">${esc(r.ip)}${r.owner ? ' <span class="you">you</span>' : ''}</td>
       <td class="small" title="${esc(fullLoc)}">${esc(shortLoc || '—')}</td>
       <td class="small">${esc(src)}</td>
       <td class="mono small trunc" title="${esc(r.path)}">${esc(r.path)}</td>
@@ -441,21 +486,21 @@ function renderDashboard(d) {
   }).join('');
 
   // filter-bar links
-  const hidingSelf = d.ownerIp && d.hide.includes(d.ownerIp);
   // Filters as on/off toggle switches: clicking navigates to the flipped-state
   // URL, so the actual filtering stays server-side (no client state needed).
-  const selfLink = d.ownerIp
-    ? toggleSwitch('Exclude my visits', hidingSelf,
-        hidingSelf
-          ? filterLink(d.token, { hide: d.hide.filter((x) => x !== d.ownerIp), humans: d.humans })
-          : filterLink(d.token, { hide: [...d.hide, d.ownerIp], humans: d.humans }))
-    : '';
+  // "Exclude my visits" now filters by the owner FLAG (the cookie this dashboard
+  // drops), so it hides ALL your devices at once — not just the IP you're on.
+  const excludingMine = d.mine;
+  const selfLink = toggleSwitch('Exclude my visits', excludingMine,
+    excludingMine
+      ? filterLink(d.token, { hide: d.hide, humans: d.humans, mine: false })
+      : filterLink(d.token, { hide: d.hide, humans: d.humans, mine: true }));
   const humansLink = toggleSwitch('Humans only', d.humans,
     d.humans
-      ? filterLink(d.token, { hide: d.hide, humans: false })
-      : filterLink(d.token, { hide: d.hide, humans: true }));
+      ? filterLink(d.token, { hide: d.hide, humans: false, mine: d.mine })
+      : filterLink(d.token, { hide: d.hide, humans: true, mine: d.mine }));
   // "Show all" clears every filter — only shown when a filter is active.
-  const allLink = (d.hide.length || d.humans)
+  const allLink = (d.hide.length || d.humans || d.mine)
     ? `<a class="clearLink" href="${esc(LOGS_PATH + '?token=' + encodeURIComponent(d.token))}">Show all</a>`
     : '';
   const activeNote = '';

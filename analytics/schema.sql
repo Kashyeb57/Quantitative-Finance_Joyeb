@@ -19,10 +19,12 @@ CREATE TABLE IF NOT EXISTS hits (
   screen    TEXT,            -- e.g. "1920x1080"
   lang      TEXT,            -- visitor's preferred language (Accept-Language)
   view_id   TEXT,            -- per-pageview id, used to attach time-on-page
-  duration  INTEGER          -- seconds spent on the page (filled on page leave)
+  duration  INTEGER,         -- seconds spent on the page (filled on page leave)
+  owner     INTEGER NOT NULL DEFAULT 0  -- 1 when the visit is the owner's own device
 );
 
 CREATE INDEX IF NOT EXISTS idx_hits_ts      ON hits(ts);
 CREATE INDEX IF NOT EXISTS idx_hits_ip      ON hits(ip);
 CREATE INDEX IF NOT EXISTS idx_hits_country ON hits(country);
 CREATE INDEX IF NOT EXISTS idx_hits_view    ON hits(view_id);
+CREATE INDEX IF NOT EXISTS idx_hits_owner   ON hits(owner);
