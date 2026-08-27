@@ -38,6 +38,17 @@ const FEEDS = [
   { source: 'SEC', cat: 'REG', url: 'https://www.sec.gov/news/pressreleases.rss' },
   { source: 'FED', cat: 'REG', url: 'https://www.federalreserve.gov/feeds/press_all.xml' },
   { source: 'ECB', cat: 'REG', url: 'https://www.ecb.europa.eu/rss/press.html' },
+
+  // Fast-updating market sources (verified live). Google News is an aggregator
+  // that stays fresh 24/7; the rest are near-instant on breaking market moves.
+  { source: 'MW REALTIME', cat: 'MKT', url: 'https://feeds.marketwatch.com/marketwatch/realtimeheadlines/' },
+  { source: 'MW BREAKING', cat: 'MKT', url: 'https://feeds.marketwatch.com/marketwatch/bulletins/' },
+  { source: 'NASDAQ', cat: 'MKT', url: 'https://www.nasdaq.com/feed/rssoutbound?category=Markets' },
+  { source: 'BENZINGA', cat: 'MKT', url: 'https://www.benzinga.com/feed' },
+  { source: 'PR NEWSWIRE', cat: 'MKT', url: 'https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss' },
+  { source: 'GOOGLE NEWS', cat: 'MKT', url: 'https://news.google.com/rss/search?q=stock+market+OR+earnings+OR+stocks+when:1d&hl=en-US&gl=US&ceid=US:en' },
+  { source: 'FT MARKETS', cat: 'MKT', url: 'https://www.ft.com/markets?format=rss' },
+  { source: 'THE BLOCK', cat: 'CRPT', url: 'https://www.theblock.co/rss.xml' },
 ];
 
 const CATEGORIES = ['ALL', 'MKT', 'ECO', 'TECH', 'NRG', 'CRPT', 'GEO', 'REG'];
