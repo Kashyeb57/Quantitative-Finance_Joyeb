@@ -39,19 +39,23 @@ const FEEDS = [
   { source: 'FED', cat: 'REG', url: 'https://www.federalreserve.gov/feeds/press_all.xml' },
   { source: 'ECB', cat: 'REG', url: 'https://www.ecb.europa.eu/rss/press.html' },
 
-  // Fast-updating market sources (verified live). Google News is an aggregator
-  // that stays fresh 24/7; the rest are near-instant on breaking market moves.
+  // Fast-updating, market-only wires (verified live) — near-instant on breaking
+  // market moves. These feed the "⚡ Breaking" view (see FAST below).
   { source: 'MW REALTIME', cat: 'MKT', url: 'https://feeds.marketwatch.com/marketwatch/realtimeheadlines/' },
   { source: 'MW BREAKING', cat: 'MKT', url: 'https://feeds.marketwatch.com/marketwatch/bulletins/' },
   { source: 'NASDAQ', cat: 'MKT', url: 'https://www.nasdaq.com/feed/rssoutbound?category=Markets' },
   { source: 'BENZINGA', cat: 'MKT', url: 'https://www.benzinga.com/feed' },
   { source: 'PR NEWSWIRE', cat: 'MKT', url: 'https://www.prnewswire.com/rss/financial-services-latest-news/financial-services-latest-news-list.rss' },
-  { source: 'GOOGLE NEWS', cat: 'MKT', url: 'https://news.google.com/rss/search?q=stock+market+OR+earnings+OR+stocks+when:1d&hl=en-US&gl=US&ceid=US:en' },
   { source: 'FT MARKETS', cat: 'MKT', url: 'https://www.ft.com/markets?format=rss' },
   { source: 'THE BLOCK', cat: 'CRPT', url: 'https://www.theblock.co/rss.xml' },
 ];
 
 const CATEGORIES = ['ALL', 'MKT', 'ECO', 'TECH', 'NRG', 'CRPT', 'GEO', 'REG'];
+
+// The fast, market-moving wires. The "⚡ Breaking" toggle filters to just these,
+// so the feed reads like a clean market tape instead of a mixed world-news
+// stream (drops the sports/general noise the broad sources carry).
+const FAST = new Set(['MW BREAKING', 'MW REALTIME', 'PR NEWSWIRE', 'BENZINGA', 'NASDAQ', 'MARKETWATCH', 'CNBC', 'SEEKING ALPHA', 'INVESTING', 'FXSTREET']);
 const RANGES = [
   { code: '1H', h: 1 },
   { code: '6H', h: 6 },
@@ -167,6 +171,7 @@ export default function News({ ticker }) {
   const [range, setRange] = useState('24H');
   const [query, setQuery] = useState('');
   const [onlyTicker, setOnlyTicker] = useState(false);
+  const [breaking, setBreaking] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -214,12 +219,13 @@ export default function News({ ticker }) {
     const cutoff = r && r.h ? Date.now() - r.h * 3600 * 1000 : null;
     const q = query.trim().toLowerCase();
     return items.filter((it) => {
+      if (breaking && !FAST.has(it.source)) return false;
       if (cutoff) { const d = new Date(it.pubDate); if (!isNaN(d) && d.getTime() < cutoff) return false; }
       if (q && !it.title.toLowerCase().includes(q) && !it.tags.some((t) => t.toLowerCase().includes(q))) return false;
       if (onlyTicker && !matchesTicker(it, ticker)) return false;
       return true;
     });
-  }, [items, range, query, onlyTicker, ticker]);
+  }, [items, range, query, onlyTicker, breaking, ticker]);
 
   const arrow = (imp) => (imp === 'pos' ? '▲' : imp === 'neg' ? '▼' : '–');
 
@@ -240,6 +246,13 @@ export default function News({ ticker }) {
         ))}
       </div>
       <div className={styles.termRow}>
+        <button
+          className={`${styles.tab} ${styles.tabBreaking} ${breaking ? styles.tabActive : ''}`}
+          onClick={() => setBreaking((v) => !v)}
+          title="Only the fast market wires — a clean, low-noise breaking tape"
+        >
+          ⚡ Breaking
+        </button>
         {RANGES.map((r) => (
           <button key={r.code} className={`${styles.tab} ${r.code === range ? styles.tabActive : ''}`} onClick={() => setRange(r.code)}>{r.code}</button>
         ))}
