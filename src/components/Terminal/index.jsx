@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import { SECTIONS } from './tickers';
 import styles from './styles.module.css';
@@ -27,10 +27,47 @@ export default function Terminal() {
   const [chartOpen, setChartOpen] = useState(true);
   const [newsOpen, setNewsOpen] = useState(true);
   const deckRef = useRef(null); // fullscreen target — the whole deck (chart + news)
+  const [split, setSplit] = useState(0.62); // chart's share of the width (0–1)
+  const draggingRef = useRef(false);
 
   // Keep at least one section open — you can't collapse the last one.
   const toggleChart = () => { if (chartOpen && !newsOpen) return; setChartOpen(!chartOpen); };
   const toggleNews = () => { if (newsOpen && !chartOpen) return; setNewsOpen(!newsOpen); };
+
+  // Drag the divider to resize chart vs news. Works in fullscreen too, since the
+  // deck is the same element. Listeners live on window so the drag keeps
+  // tracking even when the cursor moves over the chart or news.
+  const startResize = (e) => {
+    draggingRef.current = true;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+    if (e.cancelable) e.preventDefault();
+  };
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!draggingRef.current || !deckRef.current) return;
+      if (e.cancelable) e.preventDefault();
+      const rect = deckRef.current.getBoundingClientRect();
+      const cx = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+      setSplit(Math.max(0.2, Math.min(0.82, (cx - rect.left) / rect.width)));
+    };
+    const onUp = () => {
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    };
+  }, []);
 
   const active = SECTIONS.find((s) => s.name === section) || SECTIONS[0];
 
@@ -62,7 +99,7 @@ export default function Terminal() {
         ))}
       </div>
 
-      <div className={styles.deck} ref={deckRef}>
+      <div className={styles.deck} ref={deckRef} style={chartOpen && newsOpen ? {'--chart-flex': split, '--news-flex': 1 - split} : undefined}>
         <section className={`${styles.deckSection} ${styles.chartSection} ${chartOpen ? '' : styles.collapsed}`}>
           <button type="button" className={styles.deckHead} onClick={toggleChart} aria-expanded={chartOpen} title={chartOpen ? 'Collapse chart' : 'Expand chart'}>
             <span className={styles.deckTitle}>Chart</span>
@@ -87,6 +124,17 @@ export default function Terminal() {
             <span className={styles.railTitle}>Chart</span>
           </button>
         </section>
+
+        {chartOpen && newsOpen && (
+          <div
+            className={styles.resizer}
+            onMouseDown={startResize}
+            onTouchStart={startResize}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Drag to resize chart and news"
+          />
+        )}
 
         <section className={`${styles.deckSection} ${styles.newsSection} ${newsOpen ? '' : styles.collapsed}`}>
           <button type="button" className={styles.deckHead} onClick={toggleNews} aria-expanded={newsOpen} title={newsOpen ? 'Collapse news' : 'Expand news'}>

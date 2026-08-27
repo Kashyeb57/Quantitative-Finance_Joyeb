@@ -156,9 +156,31 @@
   min-width: 0;
   min-height: 0;
 }
-.chartSection { flex: 1.6 1 0; }
-.newsSection { flex: 1 1 0; border-left: 1px solid var(--line); }
+.chartSection { flex: var(--chart-flex, 1.6) 1 0; }
+.newsSection { flex: var(--news-flex, 1) 1 0; border-left: 1px solid var(--line); }
 .deckSection.collapsed { flex: 0 0 auto; }
+
+/* Drag-to-resize handle between the two open sections. It draws the divider
+   line itself, so the adjacent news border-left is dropped to avoid doubling. */
+.resizer {
+  flex: 0 0 9px;
+  align-self: stretch;
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  background: transparent;
+}
+.resizer::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--line);
+  transition: width 0.12s ease, background 0.12s ease;
+}
+.resizer:hover::before, .resizer:active::before { width: 3px; background: var(--ifm-color-primary); }
+.resizer + .newsSection { border-left: 0; }
 
 .deckHead {
   display: flex;
@@ -220,6 +242,7 @@
    just its horizontal header (no vertical rail). */
 @media (max-width: 860px) {
   .deck { flex-direction: column; min-height: 0; }
+  .resizer { display: none; }
   .chartSection, .newsSection { flex: none; }
   .newsSection { border-left: 0; border-top: 1px solid var(--line); }
   .chartSection:not(.collapsed) .deckBody { min-height: 380px; }
