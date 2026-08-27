@@ -114,7 +114,7 @@ function gexLevels(rows, S) {
   };
 }
 
-export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
+export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTargetRef }) {
   const wrapRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
@@ -137,7 +137,9 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   const gexLinesRef = useRef({});
 
   const toggleFs = () => {
-    const el = areaRef.current;
+    // Fullscreen the whole deck (chart + news) when the parent hands us its ref,
+    // so the news panel is visible in fullscreen too — fall back to the chart.
+    const el = (fsTargetRef && fsTargetRef.current) || areaRef.current;
     if (!el) return;
     if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
     else el.requestFullscreen && el.requestFullscreen();
@@ -146,7 +148,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus }) {
   // Track fullscreen state + resize the chart to fill (or leave) the screen.
   useEffect(() => {
     const onFs = () => {
-      setIsFs(document.fullscreenElement === areaRef.current);
+      setIsFs(!!document.fullscreenElement);
       setTimeout(() => {
         if (chartRef.current && wrapRef.current && wrapRef.current.clientWidth) {
           chartRef.current.applyOptions({

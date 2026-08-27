@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import { SECTIONS } from './tickers';
 import styles from './styles.module.css';
@@ -26,6 +26,7 @@ export default function Terminal() {
   const [source, setSource] = useState(null);
   const [chartOpen, setChartOpen] = useState(true);
   const [newsOpen, setNewsOpen] = useState(true);
+  const deckRef = useRef(null); // fullscreen target — the whole deck (chart + news)
 
   // Keep at least one section open — you can't collapse the last one.
   const toggleChart = () => { if (chartOpen && !newsOpen) return; setChartOpen(!chartOpen); };
@@ -61,7 +62,7 @@ export default function Terminal() {
         ))}
       </div>
 
-      <div className={styles.deck}>
+      <div className={styles.deck} ref={deckRef}>
         <section className={`${styles.deckSection} ${styles.chartSection} ${chartOpen ? '' : styles.collapsed}`}>
           <button type="button" className={styles.deckHead} onClick={toggleChart} aria-expanded={chartOpen} title={chartOpen ? 'Collapse chart' : 'Expand chart'}>
             <span className={styles.deckTitle}>Chart</span>
@@ -77,7 +78,7 @@ export default function Terminal() {
             <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading chart…</div></div>}>
               {() => {
                 const Chart = require('./Chart').default;
-                return <Chart ticker={ticker} timeframe={timeframe} setTimeframe={setTimeframe} onStatus={(s) => setSource(s.source)} />;
+                return <Chart ticker={ticker} timeframe={timeframe} setTimeframe={setTimeframe} onStatus={(s) => setSource(s.source)} fsTargetRef={deckRef} />;
               }}
             </BrowserOnly>
           </div>
