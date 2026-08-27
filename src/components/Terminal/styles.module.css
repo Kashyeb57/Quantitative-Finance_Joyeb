@@ -140,6 +140,96 @@
   .panel { min-height: 320px; }
 }
 
+/* ── Unified deck: chart + news joined in one panel, each collapsible ── */
+.deck {
+  display: flex;
+  min-height: 460px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--ifm-background-surface-color);
+  box-shadow: var(--e1);
+  overflow: hidden;
+}
+.deckSection {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.chartSection { flex: 1.6 1 0; }
+.newsSection { flex: 1 1 0; border-left: 1px solid var(--line); }
+.deckSection.collapsed { flex: 0 0 auto; }
+
+.deckHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.deckHead:hover { background: var(--ifm-color-emphasis-100); }
+.deckTitle { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.liveTag { font-family: var(--ff-mono); color: var(--ifm-color-primary); font-size: 0.8rem; letter-spacing: 0.04em; }
+.collapseIcon { flex: none; color: var(--tx-muted); font-size: 1.1rem; line-height: 1; width: 1.1rem; text-align: center; }
+.deckHead:hover .collapseIcon { color: var(--ifm-color-primary); }
+
+.deckBody { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+/* Collapsed → a slim vertical rail. The body is only hidden (display:none), so
+   the chart keeps its state and doesn't reload when you expand it again. */
+.rail {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.85rem 0.45rem;
+  border: 0;
+  background: transparent;
+  color: var(--tx-secondary);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.rail:hover { background: var(--ifm-color-emphasis-100); color: var(--ifm-color-primary); }
+.railChevron { font-size: 1.2rem; line-height: 1; }
+.railTitle {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.deckSection.collapsed .deckHead,
+.deckSection.collapsed .deckBody { display: none; }
+.deckSection.collapsed .rail { display: flex; }
+
+/* Stacked on narrow screens: sections sit top/bottom; a collapsed section is
+   just its horizontal header (no vertical rail). */
+@media (max-width: 860px) {
+  .deck { flex-direction: column; min-height: 0; }
+  .chartSection, .newsSection { flex: none; }
+  .newsSection { border-left: 0; border-top: 1px solid var(--line); }
+  .chartSection:not(.collapsed) .deckBody { min-height: 380px; }
+  .newsSection:not(.collapsed) .deckBody { min-height: 340px; }
+  .deckSection.collapsed { flex: none; }
+  .deckSection.collapsed .deckHead { display: flex; border-bottom: 0; }
+  .deckSection.collapsed .deckBody,
+  .deckSection.collapsed .rail { display: none; }
+}
+
 /* News feed */
 .news {
   display: flex;

@@ -5,8 +5,10 @@ import styles from './styles.module.css';
 
 /*
  * Market Terminal.
- * Left: live price chart (candles refresh on a timer, every timeframe).
- * Right: live RSS news feed, which can be filtered to the selected ticker.
+ * One "deck" panel holds two sections side by side — the live price chart and
+ * the live RSS news feed — joined by a divider. Each section can be collapsed
+ * to a slim rail (the chart stays mounted, so collapsing doesn't reload it) and
+ * the other section expands to fill; at least one stays open.
  *
  * Tickers are grouped into sectors (mirrors the Robinhood watchlists +
  * the space / neocloud themes). Pick a sector tab → its symbols appear;
@@ -22,6 +24,12 @@ export default function Terminal() {
   const [section, setSection] = useState(() => sectionOf('AMD'));
   const [timeframe, setTimeframe] = useState('5Min');
   const [source, setSource] = useState(null);
+  const [chartOpen, setChartOpen] = useState(true);
+  const [newsOpen, setNewsOpen] = useState(true);
+
+  // Keep at least one section open — you can't collapse the last one.
+  const toggleChart = () => { if (chartOpen && !newsOpen) return; setChartOpen(!chartOpen); };
+  const toggleNews = () => { if (newsOpen && !chartOpen) return; setNewsOpen(!newsOpen); };
 
   const active = SECTIONS.find((s) => s.name === section) || SECTIONS[0];
 
@@ -53,35 +61,50 @@ export default function Terminal() {
         ))}
       </div>
 
-      <div className={styles.grid}>
-        <div className={styles.panel}>
-          <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading price…</div></div>}>
-            {() => {
-              const PriceHeader = require('./PriceHeader').default;
-              return <PriceHeader ticker={ticker} />;
-            }}
-          </BrowserOnly>
-
-          <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading chart…</div></div>}>
-            {() => {
-              const Chart = require('./Chart').default;
-              return <Chart ticker={ticker} timeframe={timeframe} setTimeframe={setTimeframe} onStatus={(s) => setSource(s.source)} />;
-            }}
-          </BrowserOnly>
-        </div>
-
-        <div className={styles.panel}>
-          <div className={styles.panelHead}>
-            <span>Market News</span>
-            <span className={styles.panelTicker}>LIVE</span>
+      <div className={styles.deck}>
+        <section className={`${styles.deckSection} ${styles.chartSection} ${chartOpen ? '' : styles.collapsed}`}>
+          <button type="button" className={styles.deckHead} onClick={toggleChart} aria-expanded={chartOpen} title={chartOpen ? 'Collapse chart' : 'Expand chart'}>
+            <span className={styles.deckTitle}>Chart</span>
+            <span className={styles.collapseIcon} aria-hidden="true">{chartOpen ? '−' : '+'}</span>
+          </button>
+          <div className={styles.deckBody}>
+            <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading price…</div></div>}>
+              {() => {
+                const PriceHeader = require('./PriceHeader').default;
+                return <PriceHeader ticker={ticker} />;
+              }}
+            </BrowserOnly>
+            <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading chart…</div></div>}>
+              {() => {
+                const Chart = require('./Chart').default;
+                return <Chart ticker={ticker} timeframe={timeframe} setTimeframe={setTimeframe} onStatus={(s) => setSource(s.source)} />;
+              }}
+            </BrowserOnly>
           </div>
-          <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading news…</div></div>}>
-            {() => {
-              const News = require('./News').default;
-              return <News ticker={ticker} />;
-            }}
-          </BrowserOnly>
-        </div>
+          <button type="button" className={styles.rail} onClick={toggleChart} aria-label="Expand chart">
+            <span className={styles.railChevron} aria-hidden="true">›</span>
+            <span className={styles.railTitle}>Chart</span>
+          </button>
+        </section>
+
+        <section className={`${styles.deckSection} ${styles.newsSection} ${newsOpen ? '' : styles.collapsed}`}>
+          <button type="button" className={styles.deckHead} onClick={toggleNews} aria-expanded={newsOpen} title={newsOpen ? 'Collapse news' : 'Expand news'}>
+            <span className={styles.deckTitle}>Market News <span className={styles.liveTag}>LIVE</span></span>
+            <span className={styles.collapseIcon} aria-hidden="true">{newsOpen ? '−' : '+'}</span>
+          </button>
+          <div className={styles.deckBody}>
+            <BrowserOnly fallback={<div className={styles.panelBody}><div className={styles.placeholder}>Loading news…</div></div>}>
+              {() => {
+                const News = require('./News').default;
+                return <News ticker={ticker} />;
+              }}
+            </BrowserOnly>
+          </div>
+          <button type="button" className={styles.rail} onClick={toggleNews} aria-label="Expand news">
+            <span className={styles.railChevron} aria-hidden="true">‹</span>
+            <span className={styles.railTitle}>News</span>
+          </button>
+        </section>
       </div>
 
       <BrowserOnly fallback={<div className={styles.portfolio}><div className={styles.pfEmpty}>Loading portfolio…</div></div>}>
