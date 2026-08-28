@@ -135,6 +135,8 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
   const [gexExp, setGexExp] = useState('day');    // expiry bucket: day | week | 15d | 30d
   const [showGex, setShowGex] = useState(false);
   const gexLinesRef = useRef({});
+  const [gexW, setGexW] = useState(210); // GEX panel width (px) — drag to resize
+  const gexDragRef = useRef(false);
 
   const toggleFs = () => {
     // Fullscreen the whole deck (chart + news) when the parent hands us its ref,
@@ -160,6 +162,40 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
     };
     document.addEventListener('fullscreenchange', onFs);
     return () => document.removeEventListener('fullscreenchange', onFs);
+  }, []);
+
+  // Drag the divider between the GEX panel and the chart to resize the GEX
+  // sidebar. GexProfile and the chart both watch their own size, so they re-fit.
+  const startGexResize = (e) => {
+    gexDragRef.current = true;
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+    if (e.cancelable) e.preventDefault();
+  };
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!gexDragRef.current || !areaRef.current) return;
+      if (e.cancelable) e.preventDefault();
+      const rect = areaRef.current.getBoundingClientRect();
+      const cx = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+      setGexW(Math.max(120, Math.min(rect.width * 0.6, cx - rect.left)));
+    };
+    const onUp = () => {
+      if (!gexDragRef.current) return;
+      gexDragRef.current = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    };
   }, []);
 
   /* ---- create the chart once (and re-create on theme change) ---- */
@@ -464,16 +500,19 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
   }, [gex, showGex]);
 
   return (
-    <div className={styles.chartRow} ref={areaRef}>
+    <div className={styles.chartRow} ref={areaRef} style={showGex ? {'--gex-w': gexW + 'px'} : undefined}>
       {showGex && gex && gex.profile && (
-        <GexProfile
-          profile={gex.profile}
-          spot={(lastBarRef.current && lastBarRef.current.close) || (gexChain && gexChain.spot)}
-          callWall={gex.callWall}
-          putWall={gex.putWall}
-          gammaFlip={gex.gammaFlip}
-          resetKey={`${ticker}|${gexExp}`}
-        />
+        <>
+          <GexProfile
+            profile={gex.profile}
+            spot={(lastBarRef.current && lastBarRef.current.close) || (gexChain && gexChain.spot)}
+            callWall={gex.callWall}
+            putWall={gex.putWall}
+            gammaFlip={gex.gammaFlip}
+            resetKey={`${ticker}|${gexExp}`}
+          />
+          <div className={styles.gexResizer} onMouseDown={startGexResize} onTouchStart={startGexResize} role="separator" aria-orientation="vertical" aria-label="Resize GEX panel" />
+        </>
       )}
       <div className={styles.chartArea}>
       <div className={styles.chartToolbar}>

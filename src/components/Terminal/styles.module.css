@@ -441,14 +441,32 @@
   min-height: 460px;
 }
 .gexProfile {
-  width: 210px;
+  width: var(--gex-w, 210px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--line, rgba(255, 255, 255, 0.08));
   background: rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
+/* Drag handle between the GEX panel and the chart (draws the divider line). */
+.gexResizer {
+  flex: 0 0 8px;
+  align-self: stretch;
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 4;
+}
+.gexResizer::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--line, rgba(255, 255, 255, 0.14));
+  transition: width 0.12s ease, background 0.12s ease;
+}
+.gexResizer:hover::before, .gexResizer:active::before { width: 3px; background: var(--ifm-color-primary); }
 .gexProfileTitle {
   font-family: var(--ff-mono, var(--ifm-font-family-monospace));
   font-size: 0.6rem;
