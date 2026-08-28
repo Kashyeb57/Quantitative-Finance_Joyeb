@@ -226,6 +226,13 @@ const LIBRARY = [
     url: `${QR}/CREDIT%20SUISSE%20CASH%20FLOW%20AND%20OOPS%20LESSON%20FOR%20FINTECH.pdf`,
   },
   {
+    title: 'Quant Finance Interview Guide',
+    author: 'Interview guide',
+    category: 'Quant Interview Prep',
+    shortCat: 'Interview',
+    url: `${QIP}/Quant%20Finance%20Interview%20Guide.pdf`,
+  },
+  {
     title: 'CODE: The Hidden Language of Computer Hardware and Software',
     author: 'Charles Petzold',
     category: 'Programming & Computer Science',
