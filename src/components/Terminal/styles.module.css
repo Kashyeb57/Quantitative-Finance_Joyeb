@@ -1,9 +1,9 @@
 /* Market Terminal — chart + news dashboard scaffold */
 
 .wrap {
-  max-width: 1280px;
+  max-width: 2200px;
   margin: 0 auto;
-  padding: 1.25rem 1rem 4rem;
+  padding: 1.25rem 1.5rem 4rem;
 }
 
 /* Sector tabs — group the watchlist by theme (semis, software, space…) */
