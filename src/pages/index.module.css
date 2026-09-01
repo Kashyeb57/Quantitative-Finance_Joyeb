@@ -21,10 +21,12 @@
 .terminal {
   max-width: var(--w-wide);
   margin: 0 auto;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
+  /* Recessed screen: darker than the page + a hairline, so it sits IN the page
+     rather than floating on top of it (no heavy fill, no drop shadow). */
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  box-shadow: var(--e3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   animation: bootPanel var(--dur-4) var(--ease-out) both;
 }
 
@@ -54,10 +56,18 @@
 
 .termBody {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1.08fr 0.92fr;
   gap: var(--s7);
   padding: var(--s7);
-  align-items: center;
+  align-items: stretch;
+}
+
+/* Left column holds its content centred against the taller board on the right */
+.heroText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 
 /* Left column */
@@ -143,15 +153,51 @@
 }
 .statDivider { width: 1px; height: 30px; background: var(--line-strong); }
 
-/* Right column — the tearsheet */
+/* Right column — the board: header, chart, watchlist (fills the panel height) */
 .heroVisual {
   position: relative;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.visualHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding-bottom: var(--s2);
+  border-bottom: 1px solid var(--line-faint);
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+}
+.visualTicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tx-secondary);
+  letter-spacing: 0.1em;
+}
+.visualReadout {
+  color: var(--tx-primary);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.visualReadout b { color: var(--g-500); }
+
+.chartBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tearsheet {
   width: 100%;
+  max-width: 440px;
   height: auto;
   display: block;
+  margin: 0 auto;
 }
 
 .formula {
@@ -164,31 +210,59 @@
   box-shadow: var(--e2);
   line-height: 1;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0;
   animation: bootUp 0.5s var(--ease-out) both;
 }
-.formulaTop { top: 3%; left: 1%; animation-delay: 1.2s; }
-.formulaBottom { bottom: 7%; right: 1%; animation-delay: 1.35s; }
+.formulaTop { top: 2%; left: 2%; animation-delay: 1.2s; }
+.formulaBottom { bottom: 10%; right: 3%; animation-delay: 1.35s; }
 
-.readoutChip {
-  position: absolute;
-  top: 16%;
-  right: 4%;
-  z-index: 2;
-  font-family: var(--ff-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.02em;
-  color: var(--tx-primary);
-  background: var(--overlay);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-xs);
-  padding: 3px 8px;
-  font-variant-numeric: tabular-nums;
-  opacity: 0;
-  animation: bootUp 0.5s var(--ease-out) 1.4s both;
+/* Watchlist — fills the rest of the board with even rows on the recessed screen */
+.watch {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--s2);
+  border-top: 1px solid var(--line-faint);
 }
-.readoutChip b { color: var(--g-500); }
+.wRow {
+  flex: 1;
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 4.4rem 1fr auto;
+  align-items: center;
+  gap: var(--s4);
+  padding: 0 var(--s1);
+  border-bottom: 1px solid var(--line-faint);
+  transition: background var(--dur-2) var(--ease-out);
+}
+.wRow:last-child { border-bottom: none; }
+.wRow:hover { background: rgba(255, 255, 255, 0.02); }
+.wSym {
+  font-family: var(--ff-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--tx-primary);
+}
+.spark {
+  display: block;
+  width: 100%;
+  max-width: 100px;
+  height: 20px;
+  opacity: 0.9;
+}
+.wRight {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  justify-self: end;
+  font-family: var(--ff-mono);
+  font-variant-numeric: tabular-nums;
+}
+.wPx { font-size: 0.78rem; color: var(--tx-secondary); }
+.wChg { font-size: 0.7rem; letter-spacing: 0.02em; }
+.wChg.up { color: var(--g-500); }
+.wChg.down { color: var(--amber-500); }
 
 /* Tearsheet draw-in */
 .equity { stroke-dasharray: 1; stroke-dashoffset: 1; animation: drawLine 1s var(--ease-out) 0.4s forwards; }
@@ -203,7 +277,7 @@
 @keyframes fadeIn { to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .terminal, .eyebrow, .heroTitle, .heroSub, .heroButtons, .statRail, .formula, .readoutChip {
+  .terminal, .eyebrow, .heroTitle, .heroSub, .heroButtons, .statRail, .formula {
     animation: none; opacity: 1; transform: none;
   }
   .accent::after { animation: none; transform: scaleX(1); }

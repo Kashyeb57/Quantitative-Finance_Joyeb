@@ -622,6 +622,46 @@ async function handleGex(request, env, url) {
   return resp;
 }
 
+// GET /_m/quote?symbols=AMD,^KS11,GC=F,JPY=X
+// Real last-session quotes for the homepage watchlist. Alpaca only carries US
+// equities, so for a mixed board (stocks + a foreign index + gold + a forex
+// pair) we read Yahoo's public v8 chart endpoint server-side (no key, delayed
+// ~15 min). One tiny fetch per symbol, fanned out in parallel and edge-cached.
+const YF_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+const YF_SYM_RE = /^[A-Za-z0-9.^=-]{1,12}$/;
+
+async function handleQuotes(request, env, url) {
+  const raw = (url.searchParams.get('symbols') || '').trim();
+  const symbols = raw.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 16);
+  if (!symbols.length || !symbols.every((s) => YF_SYM_RE.test(s))) {
+    return json(request, { error: 'Bad symbols' }, 400);
+  }
+
+  const quotes = await Promise.all(symbols.map(async (sym) => {
+    try {
+      const r = await fetch(`${YF_CHART}${encodeURIComponent(sym)}?range=1d&interval=1d`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; quant-desk/1.0)' },
+        cf: { cacheTtl: 60, cacheEverything: true },
+      });
+      if (!r.ok) return { symbol: sym, price: null, changePct: null };
+      const j = await r.json();
+      const m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+      if (!m) return { symbol: sym, price: null, changePct: null };
+      return {
+        symbol: sym,
+        price: typeof m.regularMarketPrice === 'number' ? m.regularMarketPrice : null,
+        changePct: typeof m.regularMarketChangePercent === 'number' ? m.regularMarketChangePercent : null,
+        prevClose: typeof m.chartPreviousClose === 'number' ? m.chartPreviousClose : null,
+        currency: m.currency || null,
+      };
+    } catch (e) {
+      return { symbol: sym, price: null, changePct: null };
+    }
+  }));
+
+  return json(request, { quotes, source: 'yahoo' }, 200, 60);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -644,6 +684,7 @@ export default {
 
     if (url.pathname === '/_m/bars')      return handleBars(request, env, url);
     if (url.pathname === '/_m/snapshot')  return handleSnapshot(request, env, url);
+    if (url.pathname === '/_m/quote')     return handleQuotes(request, env, url);
     if (url.pathname === '/_m/portfolio') return handlePortfolio(request, env);
     if (url.pathname === '/_m/ledger')    return handleLedger(request, env);
     if (url.pathname === '/_m/gex')       return handleGex(request, env, url);

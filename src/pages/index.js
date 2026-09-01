@@ -139,7 +139,7 @@ function Tearsheet() {
       </defs>
 
       {/* plot frame */}
-      <rect x="40" y="26" width="366" height="228" rx="8" fill="var(--bg-sunken)" stroke="var(--line-strong)" />
+      <rect x="40" y="26" width="366" height="228" rx="8" fill="none" stroke="var(--line-faint)" />
 
       {/* grid lattice */}
       {[70, 114, 158, 202, 246].map((y) => (
@@ -178,6 +178,74 @@ function Tearsheet() {
   );
 }
 
+// ── Watchlist: MU is the featured chart above; these fill the board below ──
+// `yf` is the Yahoo symbol our Worker reads; px/chg/up are seed fallbacks shown
+// until the live quote lands (and if the fetch ever fails). The sparkline shape
+// is illustrative; its price and % change are real once quotes resolve.
+const WATCH = [
+  {sym: 'AMD',     yf: 'AMD',   px: '164.20',   chg: '1.8', up: true,  s: [150,151,149,152,153,151,154,156,155,158,157,160,162,164]},
+  {sym: 'KOSPI',   yf: '^KS11', px: '2,712.4',  chg: '0.6', up: true,  s: [2670,2675,2668,2680,2685,2678,2690,2695,2688,2700,2705,2698,2708,2712]},
+  {sym: 'SPY',     yf: 'SPY',   px: '558.90',   chg: '0.4', up: true,  s: [553,554,552,555,556,554,556,557,555,557,558,557,558,559]},
+  {sym: 'CRM',     yf: 'CRM',   px: '261.30',   chg: '0.9', up: false, s: [268,267,269,266,265,267,264,263,265,262,263,261,262,261]},
+  {sym: 'TSLA',    yf: 'TSLA',  px: '251.40',   chg: '2.3', up: true,  s: [242,240,244,246,243,248,250,247,252,249,253,251,250,251]},
+  {sym: 'GOLD',    yf: 'GC=F',  px: '2,418.6',  chg: '0.5', up: true,  s: [2402,2405,2400,2408,2410,2406,2412,2409,2414,2411,2416,2413,2417,2419]},
+  {sym: 'USD/JPY', yf: 'JPY=X', px: '149.82',   chg: '0.3', up: false, s: [150.4,150.2,150.5,150.1,150.3,149.9,150.1,149.8,150.0,149.7,149.9,149.7,149.8,149.82]},
+];
+
+// The Worker only runs in production, so from localhost we call the live domain
+// directly (it allow-lists localhost for CORS); in prod this is same-origin.
+const QUOTE_API =
+  (typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname))
+    ? 'https://joyebkashyeb.com.np'
+    : '';
+
+const fmtPx = (n) =>
+  n == null ? null : n.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+// Poll /_m/quote and return a { yahooSymbol: {price, changePct} } map. Re-polls
+// every 60s so the board tracks the tape during market hours (Yahoo ~15m delay).
+function useQuotes(symbols) {
+  const key = symbols.join(',');
+  const [map, setMap] = useState({});
+  useEffect(() => {
+    let alive = true;
+    const pull = () =>
+      fetch(`${QUOTE_API}/_m/quote?symbols=${encodeURIComponent(key)}`, {cache: 'no-store'})
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!alive || !d || !d.quotes) return;
+          const m = {};
+          d.quotes.forEach((q) => { if (q && q.symbol) m[q.symbol] = q; });
+          setMap(m);
+        })
+        .catch(() => {});
+    pull();
+    const id = setInterval(pull, 60000);
+    return () => { alive = false; clearInterval(id); };
+  }, [key]);
+  return map;
+}
+
+// Every Yahoo symbol the board needs: the featured MU chart + the watchlist.
+const YF_SYMBOLS = ['MU', ...WATCH.map((w) => w.yf)];
+
+// Compact sparkline — normalizes a series into a 62×18 polyline.
+function Spark({data, up}) {
+  const w = 62, h = 18, pad = 1.5;
+  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - 2 * pad);
+    const y = pad + (1 - (v - min) / rng) * (h - 2 * pad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return (
+    <svg className={styles.spark} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+      <polyline points={pts} fill="none" stroke={up ? 'var(--g-500)' : 'var(--amber-500)'}
+        strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function LiveClock() {
   const [t, setT] = useState('--:--:--');
   useEffect(() => {
@@ -209,6 +277,11 @@ export default function Home() {
     els.forEach((el, i) => { el.style.setProperty('--i', i % 8); io.observe(el); });
     return () => io.disconnect();
   }, []);
+
+  // Real last-session quotes for the board (falls back to the seed numbers).
+  const quotes = useQuotes(YF_SYMBOLS);
+  const mu = quotes['MU'];
+  const muDown = mu && mu.changePct != null && mu.changePct < 0;
 
   return (
     <Layout
@@ -252,16 +325,50 @@ export default function Home() {
                 </div>
               </div>
               <div className={styles.heroVisual}>
-                <Tearsheet />
-                <span
-                  className={clsx(styles.formula, styles.formulaTop)}
-                  dangerouslySetInnerHTML={tex('dS = \\mu S\\,dt + \\sigma S\\,dW')}
-                />
-                <span
-                  className={clsx(styles.formula, styles.formulaBottom)}
-                  dangerouslySetInnerHTML={tex('\\Delta = \\dfrac{\\partial V}{\\partial S}')}
-                />
-                <span className={styles.readoutChip}>MU $877.57&nbsp;<b>▲</b></span>
+                <div className={styles.visualHead}>
+                  <span className={styles.visualTicker}><span className="p-pip" />MU&nbsp;·&nbsp;1D</span>
+                  <span className={styles.visualReadout}>
+                    ${mu && mu.price != null ? fmtPx(mu.price) : '877.57'}&nbsp;
+                    <b className={muDown ? styles.down : undefined}>{muDown ? '▼' : '▲'}</b>
+                  </span>
+                </div>
+                <div className={styles.chartBox}>
+                  <Tearsheet />
+                  <span
+                    className={clsx(styles.formula, styles.formulaTop)}
+                    dangerouslySetInnerHTML={tex('dS = \\mu S\\,dt + \\sigma S\\,dW')}
+                  />
+                  <span
+                    className={clsx(styles.formula, styles.formulaBottom)}
+                    dangerouslySetInnerHTML={tex('\\Delta = \\dfrac{\\partial V}{\\partial S}')}
+                  />
+                </div>
+                <div className={styles.watch}>
+                  {WATCH.map((w) => {
+                    const q = quotes[w.yf];
+                    const live = q && q.price != null;
+                    const price = live ? fmtPx(q.price) : w.px;
+                    const cp = live && q.changePct != null
+                      ? q.changePct
+                      : (w.up ? parseFloat(w.chg) : -parseFloat(w.chg));
+                    const up = cp >= 0;
+                    const chg = Math.abs(cp).toFixed(1);
+                    // Keep the illustrative sparkline pointing the real direction.
+                    const sData = up === w.up ? w.s : [...w.s].reverse();
+                    return (
+                      <div key={w.sym} className={styles.wRow}>
+                        <span className={styles.wSym}>{w.sym}</span>
+                        <Spark data={sData} up={up} />
+                        <span className={styles.wRight}>
+                          <span className={styles.wPx}>{price}</span>
+                          <span className={clsx(styles.wChg, up ? styles.up : styles.down)}>
+                            {up ? '▲' : '▼'}&nbsp;{chg}%
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
