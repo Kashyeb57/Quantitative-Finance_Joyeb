@@ -17,6 +17,13 @@ import GexProfile from './GexProfile';
 
 const LIB = 'https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js';
 
+// The market Worker only runs in production. From localhost we call the live
+// domain directly (it allow-lists localhost for CORS) so the GEX panel previews.
+const MARKET_BASE =
+  (typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname))
+    ? 'https://joyebkashyeb.com.np'
+    : '';
+
 let _libPromise = null;
 function loadLib() {
   if (typeof window !== 'undefined' && window.LightweightCharts) {
@@ -134,9 +141,18 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
   const [gexChain, setGexChain] = useState(null); // per-strike chain from the worker
   const [gexExp, setGexExp] = useState('day');    // expiry bucket: day | week | 15d | 30d
   const [showGex, setShowGex] = useState(false);
+  const [gexSym, setGexSym] = useState('SPX');    // GEX instrument: '' = follow chart, else an index
+  const [gexErr, setGexErr] = useState(false);    // fetch failed / no options — distinct from "loading"
   const gexLinesRef = useRef({});
   const [gexW, setGexW] = useState(210); // GEX panel width (px) — drag to resize
   const gexDragRef = useRef(false);
+
+  // GEX instrument options. Index options (cash-settled, European) are the
+  // canonical dealer-gamma view — SPX and its 1/10-size cousin XSP, plus NDX/
+  // RUT/DJX. '' means "follow the charted stock" (equities/ETFs only).
+  const GEX_INSTRUMENTS = [['', 'Chart'], ['SPX', 'SPX'], ['XSP', 'XSP'], ['NDX', 'NDX'], ['RUT', 'RUT'], ['DJX', 'DJX']];
+  const gexTarget = gexSym || (ticker || '').toUpperCase();
+  const gexFollows = gexSym === '';   // GEX tracks the charted symbol (draws on-chart lines)
 
   const toggleFs = () => {
     // Fullscreen the whole deck (chart + news) when the parent hands us its ref,
@@ -448,44 +464,55 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
   /* ---- gamma exposure: fetch the per-strike chain for this ticker + expiry ---- */
   useEffect(() => {
     let cancelled = false;
-    setGexChain(null); setGex(null);
-    if (isCrypto(ticker)) return undefined; // options exist for equities/ETFs only
-    const sym = (ticker || '').toUpperCase();
+    setGexChain(null); setGex(null); setGexErr(false);
+    if (!showGex) return undefined;                          // don't fetch until the panel is open
+    // Options exist for equities/ETFs and index products — but not crypto, so
+    // only bail when we're following a crypto chart (an index pick still works).
+    if (gexFollows && isCrypto(ticker)) return undefined;
+    const sym = gexTarget;
     (async () => {
       try {
-        const res = await fetch(`/_m/gex?symbol=${encodeURIComponent(sym)}&exp=${gexExp}`, { cache: 'no-store' });
-        if (!res.ok) { if (!cancelled) { setGexChain(null); setGex(null); } return; }
+        const res = await fetch(`${MARKET_BASE}/_m/gex?symbol=${encodeURIComponent(sym)}&exp=${gexExp}`, { cache: 'no-store' });
+        if (!res.ok) { if (!cancelled) { setGexChain(null); setGex(null); setGexErr(true); } return; }
         const d = await res.json();
         if (cancelled) return;
-        if (!d || !d.spot) { setGexChain(null); setGex(null); return; }
-        setGexChain(d);
+        if (!d || !d.spot) { setGexChain(null); setGex(null); setGexErr(true); return; }
+        // Tag the chain with its instrument so the live re-compute below never
+        // prices a stale chain against a just-switched target (garbage flash).
+        setGexChain({ ...d, sym });
         // paint the server's (delayed-spot) levels immediately; the live
         // re-compute below refines them at the terminal's real-time price.
         setGex({ gammaFlip: d.gammaFlip, callWall: d.callWall, putWall: d.putWall, regime: d.regime, netGex: d.netGex });
-      } catch (_) { /* overlay is optional — never break the chart */ }
+      } catch (_) { if (!cancelled) { setGexChain(null); setGex(null); setGexErr(true); } }
     })();
     return () => { cancelled = true; };
-  }, [ticker, gexExp]);
+  }, [gexTarget, gexFollows, ticker, gexExp, showGex]);
 
   /* ---- re-price the gamma flip + walls at the LIVE spot (every ~2s) ---- */
   useEffect(() => {
-    if (!showGex || !gexChain || !gexChain.rows) return undefined;
+    // Guard against pricing a stale chain (still the previous instrument) after
+    // an instrument switch — its strikes belong to a different symbol/scale.
+    if (!showGex || !gexChain || !gexChain.rows || gexChain.sym !== gexTarget) return undefined;
     const recompute = () => {
-      const S = (lastBarRef.current && lastBarRef.current.close) || gexChain.spot;
+      // When following the chart, re-price at the live candle; for an index the
+      // chart's price is a different instrument, so use the chain's own spot.
+      const S = (gexFollows && lastBarRef.current) ? lastBarRef.current.close : gexChain.spot;
       const lv = gexLevels(gexChain.rows, S);
       if (lv) setGex(lv);
     };
     recompute();
     const id = setInterval(recompute, 2000);
     return () => clearInterval(id);
-  }, [gexChain, showGex]);
+  }, [gexChain, showGex, gexFollows, gexTarget]);
 
   /* ---- draw/update the gamma-flip + call/put walls as labeled price lines ---- */
   useEffect(() => {
     const s = seriesRef.current;
     const L = gexLinesRef.current;
     const drop = (key) => { if (s && L[key]) { try { s.removePriceLine(L[key]); } catch (_) {} } L[key] = null; };
-    if (!showGex || !gex || !s) { for (const k of ['flip', 'call', 'put']) drop(k); return undefined; }
+    // Only overlay lines on the chart when GEX is tracking the charted symbol;
+    // an index's price levels are on a different scale and don't belong here.
+    if (!showGex || !gex || !s || !gexFollows) { for (const k of ['flip', 'call', 'put']) drop(k); return undefined; }
     // update lines in place (no flicker) as the live re-compute nudges them
     const set = (key, price, color, title) => {
       if (price == null) { drop(key); return; }
@@ -497,7 +524,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
     set('put', gex.putWall, '#14b8a6', `Put wall ${gex.putWall}`);
     return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gex, showGex]);
+  }, [gex, showGex, gexFollows]);
 
   return (
     <div className={styles.chartRow} ref={areaRef} style={showGex ? {'--gex-w': gexW + 'px'} : undefined}>
@@ -509,7 +536,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
             callWall={gex.callWall}
             putWall={gex.putWall}
             gammaFlip={gex.gammaFlip}
-            resetKey={`${ticker}|${gexExp}`}
+            resetKey={`${gexTarget}|${gexExp}`}
           />
           <div className={styles.gexResizer} onMouseDown={startGexResize} onTouchStart={startGexResize} role="separator" aria-orientation="vertical" aria-label="Resize GEX panel" />
         </>
@@ -528,13 +555,26 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
         <button
           className={`${styles.tfBtn} ${styles.gexBtn} ${showGex ? styles.tfBtnActive : ''}`}
           onClick={() => setShowGex((v) => !v)}
-          disabled={isCrypto(ticker)}
+          disabled={!showGex && isCrypto(ticker) && gexFollows}
           title="Gamma exposure — dealer gamma-flip level and call/put walls"
           aria-label="Toggle gamma exposure (GEX)"
         >
           Γ GEX
         </button>
-        {showGex && !isCrypto(ticker) && [['day', 'Day'], ['week', '1W'], ['15d', '15D'], ['30d', '30D']].map(([v, l]) => (
+        {showGex && (
+          <select
+            className={`${styles.tfBtn} ${styles.gexSymSel}`}
+            value={gexSym}
+            onChange={(e) => setGexSym(e.target.value)}
+            title="GEX instrument — index options (SPX/XSP/NDX/RUT/DJX) or follow the chart"
+            aria-label="GEX instrument"
+          >
+            {GEX_INSTRUMENTS.map(([v, l]) => (
+              <option key={v || 'chart'} value={v}>{l}</option>
+            ))}
+          </select>
+        )}
+        {showGex && [['day', 'Day'], ['week', '1W'], ['15d', '15D'], ['30d', '30D']].map(([v, l]) => (
           <button
             key={v}
             className={`${styles.tfBtn} ${styles.gexExpBtn} ${gexExp === v ? styles.tfBtnActive : ''}`}
@@ -595,6 +635,8 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
         <div className={styles.gexBadge}>
           {gex ? (
             <>
+              <span className={styles.gexBadgeSym}>{gexTarget}</span>
+              {' '}
               <span className={gex.regime === 'positive' ? styles.up : styles.down}>
                 γ {gex.regime || '—'}
               </span>
@@ -602,7 +644,7 @@ export default function Chart({ ticker, timeframe, setTimeframe, onStatus, fsTar
               {gex.gammaFlip != null && <> · flip {gex.gammaFlip}</>}
               {(gex.putWall != null || gex.callWall != null) && <> · walls {gex.putWall ?? '—'}/{gex.callWall ?? '—'}</>}
             </>
-          ) : (isCrypto(ticker) ? 'γ: n/a for crypto' : (gexChain === null ? 'γ: loading…' : 'γ: no options data'))}
+          ) : (gexFollows && isCrypto(ticker) ? 'γ: n/a for crypto' : (gexErr ? `γ: no options data for ${gexTarget}` : 'γ: loading…'))}
         </div>
       )}
       <div ref={wrapRef} className={styles.chartWrap} />

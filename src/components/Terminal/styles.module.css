@@ -603,6 +603,31 @@
   font-size: 0.66rem;
   padding: 0.2rem 0.45rem;
 }
+/* GEX instrument picker — a compact <select> styled like the pills */
+.gexSymSel {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ifm-color-emphasis-900);   /* holds a live value — read as active, not muted */
+  padding: 0.2rem 1.05rem 0.2rem 0.5rem;
+  box-shadow: inset 0 0 0 1px var(--ifm-color-emphasis-300);
+  /* small chevron drawn with two gradients */
+  background-image: linear-gradient(45deg, transparent 50%, var(--ifm-color-emphasis-600) 50%),
+                    linear-gradient(135deg, var(--ifm-color-emphasis-600) 50%, transparent 50%);
+  background-position: right 0.5rem center, right 0.32rem center;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+.gexSymSel:hover { background-color: var(--ifm-color-emphasis-200); }
+.gexSymSel option { background: var(--ifm-background-surface-color); color: var(--ifm-color-emphasis-900); }
+.gexBadgeSym {
+  font-weight: 700;
+  color: var(--ifm-color-emphasis-900);
+  letter-spacing: 0.03em;
+}
 .gexBadge {
   position: absolute;
   top: 40px;
@@ -669,6 +694,8 @@
   left: 8px;
   z-index: 3;
   display: inline-flex;
+  flex-wrap: wrap;               /* GEX row (select + expiry pills) wraps instead of overflowing */
+  max-width: calc(100% - 16px);
   gap: 2px;
   padding: 2px;
   border-radius: 7px;
